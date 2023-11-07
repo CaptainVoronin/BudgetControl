@@ -5,6 +5,9 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.widget.RemoteViews;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Implementation of App Widget functionality.
  */

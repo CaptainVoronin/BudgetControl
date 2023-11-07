@@ -1,11 +1,11 @@
 package org.max.budgetcontrol.datasource;
 
+import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
+import java.net.URL;
+import java.util.Date;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -22,28 +22,49 @@ class ZenMoneyClient
 
    OkHttpClient httpClient;
 
-   String url;
+   public static final MediaType JSON = MediaType.get("application/json");
 
-   protected ZenMoneyClient(String url)
+   URL url;
+
+   protected ZenMoneyClient(URL url, String token )
    {
       this.url = url;
+      this.token = token;
       httpClient = new OkHttpClient();
    }
 
-   public static ZenMoneyClient getInstance(String url)
+   public static ZenMoneyClient getInstance(URL url, String token)
    {
       if (instance == null)
-         instance = new ZenMoneyClient(url);
+         instance = new ZenMoneyClient(url, token );
       return instance;
    }
 
-   public void getData( Callback callback ){
-      Request request = new Request.Builder()
+   Request.Builder getRequestBuilder()
+   {
+      return new Request.Builder()
               .url( url )
               .header("Content-Type", "application/json")
-              .header( "Authorization", "Bearer " + token )
-              .build();
-      httpClient.newCall(request).enqueue( callback );
+              .header( "Authorization", "Bearer " + token );
+   }
+
+   public JSONObject getInitialData() throws IOException, JSONException {
+      RequestBody body = RequestBody.create( JSON,  RequestUtils.getInitialDiffRequestBody() );
+      return doRequest( body );
+   }
+
+   public JSONObject getTransactionsFromDate( Date date ) throws IOException, JSONException {
+      RequestBody body = RequestBody.create( JSON,  RequestUtils.getDiffRequestBody(date.getTime() ) );
+      return doRequest( body );
+   }
+
+   protected JSONObject doRequest( RequestBody body ) throws IOException, JSONException {
+      Request.Builder requestBuilder = getRequestBuilder();
+      //RequestBody body = RequestBody.create( JSON,  RequestUtils.getDiffRequestBody(date.getTime() ) );
+      Request req = requestBuilder.post( body ).build();
+      try (Response response = httpClient.newCall(req).execute()) {
+         return new JSONObject( response.body().string() );
+      }
    }
 
 }

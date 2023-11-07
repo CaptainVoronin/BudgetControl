@@ -1,4 +1,4 @@
-package org.max.budgetcontrol.datamodel;
+package org.max.budgetcontrol.zentypes;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -17,6 +17,7 @@ class ZenMoneyCallback implements Callback
    @Override
    public void onResponse(Call call, Response response) throws IOException
    {
-      
+      String buff = call.toString();
+
    }
 }
