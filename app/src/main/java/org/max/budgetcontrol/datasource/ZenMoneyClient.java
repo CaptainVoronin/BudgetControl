@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 
+import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -15,7 +16,7 @@ import okhttp3.Response;
 /**
  * 57ORlyBnixp1bGhpBu0CcNkrY0qRRZ
  */
-class ZenMoneyClient
+public class ZenMoneyClient
 {
    static ZenMoneyClient instance;
    static String token = "57ORlyBnixp1bGhpBu0CcNkrY0qRRZ";
@@ -48,23 +49,23 @@ class ZenMoneyClient
               .header( "Authorization", "Bearer " + token );
    }
 
-   public JSONObject getInitialData() throws IOException, JSONException {
-      RequestBody body = RequestBody.create( JSON,  RequestUtils.getInitialDiffRequestBody() );
-      return doRequest( body );
+   public void getInitialData(Callback callback) throws JSONException, IOException
+   {
+      RequestBody body = null;
+      body = RequestBody.create( JSON,  RequestUtils.getInitialDiffRequestBody() );
+      doRequest( body, callback );
    }
 
-   public JSONObject getTransactionsFromDate( Date date ) throws IOException, JSONException {
+   public void getTransactionsFromDate( Callback callback, Date date ) throws IOException, JSONException {
       RequestBody body = RequestBody.create( JSON,  RequestUtils.getDiffRequestBody(date.getTime() ) );
-      return doRequest( body );
+      doRequest( body, callback);
    }
 
-   protected JSONObject doRequest( RequestBody body ) throws IOException, JSONException {
+   protected void doRequest(RequestBody body, Callback callback) throws IOException, JSONException {
       Request.Builder requestBuilder = getRequestBuilder();
       //RequestBody body = RequestBody.create( JSON,  RequestUtils.getDiffRequestBody(date.getTime() ) );
       Request req = requestBuilder.post( body ).build();
-      try (Response response = httpClient.newCall(req).execute()) {
-         return new JSONObject( response.body().string() );
-      }
+      httpClient.newCall(req).enqueue(callback);
    }
 
 }

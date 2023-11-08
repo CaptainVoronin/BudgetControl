@@ -19,4 +19,7 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="state_unk_text">...</string>
+    <string name="state_wating_text">get data</string>
+    <string name="state_error_text">get data error</string>
 </resources>
