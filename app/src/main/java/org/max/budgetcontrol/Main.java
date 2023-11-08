@@ -1,4 +1,4 @@
-package org.max;
+package org.max.budgetcontrol;
 
 import java.io.IOException;
 import java.net.URI;

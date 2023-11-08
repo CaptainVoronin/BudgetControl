@@ -3,23 +3,21 @@ package org.max.budgetcontrol;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.widget.RemoteViews;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Properties;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-
+import org.max.budgetcontrol.zentypes.Category;
 /**
  * Implementation of App Widget functionality.
  */
@@ -27,6 +25,7 @@ public class BCWidget extends AppWidgetProvider
 {
     enum State
     {
+        init,
         unknown,
         waiting,
         hasdata,
@@ -79,6 +78,7 @@ public class BCWidget extends AppWidgetProvider
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
     {
+
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds)
         {
@@ -89,23 +89,18 @@ public class BCWidget extends AppWidgetProvider
     @Override
     public void onEnabled(Context context)
     {
-        /*try
-        {
-            loadSettings(context);
-        } catch (JSONException e)
-        {
-            throw new RuntimeException(e);
-        } catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }*/
+        initApp(context);
     }
 
-    private void loadSettings(Context context) throws JSONException, IOException
+    private void initApp(Context context)
+    {
+        List<Category> cats = getCategoryList( context );
+    }
+
+    private List<Category> getCategoryList(Context context) throws IOException, JSONException
     {
         client = ZenMoneyClient.getInstance( new URL(url), token );
-        client.getInitialData( new MoneyRequestCallback(context) );
-        state = State.waiting;
+        client.getInitialData( new MoneyRequestCallback( context ) );
     }
 
     @Override
@@ -113,6 +108,8 @@ public class BCWidget extends AppWidgetProvider
     {
         // Enter relevant functionality for when the last widget is disabled
     }
+
+
 
     class MoneyRequestCallback implements Callback
     {
