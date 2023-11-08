@@ -10,7 +10,8 @@ import java.util.Map;
 
 public class RequestUtils {
 
-    public static String getInitialDiffRequestBody() throws JSONException {
+    public static String getInitialDiffRequestBody() throws JSONException
+    {
         Map<String, Object> map = new HashMap<>();
         map.put("currentClientTimestamp", Long.valueOf(  System.currentTimeMillis() / 1000L ) );
         map.put("serverTimestamp", 0);
