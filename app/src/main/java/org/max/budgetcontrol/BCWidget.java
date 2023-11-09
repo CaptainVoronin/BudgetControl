@@ -10,14 +10,12 @@ import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-import org.max.budgetcontrol.zentypes.Category;
+
 /**
  * Implementation of App Widget functionality.
  */
@@ -89,15 +87,20 @@ public class BCWidget extends AppWidgetProvider
     @Override
     public void onEnabled(Context context)
     {
-        initApp(context);
+        try {
+            initApp(context);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void initApp(Context context)
-    {
-        List<Category> cats = getCategoryList( context );
+    private void initApp(Context context) throws JSONException, IOException {
+        getCategoryListFromServer( context );
     }
 
-    private List<Category> getCategoryList(Context context) throws IOException, JSONException
+    private void getCategoryListFromServer(Context context) throws IOException, JSONException
     {
         client = ZenMoneyClient.getInstance( new URL(url), token );
         client.getInitialData( new MoneyRequestCallback( context ) );
