@@ -13,8 +13,6 @@ import java.util.UUID;
 @Entity
 public class Category {
 
-
-
     public String getName() {
         return name;
     }
@@ -41,13 +39,14 @@ public class Category {
     String name;
     boolean outcome;
 
-    @ColumnInfo( name="tag_id")
+    @ColumnInfo(name="id")
     UUID id;
 
     public UUID getParent() {
         return parent;
     }
 
+    @ColumnInfo(name="parent_id")
     UUID parent;
 
     protected Category( String id, String name, boolean outcome, String parent ){

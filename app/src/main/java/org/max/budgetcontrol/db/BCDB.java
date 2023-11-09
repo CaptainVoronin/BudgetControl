@@ -13,7 +13,8 @@ class BCDB extends SQLiteOpenHelper
    public static final String create_categories_table = "create table category ( " +
            "id text not null primary key," +
            "name text not null," +
-           "parent_id integer" +
+           "isoutcome integer not null default 1," +
+           "parent_id text" +
            ");";
 
    public static final String create_widget_table = "create table widget ( " +
