@@ -27,7 +27,7 @@ public class Transaction {
         this.category = category;
     }
 
-    public static Transaction newTransaction(JSONObject obj, List<Category> categories ) throws ParseException, JSONException {
+    public static Transaction fromJSONObject(JSONObject obj, List<Category> categories ) throws ParseException, JSONException {
 
         UUID uuid = UUID.fromString( obj.getString( "id" ) );
         if( obj.isNull( "tag") )

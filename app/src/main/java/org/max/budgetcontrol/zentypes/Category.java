@@ -1,5 +1,8 @@
 package org.max.budgetcontrol.zentypes;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
@@ -7,7 +10,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+@Entity
 public class Category {
+
+
 
     public String getName() {
         return name;
@@ -31,9 +37,11 @@ public class Category {
 
     List<Category> child;
 
+    @ColumnInfo( name="name")
     String name;
     boolean outcome;
 
+    @ColumnInfo( name="tag_id")
     UUID id;
 
     public UUID getParent() {

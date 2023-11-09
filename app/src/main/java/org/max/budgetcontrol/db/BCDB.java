@@ -11,7 +11,7 @@ class BCDB extends SQLiteOpenHelper
    public static final String DATABASE_NAME = "bcbd.db";
 
    public static final String create_categories_table = "create table category ( " +
-           "id integer primary key autoincrement," +
+           "id text not null primary key," +
            "name text not null," +
            "parent_id integer" +
            ");";
@@ -26,7 +26,7 @@ class BCDB extends SQLiteOpenHelper
    public static final String create_widget_cats_table = "create table widget_cats ( " +
            "id integer primary key autoincrement," +
            "widget_id integer not null," +
-           "category_id integer not null, " +
+           "category_id text not null, " +
            "foreign key ( widget_id ) references widget ( id )," +
            "foreign key ( category_id ) references category ( id )" +
            ");";

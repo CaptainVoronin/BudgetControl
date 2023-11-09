@@ -7,6 +7,8 @@ import android.widget.RemoteViews;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.max.budgetcontrol.datasource.IErrorHandler;
+import org.max.budgetcontrol.datasource.IResponseHandler;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 
 import java.io.IOException;
@@ -112,21 +114,30 @@ public class BCWidget extends AppWidgetProvider
         // Enter relevant functionality for when the last widget is disabled
     }
 
-
-
     class MoneyRequestCallback implements Callback
     {
         Context context;
+        IErrorHandler errorHandler;
+        IResponseHandler responseHandler;
 
-        public MoneyRequestCallback( Context context )
+        public MoneyRequestCallback( Context context, IResponseHandler responseHandler )
         {
             this.context = context;
+            this.errorHandler = new DefaultErrorHandler();
+            this.responseHandler = responseHandler;
+        }
+
+        public MoneyRequestCallback( Context context, IResponseHandler responseHandler, IErrorHandler errorHandler )
+        {
+            this.context = context;
+            this.errorHandler = errorHandler;
+            this.responseHandler = responseHandler;
         }
 
         @Override
         public void onFailure(Call call, IOException e)
         {
-            e.printStackTrace();
+            errorHandler.handleError( call, e );
             state = State.error;
         }
 
@@ -137,6 +148,7 @@ public class BCWidget extends AppWidgetProvider
             try
             {
                 JSONObject jo = new JSONObject( buff );
+                responseHandler.processResponse( jo );
                 state = State.hasdata;
 
             } catch (JSONException e)
@@ -144,6 +156,14 @@ public class BCWidget extends AppWidgetProvider
                 state = State.error;
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    class DefaultErrorHandler implements IErrorHandler
+    {
+        public void handleError(Call call, IOException e)
+        {
+            e.printStackTrace();
         }
     }
 }
