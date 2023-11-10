@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.IErrorHandler;
 import org.max.budgetcontrol.datasource.IResponseHandler;
+import org.max.budgetcontrol.datasource.InitialRequestResponseHandler;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 
 import java.io.IOException;
@@ -105,7 +106,7 @@ public class BCWidget extends AppWidgetProvider
     private void getCategoryListFromServer(Context context) throws IOException, JSONException
     {
         client = ZenMoneyClient.getInstance( new URL(url), token );
-        client.getInitialData( new MoneyRequestCallback( context ) );
+        client.getInitialData( new MoneyRequestCallback( context, new InitialRequestResponseHandler(context)) );
     }
 
     @Override
