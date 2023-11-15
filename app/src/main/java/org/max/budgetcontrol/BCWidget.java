@@ -164,7 +164,9 @@ public class BCWidget extends AppWidgetProvider
     {
         public void handleError(Call call, IOException e)
         {
-            e.printStackTrace();
+            state = State.error;
+            String str =Log.getStackTraceString( e );
+            Log.e( this.getClass().getName(), str  );
         }
     }
 }
