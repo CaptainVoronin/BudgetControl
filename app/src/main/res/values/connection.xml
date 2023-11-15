@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="token">0yteuv8iwTQcJpaBQXJ3XDZ3nnh1RV</attr>
+    <attr name="url">https://api.zenmoney.ru/v8/diff</attr>
+</resources>
