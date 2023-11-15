@@ -8,7 +8,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ResponseProcessor {
 
@@ -45,6 +50,32 @@ public class ResponseProcessor {
         }
 
         return transactions;
+    }
+
+    private static List<Category> makeCategoryTree(List<Category> categories) {
+        Category parent;
+        Map<UUID, Category> cTree = new HashMap<>();
+
+        // Take top level categories
+        cTree = categories.stream().filter( category -> category.getParent() == null ).collect(Collectors.toMap( Category::getId, category -> category ) );
+
+        // Fill categories with child ones
+        List<Category> children = categories.stream().filter( category -> category.getParent() != null ).toList();
+
+        Iterator<UUID> it = cTree.keySet().iterator();
+        while( it.hasNext() )
+        {
+            UUID id = it.next();
+            cTree.get( id ).setChild( children.stream().filter( ch -> ch.getParent().equals( id ) ).toList() );
+        }
+
+        // Make the sorted list
+        List<Category> set = cTree.values().stream().sorted( new Category.CategoryComparator() ).toList();
+
+        // Sort child categories
+        set.forEach( category -> { if( category.getChild() != null ) category.setChild( category.getChild().stream().sorted( new Category.CategoryComparator() ).toList() ); } );
+
+        return set;
     }
 
 }

@@ -10,7 +10,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
+@Entity ( tableName = "category")
 public class Category {
 
     public String getName() {
@@ -42,12 +42,13 @@ public class Category {
     @ColumnInfo(name="id")
     UUID id;
 
+    @ColumnInfo(name="parent_id")
+    UUID parent;
+
     public UUID getParent() {
         return parent;
     }
 
-    @ColumnInfo(name="parent_id")
-    UUID parent;
 
     protected Category( String id, String name, boolean outcome, String parent ){
         this.id = UUID.fromString( id );

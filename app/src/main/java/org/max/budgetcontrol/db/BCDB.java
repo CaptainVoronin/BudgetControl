@@ -25,7 +25,6 @@ class BCDB extends SQLiteOpenHelper
            ");";
 
    public static final String create_widget_cats_table = "create table widget_cats ( " +
-           "id integer primary key autoincrement," +
            "widget_id integer not null," +
            "category_id text not null, " +
            "foreign key ( widget_id ) references widget ( id )," +

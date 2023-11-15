@@ -23,6 +23,5 @@ public class InitialRequestResponseHandler implements  IResponseHandler{
 
     private void saveCategoryListInDB(Context context, List<Category> cats) {
 
-
     }
 }
