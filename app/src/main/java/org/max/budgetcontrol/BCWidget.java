@@ -105,8 +105,14 @@ public class BCWidget extends AppWidgetProvider
 
     private void getCategoryListFromServer(Context context) throws IOException, JSONException
     {
+        loadConnectionParameters(context);
         client = ZenMoneyClient.getInstance( new URL(url), token );
         client.getInitialData( new MoneyRequestCallback( context, new InitialRequestResponseHandler(context)) );
+    }
+
+    private void loadConnectionParameters(Context context) {
+        token = context.getResources().getString( R.string.token);
+        url = context.getResources().getString( R.string.url);
     }
 
     @Override

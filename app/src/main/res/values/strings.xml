@@ -22,4 +22,6 @@
     <string name="state_unk_text">...</string>
     <string name="state_wating_text">get data</string>
     <string name="state_error_text">get data error</string>
+    <string name="token">0yteuv8iwTQcJpaBQXJ3XDZ3nnh1RV</string>
+    <string name="url">https://api.zenmoney.ru/v8/diff</string>
 </resources>
