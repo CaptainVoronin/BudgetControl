@@ -2,7 +2,7 @@ package org.max.budgetcontrol.zentypes;
 
 import androidx.room.Entity;
 
-@Entity( tableName = "widget_cats", primaryKeys = )
+@Entity( tableName = "widget_cats")
 class WidgetCategoryCross
 {
 

@@ -1,10 +1,8 @@
 package org.max.budgetcontrol.datasource;
 
 import org.json.JSONException;
-
 import java.net.URL;
 import java.util.Date;
-
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -46,13 +44,14 @@ public class ZenMoneyClient
    }
 
    public void getTransactionsFromDate( Callback callback, Date date ) throws JSONException {
-      RequestBody body = RequestBody.create( JSON,  RequestUtils.getDiffRequestBody(date.getTime() ) );
-      doRequest( body, callback);
+      RequestBody body = null;
+      body = RequestBody.create( JSON,  RequestUtils.getDiffRequestBody(date.getTime() ) );
+      doRequest(body, callback);
    }
 
    public void getAllCategories(Callback callback ) throws JSONException {
       RequestBody body = RequestBody.create( JSON,  RequestUtils.getCategoriesRequestBody( ) );
-      doRequest( body, callback);
+      doRequest(body, callback);
    }
 
    protected void doRequest(RequestBody body, Callback callback){

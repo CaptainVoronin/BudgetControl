@@ -3,17 +3,21 @@ package org.max.budgetcontrol;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
-import android.widget.RemoteViews;
+import android.content.SharedPreferences;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.max.budgetcontrol.datasource.AllUpdateHandler;
 import org.max.budgetcontrol.datasource.IErrorHandler;
 import org.max.budgetcontrol.datasource.IResponseHandler;
 import org.max.budgetcontrol.datasource.InitialRequestResponseHandler;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -24,67 +28,23 @@ import okhttp3.Response;
  */
 public class BCWidget extends AppWidgetProvider
 {
-    enum State
-    {
-        init,
-        unknown,
-        waiting,
-        hasdata,
-        error
-    }
-
-    ZenMoneyClient client;
-
-    State state;
-
-    String token = "0yteuv8iwTQcJpaBQXJ3XDZ3nnh1RV";
-    String url = "https://api.zenmoney.ru/v8/diff";
-
-    public BCWidget()
-    {
-        state = State.unknown;
-    }
-
-    public void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId)
-    {
-
-        CharSequence widgetText = getStateText( context );
-        // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.b_c_widget);
-        views.setTextViewText(R.id.txt_reminder, widgetText);
-
-        // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
-    }
-
-    private CharSequence getStateText( Context context )
-    {
-        int id;
-
-        switch ( state )
-        {
-            case error:
-                id = R.string.state_error_text;
-                break;
-            case waiting:
-                id = R.string.state_wating_text;
-                break;
-            default:
-                id = R.string.state_unk_text;
-        }
-        return context.getString( id );
-    }
+    String token;
+    URL url;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
     {
-
-        // There may be multiple widgets active, so update all of them
-        for (int appWidgetId : appWidgetIds)
-        {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
+        ZenMoneyClient client = new ZenMoneyClient( url, token );
+        AllUpdateHandler handler = new AllUpdateHandler( context, appWidgetManager, appWidgetIds );
+        try {
+            client.getTransactionsFromDate( new MoneyRequestCallback( handler, handler ), new Date() );
+        } catch (JSONException e) {
+            updateWithError( context, appWidgetManager, appWidgetIds, e );
         }
+    }
+
+    private void updateWithError(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, JSONException e) {
+
     }
 
     @Override
@@ -100,19 +60,32 @@ public class BCWidget extends AppWidgetProvider
     }
 
     private void initApp(Context context) throws JSONException, IOException {
+        loadConnectionParameters( context );
         getCategoryListFromServer( context );
     }
 
     private void getCategoryListFromServer(Context context) throws IOException, JSONException
     {
         loadConnectionParameters(context);
-        client = ZenMoneyClient.getInstance( new URL(url), token );
-        client.getInitialData( new MoneyRequestCallback( context, new InitialRequestResponseHandler(context)) );
+        ZenMoneyClient client = new ZenMoneyClient( url, token );
+        client.getInitialData( new MoneyRequestCallback( new InitialRequestResponseHandler(context)) );
     }
 
-    private void loadConnectionParameters(Context context) {
-        token = context.getResources().getString( R.string.token);
-        url = context.getResources().getString( R.string.url);
+    private void loadConnectionParameters(Context context) throws MalformedURLException {
+        SharedPreferences pr = context.getSharedPreferences( "app.properties", Context.MODE_PRIVATE );
+        String strURL = pr.getString( context.getString( R.string.url ), null );
+        token = pr.getString( context.getString( R.string.token ), null );
+
+        if( strURL == null ) {
+            token = context.getString(R.string.token_value);
+            strURL = context.getString(R.string.url_value);
+            SharedPreferences.Editor ed = pr.edit();
+            ed.putString( context.getString( R.string.url ), strURL );
+            ed.putString( context.getString( R.string.token ), token );
+            ed.commit();
+        }
+
+        url = new URL( strURL );
     }
 
     @Override
@@ -123,20 +96,19 @@ public class BCWidget extends AppWidgetProvider
 
     class MoneyRequestCallback implements Callback
     {
-        Context context;
         IErrorHandler errorHandler;
         IResponseHandler responseHandler;
 
-        public MoneyRequestCallback( Context context, IResponseHandler responseHandler )
+        public MoneyRequestCallback( IResponseHandler responseHandler )
         {
-            this.context = context;
+           // this.context = context;
             this.errorHandler = new DefaultErrorHandler();
             this.responseHandler = responseHandler;
         }
 
-        public MoneyRequestCallback( Context context, IResponseHandler responseHandler, IErrorHandler errorHandler )
+        public MoneyRequestCallback( IResponseHandler responseHandler, IErrorHandler errorHandler )
         {
-            this.context = context;
+            //this.context = context;
             this.errorHandler = errorHandler;
             this.responseHandler = responseHandler;
         }
@@ -145,7 +117,6 @@ public class BCWidget extends AppWidgetProvider
         public void onFailure(Call call, IOException e)
         {
             errorHandler.handleError( call, e );
-            state = State.error;
         }
 
         @Override
@@ -156,11 +127,9 @@ public class BCWidget extends AppWidgetProvider
             {
                 JSONObject jo = new JSONObject( buff );
                 responseHandler.processResponse( jo );
-                state = State.hasdata;
 
             } catch (JSONException e)
             {
-                state = State.error;
                 throw new RuntimeException(e);
             }
         }
@@ -170,8 +139,7 @@ public class BCWidget extends AppWidgetProvider
     {
         public void handleError(Call call, IOException e)
         {
-            state = State.error;
-            String str =Log.getStackTraceString( e );
+            String str = Log.getStackTraceString( e );
             Log.e( this.getClass().getName(), str  );
         }
     }

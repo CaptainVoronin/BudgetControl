@@ -2,7 +2,10 @@ package org.max.budgetcontrol.zentypes;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
@@ -33,12 +36,15 @@ public class Category {
         this.child = child;
     }
 
+    @Ignore
     List<Category> child;
 
     @ColumnInfo( name="name")
     String name;
     boolean outcome;
 
+    @PrimaryKey
+    @NotNull
     @ColumnInfo(name="id")
     UUID id;
 
@@ -58,6 +64,11 @@ public class Category {
             this.parent = UUID.fromString( parent );
         else
             this.parent = null;
+    }
+
+    public Category()
+    {
+
     }
 
     public boolean addChild( Category c )
@@ -81,7 +92,7 @@ public class Category {
             parent = obj.getString( "parent" );
         return new Category(  id, name, b, parent );
     }
-    public class CategoryComparator implements Comparator<Category>
+    public static class CategoryComparator implements Comparator<Category>
     {
         // Used for sorting in ascending order of
         // roll number
