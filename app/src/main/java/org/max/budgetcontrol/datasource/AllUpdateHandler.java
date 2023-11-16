@@ -35,12 +35,15 @@ public class AllUpdateHandler implements IResponseHandler, IErrorHandler {
         List<Category> categories = ResponseProcessor.getCategory( jObject );
         try {
             List<Transaction> transactions = ResponseProcessor.getTransactions( jObject, System.currentTimeMillis(),categories );
-            views = getRemoteViews( jObject );
-
+            for( int id : appWidgetId )
+            {
+                views = getRemoteViews( jObject );
+                appWidgetManager.updateAppWidget( id, views );
+            }
         } catch (ParseException e) {
             views = getErrorView( e );
+            appWidgetManager.updateAppWidget( appWidgetId, views );
         }
-        appWidgetManager.updateAppWidget( appWidgetId, views );
     }
 
     private RemoteViews getErrorView(ParseException e) {
