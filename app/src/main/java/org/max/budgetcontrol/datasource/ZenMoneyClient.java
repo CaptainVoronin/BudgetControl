@@ -24,7 +24,7 @@ public class ZenMoneyClient
 
    URL url;
 
-   protected ZenMoneyClient(URL url, String token )
+   public ZenMoneyClient(URL url, String token )
    {
       this.url = url;
       this.token = token;
