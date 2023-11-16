@@ -2,7 +2,6 @@ package org.max.budgetcontrol.datasource;
 
 import org.json.JSONException;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 
@@ -17,8 +16,7 @@ import okhttp3.RequestBody;
  */
 public class ZenMoneyClient
 {
-   static ZenMoneyClient instance;
-   static String token = "57ORlyBnixp1bGhpBu0CcNkrY0qRRZ";
+   String token;
 
    OkHttpClient httpClient;
 
@@ -33,13 +31,6 @@ public class ZenMoneyClient
       httpClient = new OkHttpClient();
    }
 
-   public static ZenMoneyClient getInstance(URL url, String token)
-   {
-      if (instance == null)
-         instance = new ZenMoneyClient(url, token );
-      return instance;
-   }
-
    Request.Builder getRequestBuilder()
    {
       return new Request.Builder()
@@ -48,23 +39,23 @@ public class ZenMoneyClient
               .header( "Authorization", "Bearer " + token );
    }
 
-   public void getInitialData(Callback callback) throws JSONException, IOException
+   public void getInitialData(Callback callback) throws JSONException
    {
       RequestBody body = RequestBody.create( JSON,  RequestUtils.getInitialRequestBody() );
       doRequest( body, callback );
    }
 
-   public void getTransactionsFromDate( Callback callback, Date date ) throws IOException, JSONException {
+   public void getTransactionsFromDate( Callback callback, Date date ) throws JSONException {
       RequestBody body = RequestBody.create( JSON,  RequestUtils.getDiffRequestBody(date.getTime() ) );
       doRequest( body, callback);
    }
 
-   public void getAllCategories(Callback callback ) throws IOException, JSONException {
+   public void getAllCategories(Callback callback ) throws JSONException {
       RequestBody body = RequestBody.create( JSON,  RequestUtils.getCategoriesRequestBody( ) );
       doRequest( body, callback);
    }
 
-   protected void doRequest(RequestBody body, Callback callback) throws IOException, JSONException {
+   protected void doRequest(RequestBody body, Callback callback){
       Request.Builder requestBuilder = getRequestBuilder();
       Request req = requestBuilder.post( body ).build();
       httpClient.newCall(req).enqueue(callback);
