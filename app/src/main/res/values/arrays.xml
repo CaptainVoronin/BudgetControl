@@ -9,4 +9,10 @@
         <item>reply</item>
         <item>reply_all</item>
     </string-array>
+
+    <string-array name="period_codes">
+        <item>год</item>
+        <item>месяц</item>
+        <item>неделя</item>
+    </string-array>
 </resources>
