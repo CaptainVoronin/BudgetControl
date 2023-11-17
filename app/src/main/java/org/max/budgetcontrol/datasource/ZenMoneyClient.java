@@ -1,13 +1,18 @@
 package org.max.budgetcontrol.datasource;
 
 import org.json.JSONException;
+
+import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
+
+import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * 57ORlyBnixp1bGhpBu0CcNkrY0qRRZ
@@ -43,7 +48,7 @@ public class ZenMoneyClient
       doRequest( body, callback );
    }
 
-   public void getTransactionsFromDate( Callback callback, Date date ) throws JSONException {
+   public void updateWidgets(Callback callback, Date date ) throws JSONException {
       RequestBody body = null;
       body = RequestBody.create( JSON,  RequestUtils.getDiffRequestBody(date.getTime() ) );
       doRequest(body, callback);
@@ -60,4 +65,16 @@ public class ZenMoneyClient
       httpClient.newCall(req).enqueue(callback);
    }
 
+   class InternalCallback implements Callback{
+
+      @Override
+      public void onFailure(Call call, IOException e) {
+
+      }
+
+      @Override
+      public void onResponse(Call call, Response response) throws IOException {
+
+      }
+   }
 }
