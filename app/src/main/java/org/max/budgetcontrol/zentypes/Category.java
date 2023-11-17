@@ -1,4 +1,4 @@
-package org.max.budgetcontrol.zentypes;
+childpackage org.max.budgetcontrol.zentypes;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -64,11 +64,12 @@ public class Category {
             this.parent = UUID.fromString( parent );
         else
             this.parent = null;
+        child = new ArrayList<>();
     }
 
     public Category()
     {
-
+        child = new ArrayList<>();
     }
 
     public boolean addChild( Category c )
@@ -77,7 +78,6 @@ public class Category {
             return false;
         else
         {
-            if( child == null ) child = new ArrayList<>();
             if ( !child.contains( c )) child.add( c );
             return true;
         }
