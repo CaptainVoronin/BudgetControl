@@ -1,4 +1,4 @@
-childpackage org.max.budgetcontrol.zentypes;
+package org.max.budgetcontrol.zentypes;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -84,7 +84,7 @@ public class Category {
     }
 
     public static Category fromJSONObject(JSONObject obj ) throws JSONException {
-        Boolean b = obj.getBoolean( "showOutcome" );
+        boolean b = obj.getBoolean( "showOutcome" );
         String name = obj.getString( "title" );
         String parent = null;
         String id = obj.getString( "id" );
