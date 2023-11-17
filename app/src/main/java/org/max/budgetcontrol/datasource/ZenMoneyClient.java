@@ -1,6 +1,7 @@
 package org.max.budgetcontrol.datasource;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
@@ -27,10 +28,13 @@ public class ZenMoneyClient
 
    URL url;
 
-   public ZenMoneyClient(URL url, String token )
+   IZenClientResponseHandler handler;
+
+   public ZenMoneyClient(URL url, String token, IZenClientResponseHandler handler )
    {
       this.url = url;
       this.token = token;
+      this.handler = handler;
       httpClient = new OkHttpClient();
    }
 
@@ -48,15 +52,20 @@ public class ZenMoneyClient
       doRequest( body, callback );
    }
 
-   public void updateWidgets(Callback callback, Date date ) throws JSONException {
+   /**
+    * Надо переименовать
+    * @param date
+    * @throws JSONException
+    */
+   public void updateWidgets( Date date ) throws JSONException {
       RequestBody body = null;
       body = RequestBody.create( JSON,  RequestUtils.getDiffRequestBody(date.getTime() ) );
-      doRequest(body, callback);
+      doRequest(body, new InternalCallback( handler ));
    }
 
-   public void getAllCategories(Callback callback ) throws JSONException {
+   public void getAllCategories() throws JSONException {
       RequestBody body = RequestBody.create( JSON,  RequestUtils.getCategoriesRequestBody( ) );
-      doRequest(body, callback);
+      doRequest(body, new InternalCallback( handler ));
    }
 
    protected void doRequest(RequestBody body, Callback callback){
@@ -66,15 +75,27 @@ public class ZenMoneyClient
    }
 
    class InternalCallback implements Callback{
+      IZenClientResponseHandler zenResponseHandler;
+
+      public InternalCallback( IZenClientResponseHandler zenResponseHandler )
+      {
+         this.zenResponseHandler = zenResponseHandler;
+      }
 
       @Override
       public void onFailure(Call call, IOException e) {
-
+         zenResponseHandler.processError( e );
       }
 
       @Override
       public void onResponse(Call call, Response response) throws IOException {
-
+         JSONObject jsonObject = null;
+         try {
+            jsonObject = new JSONObject( response.body().string() );
+            zenResponseHandler.processResponse( jsonObject );
+         } catch (JSONException e) {
+            zenResponseHandler.processError(e);
+         }
       }
    }
 }
