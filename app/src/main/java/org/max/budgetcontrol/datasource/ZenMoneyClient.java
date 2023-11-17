@@ -4,6 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 
@@ -46,26 +47,35 @@ public class ZenMoneyClient
               .header( "Authorization", "Bearer " + token );
    }
 
-   public void getInitialData(Callback callback) throws JSONException
+   /*public void getInitialData(Callback callback) throws JSONException
    {
       RequestBody body = RequestBody.create( JSON,  RequestUtils.getInitialRequestBody() );
       doRequest( body, callback );
-   }
+   }*/
 
    /**
     * Надо переименовать
     * @param date
     * @throws JSONException
     */
-   public void updateWidgets( Date date ) throws JSONException {
-      RequestBody body = null;
-      body = RequestBody.create( JSON,  RequestUtils.getDiffRequestBody(date.getTime() ) );
-      doRequest(body, new InternalCallback( handler ));
+   public void updateWidgets( Date date ) {
+      try {
+         RequestBody body = RequestBody.create(JSON, RequestUtils.getDiffRequestBody(date.getTime()));
+         doRequest(body, new InternalCallback(handler));
+      } catch ( JSONException e )
+      {
+         handler.processError( e );
+      }
    }
 
-   public void getAllCategories() throws JSONException {
-      RequestBody body = RequestBody.create( JSON,  RequestUtils.getCategoriesRequestBody( ) );
-      doRequest(body, new InternalCallback( handler ));
+   public void getAllCategories() {
+      try {
+         RequestBody body = RequestBody.create(JSON, RequestUtils.getCategoriesRequestBody());
+         doRequest(body, new InternalCallback(handler));
+      } catch ( JSONException e )
+      {
+         handler.processError( e );
+      }
    }
 
    protected void doRequest(RequestBody body, Callback callback){
