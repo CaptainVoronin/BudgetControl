@@ -17,7 +17,27 @@ public class WidgetParams
     double limitAmount;
 
     @ColumnInfo( name = "start_period")
-    long startPeriod;
+    StartPeriodEncoding startPeriod;
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setAppId(int appId) {
+        this.appId = appId;
+    }
+
+    public void setLimitAmount(double limitAmount) {
+        this.limitAmount = limitAmount;
+    }
+
+    public void setStartPeriod(StartPeriodEncoding startPeriod) {
+        this.startPeriod = startPeriod;
+    }
+
+    public void setStartPeriod(String startPeriod) {
+        this.startPeriod = StartPeriodEncoding.valueOf( startPeriod );
+    }
 
     public int getId()
     {
@@ -34,7 +54,12 @@ public class WidgetParams
         return limitAmount;
     }
 
-    public long getStartPeriod()
+    public String getStartPeriod()
+    {
+        return startPeriod.toString();
+    }
+
+    public StartPeriodEncoding getStartPeriodCode()
     {
         return startPeriod;
     }

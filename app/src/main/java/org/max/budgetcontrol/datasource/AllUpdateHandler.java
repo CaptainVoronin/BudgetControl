@@ -16,7 +16,7 @@ import java.util.List;
 
 import okhttp3.Call;
 
-public class AllUpdateHandler implements IResponseHandler, IErrorHandler {
+public class AllUpdateHandler implements IZenClientResponseHandler {
     Context context;
     AppWidgetManager appWidgetManager;
     int[] appWidgetId;
@@ -36,35 +36,14 @@ public class AllUpdateHandler implements IResponseHandler, IErrorHandler {
         try {
             List<Transaction> transactions = ResponseProcessor.getTransactions( jObject, System.currentTimeMillis(),categories );
             for( int id : appWidgetId )
-            {
-                views = getRemoteViews( jObject );
-                appWidgetManager.updateAppWidget( id, views );
-            }
+                new WidgetUpdater( context, appWidgetManager, id ).updateWidget( transactions );
         } catch (ParseException e) {
-            views = getErrorView( e );
-            appWidgetManager.updateAppWidget( appWidgetId, views );
         }
     }
 
-    private RemoteViews getErrorView(ParseException e) {
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.b_c_widget);
-        views.setTextViewText(R.id.txt_reminder, e.getLocalizedMessage() );
-        return views;
-    }
-
-    private RemoteViews getRemoteViews(JSONObject jObject) {
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.b_c_widget);
-        views.setTextViewText(R.id.txt_reminder, "updated");
-        return views;
-    }
-
-    List<Transaction> filterTransactions(List<Category> cats, List<Transaction> transactions )
-    {
-        return transactions;
-    }
-
     @Override
-    public void handleError(Call call, IOException e) {
+    public void processError(Exception e) {
 
     }
+
 }

@@ -10,10 +10,13 @@ public class SettingsHolder {
 
     Map<String, Object> props;
 
+    boolean isInit;
+
     public SettingsHolder( Context context )
     {
         this.context = context;
         props = new HashMap<>();
+        isInit = false;
     }
 
     public void init()
@@ -31,25 +34,30 @@ public class SettingsHolder {
             ed.putString( context.getString( R.string.token ), token );
             ed.commit();
         }
+        isInit = true;
     }
 
     public Object getParameter( String name )
     {
+        assert isInit != false : "Application settings not initialized. Call init()!";
         return props.get( name );
     }
 
     public String getParameterAsString( String name )
     {
+        assert isInit != false : "Application settings not initialized. Call init()!!";
         return props.get( name ).toString();
     }
 
     public Integer getParameterAsInt( String name )
     {
+        assert isInit != false : "Application settings not initialized! Call init()!";
         return Integer.parseInt( props.get( name ).toString() );
     }
 
     public Long getParameterAsLong( String name )
     {
+        assert isInit != false: "Application settings not initialized! Call init()!";
         return Long.parseLong( props.get( name ).toString() );
     }
 

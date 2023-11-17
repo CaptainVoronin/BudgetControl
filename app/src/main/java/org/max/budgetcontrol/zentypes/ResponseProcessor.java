@@ -52,7 +52,7 @@ public class ResponseProcessor {
         return transactions;
     }
 
-    private static List<Category> makeCategoryTree(List<Category> categories) {
+    public static List<Category> makeCategoryTree(List<Category> categories) {
         Category parent;
         Map<UUID, Category> cTree = new HashMap<>();
 
