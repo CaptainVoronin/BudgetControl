@@ -61,6 +61,7 @@ public class ResponseProcessor {
 
         // Fill categories with child ones
         List<Category> children = categories.stream().filter( category -> category.getParent() != null ).collect(Collectors.toList());
+        children = children.stream().sorted( new Category.CategoryComparator() ).collect(Collectors.toList());
 
         Iterator<UUID> it = cTree.keySet().iterator();
         while( it.hasNext() )
@@ -71,9 +72,6 @@ public class ResponseProcessor {
 
         // Make the sorted list
         List<Category> set = cTree.values().stream().sorted( new Category.CategoryComparator() ).collect(Collectors.toList());
-
-        // Sort child categories
-        set.forEach( category -> { if( category.getChild() != null ) category.setChild( category.getChild().stream().sorted( new Category.CategoryComparator() ).collect(Collectors.toList())); } );
 
         return set;
     }
