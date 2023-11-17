@@ -22,19 +22,19 @@
     <Spinner
         android:id="@+id/spStartPeriod"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:entries="@array/period_codes">
     </Spinner>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <ExpandableListView
+        <ListView
             android:id="@+id/lvCategories"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
+            android:layout_height="wrap_content" />
     </ScrollView>
 
 </LinearLayout>

@@ -5,7 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ExpandableListView;
+import android.widget.ListView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,7 +22,10 @@ import org.max.budgetcontrol.zentypes.WidgetParams;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
     List<Category> categories;
@@ -71,8 +77,15 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void processResponse(JSONObject jObject) throws JSONException {
             List<Category> cats = ResponseProcessor.getCategory(jObject);
-            cats = ResponseProcessor.makeCategoryTree(cats);
-            bringCategoryListToFront(cats);
+            final List<Category> cs = ResponseProcessor.makeCategoryTree(cats);
+            runOnUiThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    bringCategoryListToFront(cs);
+                }
+            });
         }
 
         @Override
@@ -83,8 +96,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void bringCategoryListToFront(List<Category> cats) {
         categories = cats;
-        ExpandableListView lv = (ExpandableListView) findViewById(R.id.lvCategories);
-        lv.setAdapter(new CategoryListViewAdapter(getApplicationContext(), categories));
-    }
+        List<Category> res = new ArrayList<>();
+        for ( Category c : categories)
+        {
+            res.add( c );
+            if( c.getChild().size() != 0 )
+                res.addAll( c.getChild() );
+        }
+        ListView lv = (ListView) findViewById(R.id.lvCategories);
 
+        res = res.stream().filter( c -> c.isOutcome() ).collect(Collectors.toList());
+        lv.setAdapter(new CategoryListViewAdapter(getApplicationContext(), res, null));
+    }
 }

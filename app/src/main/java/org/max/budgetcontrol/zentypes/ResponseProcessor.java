@@ -71,9 +71,7 @@ public class ResponseProcessor {
         }
 
         // Make the sorted list
-        List<Category> set = cTree.values().stream().sorted( new Category.CategoryComparator() ).collect(Collectors.toList());
-
-        return set;
+        return cTree.values().stream().sorted( new Category.CategoryComparator() ).collect(Collectors.toList());
     }
 
 }
