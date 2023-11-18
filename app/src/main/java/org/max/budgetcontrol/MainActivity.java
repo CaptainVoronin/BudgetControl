@@ -2,7 +2,6 @@ package org.max.budgetcontrol;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.room.Room;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -10,33 +9,37 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.IZenClientResponseHandler;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
-import org.max.budgetcontrol.db.BCDao;
-import org.max.budgetcontrol.db.BCRoomDB;
+import org.max.budgetcontrol.db.BCDBHelper;
 import org.max.budgetcontrol.zentypes.Category;
 import org.max.budgetcontrol.zentypes.ResponseProcessor;
 import org.max.budgetcontrol.zentypes.WidgetParams;
-import org.max.budgetcontrol.zentypes.WidgetWithCategories;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener{
     List<Category> categories;
     SettingsHolder settings;
 
-    BCRoomDB db;
+    BCDBHelper db;
+
+    WidgetParams currentWidget;
+
+    WidgetCategoryHolder categoryHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById( R.id.toolbar );
         setSupportActionBar( toolbar );
 
+        // Создать или открыть БД
         db();
 
         Intent intent = getIntent();
@@ -59,19 +63,20 @@ public class MainActivity extends AppCompatActivity {
             appWidgetId = extras.getInt(
                     AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
-            configureWidget(appWidgetId);
-        } else {
-            prepareForNewWidget();
         }
+        configureWidget(appWidgetId);
+        loadCategories();
+
     }
 
     private void db()
     {
-        db = Room.databaseBuilder( getApplicationContext(), BCRoomDB.class, "bc.db").build();
+        db = new BCDBHelper( getApplicationContext() );
+        db.open();
     }
 
-    private void prepareForNewWidget() {
-        CategoryLoaderHandler categoryLoaderHandler = new CategoryLoaderHandler();
+    private void loadCategories() {
+        CategoryLoaderHandler categoryLoaderHandler = new CategoryLoaderHandler(  );
         try {
             ZenMoneyClient client = new ZenMoneyClient(
                     new URL(settings.getParameterAsString("url")),
@@ -108,6 +113,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void saveChanges()
     {
+        currentWidget.setCategories( categoryHolder.cats );
+
+        if( currentWidget.id == WidgetParams.INVALID_WIDGET_ID )
+            db.insertWidgetParams( currentWidget );
+        else
+            db.updateWidgetParams( currentWidget );
+
         AppWidgetManager mAppWidgetManager =
                 getApplicationContext().getSystemService(AppWidgetManager.class);
 
@@ -137,20 +149,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configureWidget(int appWidgetId) {
-        WidgetParams wp = getWidgetParams(appWidgetId);
+        currentWidget = getWidgetParams(appWidgetId);
+        categoryHolder = new WidgetCategoryHolder( currentWidget.getCategories() );
     }
 
     private WidgetParams getWidgetParams(int appWidgetId) {
-        BCDao bcDao = db.bcDao();
-        WidgetParams wp = bcDao.loadWidgetParams( appWidgetId );
+        WidgetParams wp = db.loadWidgetParamsByAppId( appWidgetId );
         if( wp == null )
         {
             wp = new WidgetParams();
+            wp.setAppId( appWidgetId );
         }
-        return null;
+        return wp;
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean checked)
+    {
+        UUID id = ( UUID ) compoundButton.getTag();
+        if( checked )
+            categoryHolder.add( id );
+        else
+            categoryHolder.remove( id );
     }
 
     class CategoryLoaderHandler implements IZenClientResponseHandler {
+
         @Override
         public void processResponse(JSONObject jObject) throws JSONException {
             List<Category> cats = ResponseProcessor.getCategory(jObject);
@@ -173,16 +197,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void bringCategoryListToFront(List<Category> cats) {
         categories = cats;
-        List<Category> res = new ArrayList<>();
+        List<Category> flatList = new ArrayList<>();
         for ( Category c : categories)
         {
-            res.add( c );
+            flatList.add( c );
             if( c.getChild().size() != 0 )
-                res.addAll( c.getChild() );
+                flatList.addAll( c.getChild() );
         }
         ListView lv = (ListView) findViewById(R.id.lvCategories);
 
-        res = res.stream().filter( c -> c.isOutcome() ).collect(Collectors.toList());
-        lv.setAdapter(new CategoryListViewAdapter(getApplicationContext(), res, null));
+        flatList = flatList.stream().filter( c -> c.isOutcome() ).collect(Collectors.toList());
+        List<UUID> widgetCats = null;
+        if( currentWidget != null )
+            widgetCats = currentWidget.getCategories();
+
+        lv.setAdapter(new CategoryListViewAdapter(getApplicationContext(), MainActivity.this, flatList, widgetCats ));
     }
 }

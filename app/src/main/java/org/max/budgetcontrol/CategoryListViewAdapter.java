@@ -24,13 +24,19 @@ public class CategoryListViewAdapter extends ArrayAdapter<Category>
 
     Context context;
 
-    public CategoryListViewAdapter(Context context, List<Category> flatList, List<Category> widgetCts)
+    MainActivity setChangeListener;
+
+    public CategoryListViewAdapter(Context context, MainActivity setChangeListener, List<Category> flatList, List<UUID> widgetCts)
     {
         super(context, R.layout.category_list_item, flatList );
         this.context = context;
-        selectedCats = new ArrayList<>();
+
+        this.setChangeListener = setChangeListener;
+
         if( widgetCts != null )
-            widgetCts.stream().map( c -> selectedCats.add( c.getId() ) );
+            selectedCats = widgetCts;
+        else
+            selectedCats = new ArrayList<>();
     }
 
     @Override
@@ -109,20 +115,7 @@ public class CategoryListViewAdapter extends ArrayAdapter<Category>
         } else
             cb.setChecked(false);
 
-        cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-        {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean checked)
-            {
-                UUID id = ( UUID ) compoundButton.getTag();
-                if( checked )
-                    if( !selectedCats.contains( id ))
-                        selectedCats.add( id );
-                else
-                    if( !selectedCats.contains( id ))
-                        selectedCats.remove( id );
-            }
-        });
+        cb.setOnCheckedChangeListener(setChangeListener);
         return view;
     }
 

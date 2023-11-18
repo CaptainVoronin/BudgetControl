@@ -11,21 +11,17 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverter;
 
-@Entity( tableName = "widget" )
 public class WidgetParams
 {
-    @PrimaryKey (autoGenerate = true)
+
+    public static final int INVALID_WIDGET_ID = -1;
+
     public int id;
 
-    @NotNull
-    @ColumnInfo( name="app_id" )
     public int appId;
 
-    @ColumnInfo( name = "limit_amount")
     public double limitAmount;
 
-    @NotNull
-    @ColumnInfo( name = "start_period")
     public StartPeriodEncoding startPeriod;
 
     public List<UUID> getCategories()
@@ -33,13 +29,18 @@ public class WidgetParams
         return categories;
     }
 
+    public void setCategories(List<UUID> categories)
+    {
+        this.categories = categories;
+    }
+
     List<UUID> categories;
 
-    public WidgetParams(double limitAmount, @NotNull StartPeriodEncoding startPeriod)
+    public WidgetParams( )
     {
         this.limitAmount = 0;
         this.startPeriod = StartPeriodEncoding.month;
-        this.id = -1;
+        this.id = INVALID_WIDGET_ID;
         this.appId = -1;
         categories = new ArrayList<>();
     }
@@ -58,16 +59,6 @@ public class WidgetParams
 
     public void setStartPeriod(StartPeriodEncoding startPeriod) {
         this.startPeriod = startPeriod;
-    }
-
-    @TypeConverter
-    public static StartPeriodEncoding stringToStartPeriod(String startPeriod) {
-        return StartPeriodEncoding.valueOf( startPeriod );
-    }
-
-    @TypeConverter
-    public static String startPeriodToString(StartPeriodEncoding startPeriod) {
-        return startPeriod.toString();
     }
 
 }

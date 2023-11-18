@@ -9,13 +9,9 @@ class BCDB extends SQLiteOpenHelper
    // If you change the database schema, you must increment the database version.
    public static final int DATABASE_VERSION = 1;
    public static final String DATABASE_NAME = "bcbd.db";
-   /*
-   public static final String create_categories_table = "create table category ( " +
-           "id text not null primary key," +
-           "name text not null," +
-           "isoutcome integer not null default 1," +
-           "parent_id text" +
-           ");"; */
+
+   public static final String TABLE_WIDGET = "widget";
+   public static final String TABLE_WIDGET_CATS = "widget_cats";
 
    public static final String create_widget_table = "create table widget ( " +
            "id integer primary key autoincrement," +
