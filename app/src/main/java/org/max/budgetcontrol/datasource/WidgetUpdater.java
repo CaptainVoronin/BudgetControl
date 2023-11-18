@@ -24,7 +24,7 @@ public class WidgetUpdater {
     public void updateWidget(List<Transaction> transactions)
     {
         WidgetParams wp = getWidgetParamsFromDB();
-        long startDate = calculateStartDate( wp.getStartPeriodCode() );
+        long startDate = calculateStartDate( wp.startPeriod );
         double amount = getAmount( transactions, startDate);
         RemoteViews view = getViews( amount );
         appWidgetManager.updateAppWidget( widgetId, view );

@@ -1,23 +1,48 @@
 package org.max.budgetcontrol.zentypes;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverter;
 
 @Entity( tableName = "widget" )
 public class WidgetParams
 {
     @PrimaryKey (autoGenerate = true)
-    int id;
+    public int id;
 
+    @NotNull
     @ColumnInfo( name="app_id" )
-    int appId;
+    public int appId;
 
     @ColumnInfo( name = "limit_amount")
-    double limitAmount;
+    public double limitAmount;
 
+    @NotNull
     @ColumnInfo( name = "start_period")
-    StartPeriodEncoding startPeriod;
+    public StartPeriodEncoding startPeriod;
+
+    public List<UUID> getCategories()
+    {
+        return categories;
+    }
+
+    List<UUID> categories;
+
+    public WidgetParams(double limitAmount, @NotNull StartPeriodEncoding startPeriod)
+    {
+        this.limitAmount = 0;
+        this.startPeriod = StartPeriodEncoding.month;
+        this.id = -1;
+        this.appId = -1;
+        categories = new ArrayList<>();
+    }
 
     public void setId(int id) {
         this.id = id;
@@ -35,32 +60,14 @@ public class WidgetParams
         this.startPeriod = startPeriod;
     }
 
-    public void setStartPeriod(String startPeriod) {
-        this.startPeriod = StartPeriodEncoding.valueOf( startPeriod );
+    @TypeConverter
+    public static StartPeriodEncoding stringToStartPeriod(String startPeriod) {
+        return StartPeriodEncoding.valueOf( startPeriod );
     }
 
-    public int getId()
-    {
-        return id;
-    }
-
-    public int getAppId()
-    {
-        return appId;
-    }
-
-    public double getLimitAmount()
-    {
-        return limitAmount;
-    }
-
-    public String getStartPeriod()
-    {
+    @TypeConverter
+    public static String startPeriodToString(StartPeriodEncoding startPeriod) {
         return startPeriod.toString();
     }
 
-    public StartPeriodEncoding getStartPeriodCode()
-    {
-        return startPeriod;
-    }
 }
