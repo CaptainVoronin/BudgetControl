@@ -1,30 +1,25 @@
 package org.max.budgetcontrol;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.appcompat.widget.Toolbar;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.CheckBox;
-import android.widget.ExpandableListView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ListView;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.max.budgetcontrol.R;
 import org.max.budgetcontrol.datasource.IZenClientResponseHandler;
-import org.max.budgetcontrol.datasource.RequestUtils;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 import org.max.budgetcontrol.zentypes.Category;
 import org.max.budgetcontrol.zentypes.ResponseProcessor;
 import org.max.budgetcontrol.zentypes.WidgetParams;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
 
         settings = new SettingsHolder(getApplicationContext());
         settings.init();
+
+        Toolbar toolbar = findViewById( R.id.toolbar );
+        setSupportActionBar( toolbar );
+
         Intent intent = getIntent();
 
         Bundle extras = intent.getExtras();
@@ -63,6 +62,39 @@ public class MainActivity extends AppCompatActivity {
         } catch (MalformedURLException e) {
             categoryLoaderHandler.processError( e );
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuInflater i = getMenuInflater();
+        i.inflate(R.menu.action_bar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() ==  R.id.idCancel1 )
+        {
+            exitApp();
+            return true;
+        } else if ( item.getItemId() ==  R.id.idSave1 )
+        {
+            saveChanges();
+            return true;
+        }
+        else
+            return super.onOptionsItemSelected(item);
+    }
+
+    private void saveChanges()
+    {
+    }
+
+    private void exitApp()
+    {
+        finishAndRemoveTask();
+        System.exit(0);
     }
 
     private void configureWidget(int appWidgetId) {
