@@ -13,7 +13,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-@Entity ( tableName = "category")
 public class Category {
 
     public String getName() {
@@ -36,19 +35,13 @@ public class Category {
         this.child = child;
     }
 
-    @Ignore
     List<Category> child;
 
-    @ColumnInfo( name="name")
     String name;
     boolean outcome;
 
-    @PrimaryKey
-    @NotNull
-    @ColumnInfo(name="id")
     UUID id;
 
-    @ColumnInfo(name="parent_id")
     UUID parent;
 
     public UUID getParent() {
