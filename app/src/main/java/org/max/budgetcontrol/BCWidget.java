@@ -11,6 +11,7 @@ import org.max.budgetcontrol.datasource.AllUpdateHandler;
 import org.max.budgetcontrol.datasource.IErrorHandler;
 import org.max.budgetcontrol.datasource.IZenClientResponseHandler;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
+import org.max.budgetcontrol.db.BCDBHelper;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -66,7 +67,9 @@ public class BCWidget extends AppWidgetProvider
     @Override
     public void onDisabled(Context context)
     {
-        // Enter relevant functionality for when the last widget is disabled
+        BCDBHelper bcdbHelper = new BCDBHelper(  context );
+        bcdbHelper.open();
+        bcdbHelper.clearWidgets();
     }
 
 }

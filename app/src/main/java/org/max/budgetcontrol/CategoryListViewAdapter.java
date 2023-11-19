@@ -108,7 +108,7 @@ public class CategoryListViewAdapter extends ArrayAdapter<Category>
 
         CheckBox cb = (CheckBox) view.findViewById(R.id.cbSelected);
         cb.setTag(category.getId());
-        if (selectedCats != null)
+        if (selectedCats != null && selectedCats.size() != 0 )
         {
             if (selectedCats.contains(category.getId()))
                 cb.setChecked(true);

@@ -3,6 +3,7 @@ package org.max.budgetcontrol;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
@@ -14,6 +15,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.RemoteViews;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.IZenClientResponseHandler;
@@ -63,7 +66,9 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             appWidgetId = extras.getInt(
                     AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
+            setActivityResult(Activity.RESULT_CANCELED, appWidgetId );
         }
+
         configureWidget(appWidgetId);
         loadCategories();
 
@@ -115,15 +120,23 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     {
         currentWidget.setCategories( categoryHolder.cats );
 
-        if( currentWidget.id == WidgetParams.INVALID_WIDGET_ID )
+        if( currentWidget.getId() == WidgetParams.INVALID_WIDGET_ID )
             db.insertWidgetParams( currentWidget );
         else
             db.updateWidgetParams( currentWidget );
 
-        AppWidgetManager mAppWidgetManager =
+        setActivityResult( Activity.RESULT_OK, currentWidget.getAppId() );
+
+
+        AppWidgetManager widgetManager =
                 getApplicationContext().getSystemService(AppWidgetManager.class);
 
-        AppWidgetProviderInfo myWidgetProviderInfo = new AppWidgetProviderInfo();
+        RemoteViews views = new RemoteViews( getApplicationContext().getPackageName(), R.layout.b_c_widget);
+        views.setTextViewText(R.id.txt_reminder, "йцуйцуйцуйцуйцуйцуйцу" );
+
+        widgetManager.updateAppWidget( currentWidget.getAppId(), views );
+
+    /*    AppWidgetProviderInfo myWidgetProviderInfo = new AppWidgetProviderInfo();
         ComponentName myProvider = myWidgetProviderInfo.provider;
 
         if (mAppWidgetManager.isRequestPinAppWidgetSupported()) {
@@ -139,13 +152,21 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                     pinnedWidgetCallbackIntent, PendingIntent.FLAG_IMMUTABLE);
 
             mAppWidgetManager.requestPinAppWidget(myProvider, null, successCallback);
-        }
+        }*/
+        finishAndRemoveTask();
+
     }
 
     private void exitApp()
     {
         finishAndRemoveTask();
-        System.exit(0);
+    }
+
+    private void setActivityResult( int result, int widgetId )
+    {
+        Intent intent = new Intent();
+        intent.putExtra( AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId );
+        setResult( result, intent );
     }
 
     private void configureWidget(int appWidgetId) {

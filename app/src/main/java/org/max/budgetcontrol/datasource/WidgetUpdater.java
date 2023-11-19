@@ -13,21 +13,20 @@ import java.util.List;
 public class WidgetUpdater {
     Context context;
     AppWidgetManager appWidgetManager;
-    int widgetId;
+    WidgetParams widget;
 
-    public WidgetUpdater(Context context, AppWidgetManager appWidgetManager, int widgetId) {
+    public WidgetUpdater(Context context, AppWidgetManager appWidgetManager, WidgetParams widget ) {
         this.context = context;
         this.appWidgetManager = appWidgetManager;
-        this.widgetId = widgetId;
+        this.widget = widget;
     }
 
     public void updateWidget(List<Transaction> transactions)
     {
-        WidgetParams wp = getWidgetParamsFromDB();
-        long startDate = calculateStartDate( wp.startPeriod );
+        long startDate = calculateStartDate( widget.getStartPeriod() );
         double amount = getAmount( transactions, startDate);
         RemoteViews view = getViews( amount );
-        appWidgetManager.updateAppWidget( widgetId, view );
+        appWidgetManager.updateAppWidget( widget.getAppId(), view );
     }
 
     private long calculateStartDate(StartPeriodEncoding startPeriodCode) {

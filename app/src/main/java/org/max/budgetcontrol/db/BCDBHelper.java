@@ -9,7 +9,10 @@ import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class BCDBHelper
@@ -31,6 +34,8 @@ public class BCDBHelper
 
    public WidgetParams loadWidgetParamsByAppId( Integer appId )
    {
+      assert db != null : "Database is not opened";
+
       WidgetParams wp = null;
       String queryWidget = "select id, limit_amount, start_period from widget where app_id = ?";
       String queryCats = "select category_id from widget_cats where widget_id = ?";
@@ -46,6 +51,7 @@ public class BCDBHelper
          wp = new WidgetParams();
          wp.setAppId( appId );
          wp.setId( wID );
+         wp.setLimitAmount( limit );
          wp.setStartPeriod( StartPeriodEncoding.valueOf( buff ) );
          crs.close();
 
@@ -57,18 +63,21 @@ public class BCDBHelper
             buff = crs.getString( 0 );
             cats.add( UUID.fromString( buff ) );
          }
+         crs.close();
          wp.setCategories( cats );
+
       }
       return wp;
    }
 
    public long insertWidgetParams( WidgetParams wp )
    {
+      assert db != null : "Database is not opened";
       ContentValues cv = new ContentValues();
 
-      cv.put( "app_id", wp.appId );
-      cv.put( "limit_amount", wp.limitAmount );
-      cv.put( "start_period", wp.startPeriod.toString() );
+      cv.put( "app_id", wp.getAppId() );
+      cv.put( "limit_amount", wp.getLimitAmount() );
+      cv.put( "start_period", wp.getStartPeriod().toString() );
 
       db.beginTransaction();
 
@@ -77,15 +86,17 @@ public class BCDBHelper
 
       List<UUID> cats = wp.getCategories();
 
+      long cat_id;
       for ( UUID uuid : cats )
       {
          cv.put( "widget_id", id );
          cv.put( "category_id", uuid.toString() );
-         db.insert( BCDB.TABLE_WIDGET_CATS, null, cv );
+         cat_id = db.insert( BCDB.TABLE_WIDGET_CATS, null, cv );
+
       }
 
+      db.setTransactionSuccessful();
       db.endTransaction();
-
       return id;
    }
 
@@ -93,25 +104,26 @@ public class BCDBHelper
    {
       ContentValues cv = new ContentValues();
 
-      cv.put( "limit_amount", wp.limitAmount );
-      cv.put( "start_period", wp.startPeriod.toString() );
+      cv.put( "limit_amount", wp.getLimitAmount() );
+      cv.put( "start_period", wp.getStartPeriod().toString() );
 
       db.beginTransaction();
 
-      db.update( BCDB.TABLE_WIDGET, cv, "id=" + wp.id, null );
+      db.update( BCDB.TABLE_WIDGET, cv, "id=" + wp.getId(), null );
       cv.clear();
 
       List<UUID> cats = wp.getCategories();
 
-      db.delete( BCDB.TABLE_WIDGET_CATS, "widget_id=?", new String[]{ Integer.toString( wp.id )});
+      db.delete( BCDB.TABLE_WIDGET_CATS, "widget_id=?", new String[]{ Integer.toString( wp.getId() )});
 
       for ( UUID uuid : cats )
       {
-         cv.put( "widget_id", wp.id );
+         cv.put( "widget_id", wp.getId() );
          cv.put( "category_id", uuid.toString() );
          db.insert( BCDB.TABLE_WIDGET_CATS, null, cv );
+         cv.clear();
       }
-
+      db.setTransactionSuccessful();
       db.endTransaction();
    }
 
@@ -121,4 +133,76 @@ public class BCDBHelper
       bcdb.close();
    }
 
+   public List<WidgetParams> getAllWidgets()
+   {
+      assert db != null : "Database is not opened";
+      final String queryAllWidgets = "select id, app_id, limit_amount, start_period from widget";
+      final String queryAllWidgetCats = "select widget_id, category_id from widget_cats";
+
+      Cursor crs = db.rawQuery( queryAllWidgets, null );
+
+      List<WidgetParams> widgets = new ArrayList<>( crs.getCount() );
+
+      while( crs.moveToNext() )
+      {
+         WidgetParams wp = new WidgetParams();
+         int wID = crs.getInt(0);
+         int appId = crs.getInt( 1 );
+         double limit = crs.getDouble(2);
+         String buff = crs.getString(3);
+
+         wp = new WidgetParams();
+         wp.setAppId( appId );
+         wp.setId( wID );
+         wp.setLimitAmount( limit );
+         wp.setStartPeriod( StartPeriodEncoding.valueOf( buff ) );
+         widgets.add( wp );
+      }
+      crs.close();
+
+      crs = db.rawQuery( queryAllWidgetCats, null );
+      Map<UUID, Integer> cats = new HashMap<>(crs.getCount());
+
+      while( crs.moveToNext() )
+      {
+         Integer widgetId = crs.getInt( 0 );
+         UUID catId = UUID.fromString( crs.getString( 1 ) );
+
+         cats.put( catId, widgetId );
+      }
+      crs.close();
+
+      for( WidgetParams w : widgets )
+      {
+         Iterator<UUID> it = cats.keySet().iterator();
+
+         while(it.hasNext())
+         {
+            UUID uuid = it.next();
+            Integer wId = cats.get( uuid );
+            if( w.getId() == wId.intValue() ) w.addCategoryId( uuid );
+         }
+      }
+
+      return widgets;
+   }
+
+   //TODO: Не реализовано
+   public void deleteLost(List<Integer> lost)
+   {
+      assert db != null : "Database is not opened";
+   }
+
+   //TODO: Обработать исключение в транзакции
+   public void clearWidgets()
+   {
+      assert db != null : "Database is not opened";
+
+      db.beginTransaction();
+      db.delete( BCDB.TABLE_WIDGET_CATS, null, null );
+      db.delete( BCDB.TABLE_WIDGET, null, null );
+      db.setTransactionSuccessful();
+      db.endTransaction();
+
+   }
 }

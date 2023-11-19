@@ -16,13 +16,45 @@ public class WidgetParams
 
     public static final int INVALID_WIDGET_ID = -1;
 
-    public int id;
+    int id;
 
-    public int appId;
+    int appId;
 
-    public double limitAmount;
+    double limitAmount;
 
-    public StartPeriodEncoding startPeriod;
+    StartPeriodEncoding startPeriod;
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public int getAppId()
+    {
+        return appId;
+    }
+
+    public double getLimitAmount()
+    {
+        return limitAmount;
+    }
+
+    public StartPeriodEncoding getStartPeriod()
+    {
+        return startPeriod;
+    }
+
+    public String getTitle()
+    {
+        return title;
+    }
+
+    public void setTitle(String title)
+    {
+        this.title = title;
+    }
+
+    String title;
 
     public List<UUID> getCategories()
     {
@@ -59,6 +91,11 @@ public class WidgetParams
 
     public void setStartPeriod(StartPeriodEncoding startPeriod) {
         this.startPeriod = startPeriod;
+    }
+
+    public void addCategoryId( UUID uuid )
+    {
+        categories.add( uuid );
     }
 
 }
