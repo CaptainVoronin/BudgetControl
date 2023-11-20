@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class BCDBHelper
 {
@@ -191,10 +192,18 @@ public class BCDBHelper
       return widgets;
    }
 
-   //TODO: Не реализовано
-   public void deleteLost(List<Integer> lost)
+   public int deleteLost(List<Integer> lost)
    {
       assert db != null : "Database is not opened";
+
+      String[] strIds = new String[lost.size()];
+
+      for( int i = 0; i < lost.size(); i++  )
+         strIds[i] = lost.get(i).toString();
+
+
+      return db.delete( BCDB.TABLE_WIDGET, "id in ?", strIds);
+
    }
 
    //TODO: Обработать исключение в транзакции
