@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class BCDB extends SQLiteOpenHelper
 {
    // If you change the database schema, you must increment the database version.
-   public static final int DATABASE_VERSION = 2;
+   public static final int DATABASE_VERSION = 3;
    public static final String DATABASE_NAME = "bcbd.db";
 
    public static final String TABLE_WIDGET = "widget";
@@ -16,8 +16,9 @@ public class BCDB extends SQLiteOpenHelper
    public static final String create_widget_table = "create table widget ( " +
            "id integer primary key autoincrement," +
            "app_id integer not null unique," +
-           "limit_amount real, " +
-           "start_period not null" +
+           "limit_amount real not null default 0, " +
+           "start_period not null," +
+           "title text not null" +
            ");";
 
    public static final String create_widget_cats_table = "create table widget_cats ( " +
