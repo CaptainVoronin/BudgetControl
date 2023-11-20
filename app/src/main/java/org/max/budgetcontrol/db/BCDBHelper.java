@@ -37,7 +37,7 @@ public class BCDBHelper
       assert db != null : "Database is not opened";
 
       WidgetParams wp = null;
-      String queryWidget = "select id, limit_amount, start_period from widget where app_id = ?";
+      String queryWidget = "select id, limit_amount, start_period, title from widget where app_id = ?";
       String queryCats = "select category_id from widget_cats where widget_id = ?";
 
       Cursor crs = db.rawQuery( queryWidget, new String[]{ appId.toString() } );
@@ -47,12 +47,14 @@ public class BCDBHelper
          crs.moveToNext();
          int wID = crs.getInt(0);
          double limit = crs.getDouble(1);
-         String buff = crs.getString(2);
+         String strStartPeriod = crs.getString(2);
+         String title = crs.getString( 3 );
          wp = new WidgetParams();
          wp.setAppId( appId );
          wp.setId( wID );
          wp.setLimitAmount( limit );
-         wp.setStartPeriod( StartPeriodEncoding.valueOf( buff ) );
+         wp.setStartPeriod( StartPeriodEncoding.valueOf( strStartPeriod ) );
+         wp.setTitle( title );
          crs.close();
 
          crs = db.rawQuery( queryCats, new String[]{ Integer.toString( wID ) } );
@@ -60,8 +62,8 @@ public class BCDBHelper
 
          while( crs.moveToNext() )
          {
-            buff = crs.getString( 0 );
-            cats.add( UUID.fromString( buff ) );
+            strStartPeriod = crs.getString( 0 );
+            cats.add( UUID.fromString( strStartPeriod ) );
          }
          crs.close();
          wp.setCategories( cats );
@@ -70,7 +72,7 @@ public class BCDBHelper
       return wp;
    }
 
-   public long insertWidgetParams( WidgetParams wp )
+   public WidgetParams insertWidgetParams( WidgetParams wp )
    {
       assert db != null : "Database is not opened";
       ContentValues cv = new ContentValues();
@@ -78,6 +80,7 @@ public class BCDBHelper
       cv.put( "app_id", wp.getAppId() );
       cv.put( "limit_amount", wp.getLimitAmount() );
       cv.put( "start_period", wp.getStartPeriod().toString() );
+      cv.put( "title", wp.getTitle() );
 
       db.beginTransaction();
 
@@ -86,18 +89,17 @@ public class BCDBHelper
 
       List<UUID> cats = wp.getCategories();
 
-      long cat_id;
       for ( UUID uuid : cats )
       {
          cv.put( "widget_id", id );
          cv.put( "category_id", uuid.toString() );
-         cat_id = db.insert( BCDB.TABLE_WIDGET_CATS, null, cv );
-
+         db.insert( BCDB.TABLE_WIDGET_CATS, null, cv );
       }
 
       db.setTransactionSuccessful();
       db.endTransaction();
-      return id;
+      wp.setId( ( int ) id );
+      return wp;
    }
 
    public void updateWidgetParams( WidgetParams wp )
@@ -106,6 +108,7 @@ public class BCDBHelper
 
       cv.put( "limit_amount", wp.getLimitAmount() );
       cv.put( "start_period", wp.getStartPeriod().toString() );
+      cv.put( "title", wp.getTitle() );
 
       db.beginTransaction();
 
@@ -136,7 +139,7 @@ public class BCDBHelper
    public List<WidgetParams> getAllWidgets()
    {
       assert db != null : "Database is not opened";
-      final String queryAllWidgets = "select id, app_id, limit_amount, start_period from widget";
+      final String queryAllWidgets = "select id, app_id, limit_amount, start_period, title from widget";
       final String queryAllWidgetCats = "select widget_id, category_id from widget_cats";
 
       Cursor crs = db.rawQuery( queryAllWidgets, null );
@@ -145,17 +148,18 @@ public class BCDBHelper
 
       while( crs.moveToNext() )
       {
-         WidgetParams wp = new WidgetParams();
          int wID = crs.getInt(0);
          int appId = crs.getInt( 1 );
          double limit = crs.getDouble(2);
-         String buff = crs.getString(3);
+         String strStartPeriod = crs.getString(3);
+         String title = crs.getString( 4 );
 
-         wp = new WidgetParams();
+         WidgetParams wp = new WidgetParams();
          wp.setAppId( appId );
          wp.setId( wID );
          wp.setLimitAmount( limit );
-         wp.setStartPeriod( StartPeriodEncoding.valueOf( buff ) );
+         wp.setStartPeriod( StartPeriodEncoding.valueOf( strStartPeriod ) );
+         wp.setTitle( title );
          widgets.add( wp );
       }
       crs.close();
