@@ -24,31 +24,37 @@ public class ResponseProcessor {
     }
 
     public static List<Category> getCategory( JSONObject obj ) throws JSONException {
-        JSONArray arr = obj.getJSONArray(ZenEntities.tag.name());
-        List<Category> cats = new ArrayList<>();
-
-        for( int i = 0; i < arr.length(); i++ )
+        if( obj.has( ZenEntities.tag.name() ) )
         {
-            JSONObject element = arr.getJSONObject( i );
-            cats.add(  Category.fromJSONObject( element ) );
-        }
+            JSONArray arr = obj.getJSONArray(ZenEntities.tag.name());
+            List<Category> cats = new ArrayList<>();
 
-        return cats;
+            for (int i = 0; i < arr.length(); i++)
+            {
+                JSONObject element = arr.getJSONObject(i);
+                cats.add(Category.fromJSONObject(element));
+            }
+            return cats;
+        }
+        else
+            return null;
     }
 
-    public static List<Transaction> getTransactions( JSONObject obj, long startTime, List<Category> cats ) throws JSONException, ParseException {
-
-        JSONArray arr = obj.getJSONArray(ZenEntities.tag.name());
-        List<Transaction> transactions = new ArrayList<>();
-
-        for( int i = 0; i < arr.length(); i++ )
+    public static List<Transaction> getTransactions( JSONObject obj, long startTime ) throws JSONException, ParseException {
+        List<Transaction> transactions = null;
+        if( obj.has( ZenEntities.transaction.name() ))
         {
-            JSONObject element = arr.getJSONObject( i );
-            Date dt = sdf.parse( element.getString( "date" ) );
-            if( dt.getTime() >= startTime )
-                transactions.add( Transaction.fromJSONObject( element, cats ) );
-        }
+            JSONArray arr = obj.getJSONArray(ZenEntities.transaction.name());
+            transactions = new ArrayList<>();
 
+            for (int i = 0; i < arr.length(); i++)
+            {
+                JSONObject element = arr.getJSONObject(i);
+                Date dt = sdf.parse(element.getString("date"));
+                if (dt.getTime() >= startTime)
+                    transactions.add(Transaction.fromJSONObject(element));
+            }
+        }
         return transactions;
     }
 
@@ -73,5 +79,4 @@ public class ResponseProcessor {
         // Make the sorted list
         return cTree.values().stream().sorted( new Category.CategoryComparator() ).collect(Collectors.toList());
     }
-
 }

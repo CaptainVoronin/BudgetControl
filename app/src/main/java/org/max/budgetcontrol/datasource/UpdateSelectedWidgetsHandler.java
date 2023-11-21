@@ -2,6 +2,7 @@ package org.max.budgetcontrol.datasource;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,10 +40,10 @@ public class UpdateSelectedWidgetsHandler implements IZenClientResponseHandler {
         BCDBHelper bcdbHelper = new BCDBHelper(context);
         bcdbHelper.open();
         List<WidgetParams> widgets = bcdbHelper.getWidgets( widgetIdList );
-        List<Category> categories = ResponseProcessor.getCategory( jObject );
+        //List<Category> categories = ResponseProcessor.getCategory( jObject );
         List<Integer> lost = new ArrayList<>();
         try {
-            List<Transaction> transactions = ResponseProcessor.getTransactions( jObject, System.currentTimeMillis(),categories );
+            List<Transaction> transactions = ResponseProcessor.getTransactions( jObject, System.currentTimeMillis() );
 
             for( WidgetParams widget : widgets )
             {
@@ -64,6 +65,6 @@ public class UpdateSelectedWidgetsHandler implements IZenClientResponseHandler {
     // TODO: не реализовано
     @Override
     public void processError(Exception e) {
-
+        e.printStackTrace();
     }
 }

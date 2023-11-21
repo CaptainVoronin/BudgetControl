@@ -11,7 +11,7 @@ public class Transaction {
     UUID id;
     double amount;
     Date date;
-    List<Category> category;
+    List<UUID> category;
 
     static SimpleDateFormat sdf;
 
@@ -19,7 +19,7 @@ public class Transaction {
         sdf = new SimpleDateFormat( "yyyy-MM-dd" );
     }
 
-    protected Transaction( UUID id, double amount, Date date, List<Category> category)
+    protected Transaction( UUID id, double amount, Date date, List<UUID> category)
     {
         this.id = id;
         this.amount = amount;
@@ -27,7 +27,7 @@ public class Transaction {
         this.category = category;
     }
 
-    public static Transaction fromJSONObject(JSONObject obj, List<Category> categories ) throws ParseException, JSONException {
+    public static Transaction fromJSONObject(JSONObject obj ) throws ParseException, JSONException {
 
         UUID uuid = UUID.fromString( obj.getString( "id" ) );
         if( obj.isNull( "tag") )
@@ -39,15 +39,12 @@ public class Transaction {
         for( int i = 0; i < oTags.length(); i++ )
             uuids.add( UUID.fromString( oTags.getString( i ) ) );
 
-        List<Category> tagCats = new ArrayList<>();
-        Transaction.getCategories( uuids, categories, tagCats );
-
         double inc = obj.getDouble( "income" );
         double out = obj.getDouble( "outcome" );
         double amount = out != 0 ? (out * -1) : inc;
         String buff = obj.getString( "date" );
         Date date = sdf.parse( buff );
-        return new Transaction( uuid, amount, date, tagCats );
+        return new Transaction( uuid, amount, date, uuids );
     }
 
     private static void getCategories(List<UUID> trTagIds, List<Category> categories, List<Category> transCats ) {
@@ -71,13 +68,13 @@ public class Transaction {
         return date;
     }
 
-    public List<Category> getCategory() {
+    public List<UUID> getCategory() {
         return category;
     }
 
     public boolean hasCategory( UUID categoryId )
     {
-        return category.stream().filter( c-> c.getId().equals( categoryId ) ).count() != 0l;
+        return category.contains( categoryId );
     }
 
 }

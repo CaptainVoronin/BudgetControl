@@ -134,7 +134,6 @@ public class BCDBHelper
 
    protected void onDestroy()
    {
-      db.close();
       bcdb.close();
    }
 
@@ -196,7 +195,7 @@ public class BCDBHelper
    public List<WidgetParams> getWidgets( int[] ids)
    {
       assert db != null : "Database is not opened";
-      final String queryAllWidgets = "select id, app_id, limit_amount, start_period, title from widget where id in ( ? )";
+      final String queryAllWidgets = "select id, app_id, limit_amount, start_period, title from widget where app_id in ( ? )";
       final String queryAllWidgetCats = "select widget_id, category_id from widget_cats";
 
       String[] strIds = new String[ids.length];
