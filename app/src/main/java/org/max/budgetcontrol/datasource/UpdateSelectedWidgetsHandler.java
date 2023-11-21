@@ -2,11 +2,9 @@ package org.max.budgetcontrol.datasource;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.widget.RemoteViews;
+
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.max.budgetcontrol.db.BCDB;
 import org.max.budgetcontrol.db.BCDBHelper;
 import org.max.budgetcontrol.zentypes.Category;
 import org.max.budgetcontrol.zentypes.ResponseProcessor;
@@ -18,12 +16,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class AllUpdateHandler implements IZenClientResponseHandler {
+public class UpdateSelectedWidgetsHandler implements IZenClientResponseHandler {
     Context context;
     AppWidgetManager appWidgetManager;
     int[] widgetIdList;
 
-    public AllUpdateHandler(Context context, AppWidgetManager appWidgetManager, int[] widgetIdList)
+    public void setAfterCallback(ASecondCallback afterCallback) {
+        this.afterCallback = afterCallback;
+    }
+
+    ASecondCallback afterCallback;
+
+    public UpdateSelectedWidgetsHandler(Context context, AppWidgetManager appWidgetManager, int[] widgetIdList)
     {
         this.context = context;
         this.appWidgetManager = appWidgetManager;
@@ -34,7 +38,7 @@ public class AllUpdateHandler implements IZenClientResponseHandler {
     public void processResponse(JSONObject jObject) throws JSONException {
         BCDBHelper bcdbHelper = new BCDBHelper(context);
         bcdbHelper.open();
-        List<WidgetParams> widgets = bcdbHelper.getAllWidgets();
+        List<WidgetParams> widgets = bcdbHelper.getWidgets( widgetIdList );
         List<Category> categories = ResponseProcessor.getCategory( jObject );
         List<Integer> lost = new ArrayList<>();
         try {
@@ -50,6 +54,8 @@ public class AllUpdateHandler implements IZenClientResponseHandler {
 
             if( lost.size() != 0 )
                 bcdbHelper.deleteLost( lost );
+            if( afterCallback != null )
+                afterCallback.action();
         } catch (ParseException e) {
 
         }

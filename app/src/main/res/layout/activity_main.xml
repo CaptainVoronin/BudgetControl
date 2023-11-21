@@ -17,24 +17,60 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         />
 
-    <TextView
-        android:id="@+id/tvStateHader"
+    <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Новый виджет" />
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Период начинается" />
+        <TableRow>
 
-    <Spinner
-        android:id="@+id/spStartPeriod"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:entries="@array/period_codes">
-    </Spinner>
+            <TextView
+                android:id="@+id/tvStateHader"
+                android:text="Новый виджет"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/edTitle"
+                android:layout_weight="1"
+                android:ems="10"
+                android:hint="Заголовок виджета"
+                android:inputType="text"
+                android:text="Name" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/textView2"
+                android:text="Период"
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/spStartPeriod"
+                android:layout_height="48dp"
+                android:entries="@array/period_codes"></Spinner>
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView" />
+
+            <EditText
+                android:id="@+id/edAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="numberDecimal"
+                android:text="0" />
+
+        </TableRow>
+    </TableLayout>
 
     <ScrollView
         android:layout_width="match_parent"

@@ -51,9 +51,9 @@ public class ZenMoneyClient {
    }*/
 
     /**
-     * Надо переименовать
+     * Получает транзакции, совершенные после заданной параметром даты
      *
-     * @param date
+     * @param date дата, от которой надо брать тразакции
      * @throws JSONException
      */
     public void updateWidgets(Date date) {
@@ -103,4 +103,5 @@ class InternalCallback implements Callback {
             zenResponseHandler.processError(e);
         }
     }
+
 }

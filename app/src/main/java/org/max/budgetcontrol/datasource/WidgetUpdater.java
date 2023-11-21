@@ -3,6 +3,8 @@ package org.max.budgetcontrol.datasource;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.widget.RemoteViews;
+import android.widget.TextView;
+
 import org.max.budgetcontrol.R;
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.Transaction;
@@ -52,7 +54,8 @@ public class WidgetUpdater {
 
     private RemoteViews getViews(Double amount) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.b_c_widget);
-        views.setTextViewText(R.id.txt_reminder, amount.toString() );
+        views.setTextViewText(R.id.tvAmount, amount.toString() );
+        views.setTextViewText(R.id.tvTitle, widget.getTitle() );
         return views;
     }
 

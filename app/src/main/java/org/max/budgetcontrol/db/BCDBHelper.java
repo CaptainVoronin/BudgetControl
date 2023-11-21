@@ -9,6 +9,7 @@ import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -192,6 +193,69 @@ public class BCDBHelper
       return widgets;
    }
 
+   public List<WidgetParams> getWidgets( int[] ids)
+   {
+      assert db != null : "Database is not opened";
+      final String queryAllWidgets = "select id, app_id, limit_amount, start_period, title from widget where id in ( ? )";
+      final String queryAllWidgetCats = "select widget_id, category_id from widget_cats";
+
+      String[] strIds = new String[ids.length];
+
+      int i = 0;
+      for( int id : ids ) {
+         strIds[i] = Integer.toString(id);
+         i++;
+      }
+
+      Cursor crs = db.rawQuery( queryAllWidgets, strIds );
+
+      List<WidgetParams> widgets = new ArrayList<>( crs.getCount() );
+
+      while( crs.moveToNext() )
+      {
+         int wID = crs.getInt(0);
+         int appId = crs.getInt( 1 );
+         double limit = crs.getDouble(2);
+         String strStartPeriod = crs.getString(3);
+         String title = crs.getString( 4 );
+
+         WidgetParams wp = new WidgetParams();
+         wp.setAppId( appId );
+         wp.setId( wID );
+         wp.setLimitAmount( limit );
+         wp.setStartPeriod( StartPeriodEncoding.valueOf( strStartPeriod ) );
+         wp.setTitle( title );
+         widgets.add( wp );
+      }
+      crs.close();
+
+      crs = db.rawQuery( queryAllWidgetCats, null );
+      Map<UUID, Integer> cats = new HashMap<>(crs.getCount());
+
+      while( crs.moveToNext() )
+      {
+         Integer widgetId = crs.getInt( 0 );
+         UUID catId = UUID.fromString( crs.getString( 1 ) );
+
+         cats.put( catId, widgetId );
+      }
+      crs.close();
+
+      for( WidgetParams w : widgets )
+      {
+         Iterator<UUID> it = cats.keySet().iterator();
+
+         while(it.hasNext())
+         {
+            UUID uuid = it.next();
+            Integer wId = cats.get( uuid );
+            if( w.getId() == wId.intValue() ) w.addCategoryId( uuid );
+         }
+      }
+
+      return widgets;
+   }
+
    public int deleteLost(List<Integer> lost)
    {
       assert db != null : "Database is not opened";
@@ -200,7 +264,6 @@ public class BCDBHelper
 
       for( int i = 0; i < lost.size(); i++  )
          strIds[i] = lost.get(i).toString();
-
 
       return db.delete( BCDB.TABLE_WIDGET, "id in ?", strIds);
 

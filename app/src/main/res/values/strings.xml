@@ -26,4 +26,7 @@
     <string name="token">token</string>
     <string name="url_value">https://api.zenmoney.ru/v8/diff</string>
     <string name="url">url</string>
+    <string name="week_code">неделя</string>
+    <string name="month_code">месяц</string>
+    <string name="year_code">год</string>
 </resources>

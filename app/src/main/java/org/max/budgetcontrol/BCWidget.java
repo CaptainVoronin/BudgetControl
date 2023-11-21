@@ -3,13 +3,9 @@ package org.max.budgetcontrol;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
-import android.util.Log;
 
 import org.json.JSONException;
-import org.json.JSONObject;
-import org.max.budgetcontrol.datasource.AllUpdateHandler;
-import org.max.budgetcontrol.datasource.IErrorHandler;
-import org.max.budgetcontrol.datasource.IZenClientResponseHandler;
+import org.max.budgetcontrol.datasource.UpdateSelectedWidgetsHandler;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 import org.max.budgetcontrol.db.BCDBHelper;
 
@@ -17,10 +13,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 /**
  * Implementation of App Widget functionality.
@@ -42,7 +34,7 @@ public class BCWidget extends AppWidgetProvider
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        AllUpdateHandler handler = new AllUpdateHandler( context, appWidgetManager, appWidgetIds );
+        UpdateSelectedWidgetsHandler handler = new UpdateSelectedWidgetsHandler( context, appWidgetManager, appWidgetIds );
         ZenMoneyClient client = new ZenMoneyClient( url, token, handler );
         client.updateWidgets( new Date() );
     }

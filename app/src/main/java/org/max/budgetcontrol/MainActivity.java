@@ -4,34 +4,38 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProviderInfo;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.RemoteViews;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.max.budgetcontrol.datasource.ASecondCallback;
 import org.max.budgetcontrol.datasource.IZenClientResponseHandler;
+import org.max.budgetcontrol.datasource.UpdateSelectedWidgetsHandler;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 import org.max.budgetcontrol.db.BCDBHelper;
 import org.max.budgetcontrol.zentypes.Category;
 import org.max.budgetcontrol.zentypes.ResponseProcessor;
+import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener{
@@ -44,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     WidgetCategoryHolder categoryHolder;
 
+    StartPeriodEncoding carrentPeriodCode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,21 +61,39 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         Toolbar toolbar = findViewById( R.id.toolbar );
         setSupportActionBar( toolbar );
 
+        Spinner sp = (Spinner) findViewById( R.id.spStartPeriod );
+        sp.setAdapter( new StartPeriodSpinAdapter( getApplicationContext() ));
+        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Object obj = view.getTag();
+                carrentPeriodCode = ( StartPeriodEncoding) obj;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
         // Создать или открыть БД
         db();
 
         Intent intent = getIntent();
 
         Bundle extras = intent.getExtras();
-        int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
         if (extras != null) {
-            appWidgetId = extras.getInt(
+            int appWidgetId = extras.getInt(
                     AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
             setActivityResult(Activity.RESULT_CANCELED, appWidgetId );
+            makeWidgetParams(appWidgetId);
+        }
+        else {
+            currentWidget = new WidgetParams();
+            currentWidget.setAppId( AppWidgetManager.INVALID_APPWIDGET_ID );
+            categoryHolder = new WidgetCategoryHolder( currentWidget.getCategories() );
         }
 
-        configureWidget(appWidgetId);
         loadCategories();
 
     }
@@ -81,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     }
 
     private void loadCategories() {
+        lockUIForWaiting();
         CategoryLoaderHandler categoryLoaderHandler = new CategoryLoaderHandler(  );
         try {
             ZenMoneyClient client = new ZenMoneyClient(
@@ -118,23 +143,28 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     private void saveChanges()
     {
-        currentWidget.setCategories( categoryHolder.cats );
+        applyEnteredValues();
 
         if( currentWidget.getId() == WidgetParams.INVALID_WIDGET_ID )
             db.insertWidgetParams( currentWidget );
         else
             db.updateWidgetParams( currentWidget );
 
-        setActivityResult( Activity.RESULT_OK, currentWidget.getAppId() );
+        AppWidgetManager wManager = AppWidgetManager.getInstance( getApplicationContext() );
+        UpdateSelectedWidgetsHandler handler =
+                new UpdateSelectedWidgetsHandler( getApplicationContext(),
+                                                  wManager,
+                                                  new int[]{ currentWidget.getAppId() });
+        handler.setAfterCallback( new AfterUpdateWidgetCallback() );
+        try {
+            ZenMoneyClient client = new ZenMoneyClient( new URL( settings.getParameterAsString( "url") ),
+                                                        settings.getParameterAsString( "token"),
+                                                        handler );
 
-
-        AppWidgetManager widgetManager =
-                getApplicationContext().getSystemService(AppWidgetManager.class);
-
-        RemoteViews views = new RemoteViews( getApplicationContext().getPackageName(), R.layout.b_c_widget);
-        views.setTextViewText(R.id.txt_reminder, "йцуйцуйцуйцуйцуйцуйцу" );
-
-        widgetManager.updateAppWidget( currentWidget.getAppId(), views );
+            client.updateWidgets(Calendar.getInstance().getTime());
+        } catch (MalformedURLException e) {
+            handler.processError( e );
+        }
 
     /*    AppWidgetProviderInfo myWidgetProviderInfo = new AppWidgetProviderInfo();
         ComponentName myProvider = myWidgetProviderInfo.provider;
@@ -153,8 +183,21 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
             mAppWidgetManager.requestPinAppWidget(myProvider, null, successCallback);
         }*/
-        finishAndRemoveTask();
 
+        setActivityResult( Activity.RESULT_OK, currentWidget.getAppId() );
+        //finishAndRemoveTask();
+
+    }
+
+    private void applyEnteredValues() {
+        currentWidget.setCategories( categoryHolder.cats );
+        TextView tv = (TextView) findViewById(R.id.edTitle );
+        currentWidget.setTitle( tv.getText().toString() );
+        tv = (TextView) findViewById( R.id.edAmount);
+        String buff = tv.getText().toString();
+        double val = Double.parseDouble( buff );
+        currentWidget.setLimitAmount( val );
+        currentWidget.setStartPeriod( carrentPeriodCode );
     }
 
     private void exitApp()
@@ -169,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         setResult( result, intent );
     }
 
-    private void configureWidget(int appWidgetId) {
+    private void makeWidgetParams(int appWidgetId) {
         currentWidget = getWidgetParams(appWidgetId);
         categoryHolder = new WidgetCategoryHolder( currentWidget.getCategories() );
     }
@@ -233,5 +276,25 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             widgetCats = currentWidget.getCategories();
 
         lv.setAdapter(new CategoryListViewAdapter(getApplicationContext(), MainActivity.this, flatList, widgetCats ));
+        unlockUIOnResult();
+    }
+
+    private void lockUIForWaiting()
+    {
+
+    }
+
+    private void unlockUIOnResult()
+    {
+
+    }
+
+    class AfterUpdateWidgetCallback extends ASecondCallback {
+
+        @Override
+        public void action() {
+            setActivityResult( Activity.RESULT_OK, currentWidget.getAppId() );
+            finishAndRemoveTask();
+        }
     }
 }
