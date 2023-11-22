@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
@@ -76,7 +77,9 @@ public class BCDBHelper
 
    public WidgetParams insertWidgetParams( WidgetParams wp )
    {
+      Log.d( this.getClass().getName(), "[insertWidgetParams]");
       assert db != null : "Database is not opened";
+
       ContentValues cv = new ContentValues();
 
       cv.put( "app_id", wp.getAppId() );
@@ -106,6 +109,8 @@ public class BCDBHelper
 
    public void updateWidgetParams( WidgetParams wp )
    {
+      Log.d( this.getClass().getName(), "[updateWidgetParams]");
+
       ContentValues cv = new ContentValues();
 
       cv.put( "limit_amount", wp.getLimitAmount() );
@@ -139,6 +144,8 @@ public class BCDBHelper
 
    public List<WidgetParams> getAllWidgets()
    {
+      Log.d( this.getClass().getName(), "[getAllWidgets]");
+
       assert db != null : "Database is not opened";
       final String queryAllWidgets = "select id, app_id, limit_amount, start_period, title from widget";
       final String queryAllWidgetCats = "select widget_id, category_id from widget_cats";
@@ -194,6 +201,8 @@ public class BCDBHelper
 
    public List<WidgetParams> getWidgets( int[] ids)
    {
+      Log.d( this.getClass().getName(), "[getWidgets]");
+
       assert db != null : "Database is not opened";
       final String queryAllWidgets = "select id, app_id, limit_amount, start_period, title from widget where app_id in ( ? )";
       final String queryAllWidgetCats = "select widget_id, category_id from widget_cats";
@@ -257,6 +266,8 @@ public class BCDBHelper
 
    public int deleteLost(List<Integer> lost)
    {
+      Log.d( this.getClass().getName(), "[deleteLost]");
+
       assert db != null : "Database is not opened";
 
       String[] strIds = new String[lost.size()];
@@ -264,20 +275,26 @@ public class BCDBHelper
       for( int i = 0; i < lost.size(); i++  )
          strIds[i] = lost.get(i).toString();
 
-      return db.delete( BCDB.TABLE_WIDGET, "id in ?", strIds);
+      long count = db.delete( BCDB.TABLE_WIDGET, "id in ?", strIds);
 
+      Log.d( this.getClass().getName(), "[deleteLost] Deleted " + count );
+
+      return (int) count;
    }
 
    //TODO: Обработать исключение в транзакции
    public void clearWidgets()
    {
+      Log.d( this.getClass().getName(), "[clearWidgets]");
+
       assert db != null : "Database is not opened";
 
       db.beginTransaction();
-      db.delete( BCDB.TABLE_WIDGET_CATS, null, null );
+      long count = db.delete( BCDB.TABLE_WIDGET_CATS, null, null );
       db.delete( BCDB.TABLE_WIDGET, null, null );
       db.setTransactionSuccessful();
       db.endTransaction();
+      Log.d( this.getClass().getName(), "[clearWidgets] Deleted " + count );
 
    }
 }

@@ -1,7 +1,6 @@
 package org.max.budgetcontrol;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -10,13 +9,13 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.ListAdapter;
-import androidx.recyclerview.widget.RecyclerView;
 
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
+import org.max.budgetcontrol.zentypes.WidgetParams;
 
 public class StartPeriodSpinAdapter extends ArrayAdapter<String> {
 
+    private final WidgetParams currentWidget;
     String mWeek;
     String mMonth;
 
@@ -25,9 +24,10 @@ public class StartPeriodSpinAdapter extends ArrayAdapter<String> {
     StartPeriodEncoding[] codes;
 
     Context context;
-    public StartPeriodSpinAdapter(@NonNull Context context) {
+    public StartPeriodSpinAdapter(@NonNull Context context, WidgetParams currentWidget) {
         super(context, R.layout.period_spinner_item, R.id.tvPeriodName );
         this.context = context;
+        this.currentWidget = currentWidget;
         init(  );
     }
 

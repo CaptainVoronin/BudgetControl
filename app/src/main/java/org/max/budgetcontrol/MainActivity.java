@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -61,20 +62,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         Toolbar toolbar = findViewById( R.id.toolbar );
         setSupportActionBar( toolbar );
 
-        Spinner sp = (Spinner) findViewById( R.id.spStartPeriod );
-        sp.setAdapter( new StartPeriodSpinAdapter( getApplicationContext() ));
-        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Object obj = view.getTag();
-                carrentPeriodCode = ( StartPeriodEncoding) obj;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
         // Создать или открыть БД
         db();
 
@@ -94,6 +81,22 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             categoryHolder = new WidgetCategoryHolder( currentWidget.getCategories() );
         }
 
+        Spinner sp = findViewById( R.id.spStartPeriod );
+        sp.setAdapter( new StartPeriodSpinAdapter( getApplicationContext(), currentWidget ));
+        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Object obj = view.getTag();
+                carrentPeriodCode = ( StartPeriodEncoding) obj;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        sp.setSelection( currentWidget.getStartPeriod().number() );
+
         loadCategories();
 
     }
@@ -106,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     private void loadCategories() {
         lockUIForWaiting();
+        Log.d( this.getClass().getName(), "[loadCategories]");
         CategoryLoaderHandler categoryLoaderHandler = new CategoryLoaderHandler(  );
         try {
             ZenMoneyClient client = new ZenMoneyClient(
@@ -143,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     private void saveChanges()
     {
+        Log.d( this.getClass().getName(), "[saveChanges]");
         applyEnteredValues();
 
         if( currentWidget.getId() == WidgetParams.INVALID_WIDGET_ID )

@@ -1,5 +1,8 @@
 package org.max.budgetcontrol.zentypes;
 
+
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,7 +43,7 @@ public class ResponseProcessor {
             return null;
     }
 
-    public static List<Transaction> getTransactions( JSONObject obj, long startTime ) throws JSONException, ParseException {
+    public static List<Transaction> getTransactions( JSONObject obj ) throws JSONException, ParseException {
         List<Transaction> transactions = null;
         if( obj.has( ZenEntities.transaction.name() ))
         {
@@ -50,16 +53,17 @@ public class ResponseProcessor {
             for (int i = 0; i < arr.length(); i++)
             {
                 JSONObject element = arr.getJSONObject(i);
-                Date dt = sdf.parse(element.getString("date"));
-                if (dt.getTime() >= startTime)
-                    transactions.add(Transaction.fromJSONObject(element));
+                Transaction tr = Transaction.fromJSONObject(element);
+                if( tr != null )
+                    transactions.add( tr );
+                else
+                    Log.w( "org.max.budgetcontrol.zentypes.ResponseProcessor", "Can't make transaction without category" );
             }
         }
         return transactions;
     }
 
     public static List<Category> makeCategoryTree(List<Category> categories) {
-        Category parent;
         Map<UUID, Category> cTree = new HashMap<>();
 
         // Take top level categories

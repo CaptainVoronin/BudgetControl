@@ -1,5 +1,8 @@
 package org.max.budgetcontrol.zentypes;
 
+import android.util.Log;
+
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,7 +22,7 @@ public class Transaction {
         sdf = new SimpleDateFormat( "yyyy-MM-dd" );
     }
 
-    protected Transaction( UUID id, double amount, Date date, List<UUID> category)
+    protected Transaction( UUID id, double amount, @NotNull Date date, @NotNull List<UUID> category)
     {
         this.id = id;
         this.amount = amount;
@@ -27,12 +30,14 @@ public class Transaction {
         this.category = category;
     }
 
-    public static Transaction fromJSONObject(JSONObject obj ) throws ParseException, JSONException {
+    public static Transaction fromJSONObject(@NotNull JSONObject obj) throws ParseException, JSONException {
 
         UUID uuid = UUID.fromString( obj.getString( "id" ) );
-        if( obj.isNull( "tag") )
+        if( obj.isNull( "tag") ) {
+            Log.w( "org.max.budgetcontrol.zentypes.Transaction", "Transaction hasn't tags");
+            Log.d( "org.max.budgetcontrol.zentypes.Transaction", obj.toString());
             return null;
-
+        }
         JSONArray oTags = obj.getJSONArray( "tag" );
         List<UUID> uuids = new ArrayList<>();
 
@@ -47,14 +52,14 @@ public class Transaction {
         return new Transaction( uuid, amount, date, uuids );
     }
 
-    private static void getCategories(List<UUID> trTagIds, List<Category> categories, List<Category> transCats ) {
+    /*private static void getCategories(List<UUID> trTagIds, List<Category> categories, List<Category> transCats ) {
         for ( Category c : categories ) {
             if( trTagIds.contains( c.getId() ) )
                 transCats.add( c );
             if( c.getChild() != null )
                 getCategories( trTagIds, c.getChild(), transCats );
         }
-    }
+    }*/
 
     public UUID getId() {
         return id;
@@ -71,10 +76,21 @@ public class Transaction {
     public List<UUID> getCategory() {
         return category;
     }
+/*
 
     public boolean hasCategory( UUID categoryId )
     {
         return category.contains( categoryId );
     }
+*/
 
+    public boolean hasCategory( List<UUID> categoryIds )
+    {
+        for( UUID uuid : categoryIds )
+        {
+            if( category.contains( uuid ) )
+                return true;
+        }
+        return false;
+    }
 }

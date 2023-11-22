@@ -40,10 +40,9 @@ public class UpdateSelectedWidgetsHandler implements IZenClientResponseHandler {
         BCDBHelper bcdbHelper = new BCDBHelper(context);
         bcdbHelper.open();
         List<WidgetParams> widgets = bcdbHelper.getWidgets( widgetIdList );
-        //List<Category> categories = ResponseProcessor.getCategory( jObject );
         List<Integer> lost = new ArrayList<>();
         try {
-            List<Transaction> transactions = ResponseProcessor.getTransactions( jObject, System.currentTimeMillis() );
+            List<Transaction> transactions = ResponseProcessor.getTransactions( jObject );
 
             for( WidgetParams widget : widgets )
             {

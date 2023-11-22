@@ -1,10 +1,11 @@
 package org.max.budgetcontrol.datasource;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 
@@ -57,6 +58,7 @@ public class ZenMoneyClient {
      * @throws JSONException
      */
     public void updateWidgets(Date date) {
+        Log.i( this.getClass().getName(), "[updateWidgets] ");
         try {
             RequestBody body = RequestBody.create(JSON, RequestUtils.getDiffRequestBody(date.getTime()));
             doRequest(body, new InternalCallback(handler));
@@ -67,6 +69,7 @@ public class ZenMoneyClient {
 
     public void getAllCategories() {
         try {
+            Log.i( this.getClass().getName(), "[getAllCategories] ");
             RequestBody body = RequestBody.create(JSON, RequestUtils.getCategoriesRequestBody());
             doRequest(body, new InternalCallback(handler));
         } catch (JSONException e) {
@@ -77,6 +80,7 @@ public class ZenMoneyClient {
     protected void doRequest(RequestBody body, Callback callback) {
         Request.Builder requestBuilder = getRequestBuilder();
         Request req = requestBuilder.post(body).build();
+        Log.i( this.getClass().getName(), "[doRequest] " + body.toString());
         httpClient.newCall(req).enqueue(callback);
     }
 }
@@ -90,18 +94,20 @@ class InternalCallback implements Callback {
 
     @Override
     public void onFailure(Call call, IOException e) {
+        Log.i( this.getClass().getName(), "[onFailure]");
         zenResponseHandler.processError(e);
     }
 
     @Override
     public void onResponse(Call call, Response response) throws IOException {
+        Log.i( this.getClass().getName(), "[onResponse] ");
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(response.body().string());
             zenResponseHandler.processResponse(jsonObject);
         } catch (JSONException e) {
+            Log.i( this.getClass().getName(), "[onResponse] Exception " + e.getClass().getName());
             zenResponseHandler.processError(e);
         }
     }
-
 }

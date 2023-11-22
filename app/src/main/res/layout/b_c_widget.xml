@@ -7,7 +7,7 @@
     <TextView
         android:id="@+id/tvAmount"
         style="@style/Widget.BudgetControl.AppWidget.InnerView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_marginStart="8dp"
@@ -21,7 +21,15 @@
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="TextView" />
+
+    <TextView
+        android:id="@+id/tvStartDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvAmount"
+        android:text="TextView" />
+
 </RelativeLayout>
