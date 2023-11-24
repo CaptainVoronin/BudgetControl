@@ -10,7 +10,7 @@
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="2"
     android:targetCellHeight="2"
-    android:updatePeriodMillis="60000"
+    android:updatePeriodMillis="1800060"
     android:widgetCategory="home_screen"
     android:configure="org.max.budgetcontrol.MainActivity"
     android:widgetFeatures="reconfigurable"
