@@ -44,6 +44,8 @@ public class ResponseProcessor {
     }
 
     public static List<Transaction> getTransactions( JSONObject obj ) throws JSONException, ParseException {
+        final String deleted = "deleted";
+
         List<Transaction> transactions = null;
         if( obj.has( ZenEntities.transaction.name() ))
         {
@@ -53,6 +55,13 @@ public class ResponseProcessor {
             for (int i = 0; i < arr.length(); i++)
             {
                 JSONObject element = arr.getJSONObject(i);
+
+                if( element.has( deleted))
+                    if( element.getBoolean( deleted) == true )
+                    {
+                        Log.i( "org.max.budgetcontrol.ResponseProcessor", "[getTransactions] Transaction deleted. Skip");
+                        continue;
+                    }
                 Transaction tr = Transaction.fromJSONObject(element);
                 if( tr != null )
                     transactions.add( tr );
