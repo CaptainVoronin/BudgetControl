@@ -1,32 +1,28 @@
 <resources>
     <string name="app_name">Budget control</string>
-    <string name="appwidget_text">EXAMPLE</string>
+    <string name="appwidget_text">1234567</string>
     <string name="add_widget">Add widget</string>
     <string name="app_widget_description">This is an app widget description</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
     <!-- Preference Titles -->
-    <string name="messages_header">Messages</string>
-    <string name="sync_header">Sync</string>
+    <string name="connection_header">Подключение</string>
+    <string name="token_header">Токен</string>
+    <string name="token_title">Токен авторизации</string>
 
     <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
+    <string name="url_title">URL сервера</string>
 
     <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="state_unk_text">...</string>
     <string name="state_wating_text">get data</string>
     <string name="state_error_text">get data error</string>
-    <string name="token_value">0yteuv8iwTQcJpaBQXJ3XDZ3nnh1RV</string>
     <string name="token">token</string>
     <string name="url_value">https://api.zenmoney.ru/v8/diff</string>
     <string name="url">url</string>
     <string name="week_code">неделя</string>
     <string name="month_code">месяц</string>
     <string name="year_code">год</string>
+    <string name="title_activity_app_settings">AppSettings</string>
 </resources>

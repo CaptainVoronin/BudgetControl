@@ -1,35 +1,43 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Widget.BudgetControl.AppWidget.Container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/Theme.BudgetControl.AppWidgetContainer">
+    android:background="@color/white">
 
     <TextView
         android:id="@+id/tvAmount"
-        style="@style/Widget.BudgetControl.AppWidget.InnerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         android:contentDescription="@string/appwidget_text"
+        android:fontFamily="@font/poiretoneregular"
+        android:gravity="right"
         android:text="@string/appwidget_text"
-        android:textSize="24sp"
-        android:textStyle="bold|italic" />
+        android:textSize="36dp" />
 
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:layout_above="@+id/tvAmount"
+        android:gravity="right"
+        android:paddingTop="4dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="4dp"
+        android:text="TextView"
+        android:textSize="18dp" />
 
     <TextView
         android:id="@+id/tvStartDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvAmount"
-        android:text="TextView" />
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:forceDarkAllowed="false"
+        android:gravity="right"
+        android:paddingRight="8dp"
+        android:text="01.11.2023"
+        android:textSize="18dp" />
 
 </RelativeLayout>

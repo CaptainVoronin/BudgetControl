@@ -1,5 +1,9 @@
 package org.max.budgetcontrol;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -15,7 +19,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CompoundButton;
 import android.widget.ListView;
-import android.widget.RemoteViews;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -51,23 +54,39 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     StartPeriodEncoding carrentPeriodCode;
 
+    ActivityResultLauncher<Intent> launcher;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        settings = new SettingsHolder(getApplicationContext());
-        settings.init();
-
         Toolbar toolbar = findViewById( R.id.toolbar );
         setSupportActionBar( toolbar );
+
+        launcher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            // There are no request codes
+                            settings = new SettingsHolder(getApplicationContext());
+                            settings.init();
+                        }
+                    }
+                });
 
         // Создать или открыть БД
         db();
 
+        settings = new SettingsHolder(getApplicationContext());
+        boolean completeConfig = settings.init();
+
         Intent intent = getIntent();
 
         Bundle extras = intent.getExtras();
+
         if (extras != null) {
             int appWidgetId = extras.getInt(
                     AppWidgetManager.EXTRA_APPWIDGET_ID,
@@ -81,8 +100,23 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             categoryHolder = new WidgetCategoryHolder( currentWidget.getCategories() );
         }
 
+        configSpinner( currentWidget );
+
+        if( completeConfig )
+            loadCategories();
+        else {
+            Runnable f = () -> {
+                loadCategories();
+            };
+            showSetting(f);
+        }
+
+    }
+
+    void configSpinner(WidgetParams widget )
+    {
         Spinner sp = findViewById( R.id.spStartPeriod );
-        sp.setAdapter( new StartPeriodSpinAdapter( getApplicationContext(), currentWidget ));
+        sp.setAdapter( new StartPeriodSpinAdapter( getApplicationContext(), widget ));
         sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -95,10 +129,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
             }
         });
-        sp.setSelection( currentWidget.getStartPeriod().number() );
-
-        loadCategories();
-
+        sp.setSelection( widget.getStartPeriod().number() );
     }
 
     private void db()
@@ -107,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         db.open();
     }
 
-    private void loadCategories() {
+    private void loadCategories(  ) {
         lockUIForWaiting();
         Log.d( this.getClass().getName(), "[loadCategories]");
         CategoryLoaderHandler categoryLoaderHandler = new CategoryLoaderHandler(  );
@@ -132,17 +163,28 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() ==  R.id.idCancel1 )
+        if (item.getItemId() ==  R.id.idCancel)
         {
             exitApp();
             return true;
-        } else if ( item.getItemId() ==  R.id.idSave1 )
+        } else if ( item.getItemId() ==  R.id.idSave)
         {
             saveChanges();
             return true;
         }
+        else if( item.getItemId() == R.id.idSettings )
+        {
+            showSetting( null );
+            return true;
+        }
         else
             return super.onOptionsItemSelected(item);
+    }
+
+    private void showSetting(Runnable f) {
+        Intent intent = new Intent(this, SettingsActivity.class);
+
+        launcher.launch( intent );
     }
 
     private void saveChanges()

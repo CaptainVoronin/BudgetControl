@@ -5,6 +5,10 @@ import android.content.SharedPreferences;
 import java.util.HashMap;
 import java.util.Map;
 
+/* Token
+0yteuv8iwTQcJpaBQXJ3XDZ3nnh1RV
+ */
+
 public class SettingsHolder {
     Context context;
 
@@ -19,22 +23,17 @@ public class SettingsHolder {
         isInit = false;
     }
 
-    public void init()
+    public boolean init()
     {
         SharedPreferences pr = context.getSharedPreferences( "app.properties", Context.MODE_PRIVATE );
         props = (Map<String, Object>) pr.getAll();
         String strURL = pr.getString( context.getString( R.string.url ), null );
-        String token = pr.getString( context.getString( R.string.token ), null );
-
-        if( strURL == null ) {
-            token = context.getString(R.string.token_value);
-            strURL = context.getString(R.string.url_value);
-            SharedPreferences.Editor ed = pr.edit();
-            ed.putString( context.getString( R.string.url ), strURL );
-            ed.putString( context.getString( R.string.token ), token );
-            ed.commit();
-        }
         isInit = true;
+
+        if( pr.getString( context.getString( R.string.token ), null ) == null )
+            return false;
+        else
+            return true;
     }
 
     public Object getParameter( String name )

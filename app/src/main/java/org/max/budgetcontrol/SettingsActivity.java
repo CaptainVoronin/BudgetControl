@@ -1,6 +1,9 @@
 package org.max.budgetcontrol;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +25,7 @@ public class SettingsActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
@@ -29,5 +33,36 @@ public class SettingsActivity extends AppCompatActivity {
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuInflater i = getMenuInflater();
+        i.inflate(R.menu.settings_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() ==  R.id.idCancel)
+        {
+            exitActivity();
+            return true;
+        } else if ( item.getItemId() ==  R.id.idSave)
+        {
+            saveChanges();
+            return true;
+        }
+        else
+            return super.onOptionsItemSelected(item);
+    }
+
+    private void saveChanges() {
+
+    }
+
+    private void exitActivity() {
+
     }
 }
