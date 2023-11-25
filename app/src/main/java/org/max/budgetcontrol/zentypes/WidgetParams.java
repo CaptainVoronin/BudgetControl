@@ -24,6 +24,18 @@ public class WidgetParams
 
     StartPeriodEncoding startPeriod;
 
+    public double getCurrentAmount()
+    {
+        return currentAmount;
+    }
+
+    public void setCurrentAmount(double currentAmount)
+    {
+        this.currentAmount = currentAmount;
+    }
+
+    double currentAmount;
+
     public int getId()
     {
         return id;
