@@ -104,7 +104,7 @@ class InternalCallback implements Callback {
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(response.body().string());
-            zenResponseHandler.processResponse(jsonObject);
+            zenResponseHandler.updateWidgets(jsonObject);
         } catch (JSONException e) {
             Log.i( this.getClass().getName(), "[onResponse] Exception " + e.getClass().getName());
             zenResponseHandler.processError(e);

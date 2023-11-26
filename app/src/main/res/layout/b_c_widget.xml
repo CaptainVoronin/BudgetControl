@@ -8,36 +8,35 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_marginEnd="8dp"
+        android:background="#D6D6D6"
         android:contentDescription="@string/appwidget_text"
-        android:fontFamily="@font/poiretoneregular"
+        android:fontFamily="sans-serif-condensed-medium"
         android:gravity="right"
+        android:paddingRight="8dp"
         android:text="@string/appwidget_text"
-        android:textSize="36dp" />
+        android:textSize="34sp" />
 
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/tvAmount"
+        android:fontFamily="sans-serif-medium"
         android:gravity="right"
-        android:paddingTop="4dp"
         android:paddingRight="8dp"
-        android:paddingBottom="4dp"
         android:text="TextView"
-        android:textSize="18dp" />
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/tvStartDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvAmount"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:fontFamily="sans-serif-medium"
         android:forceDarkAllowed="false"
         android:gravity="right"
         android:paddingRight="8dp"
         android:text="01.11.2023"
-        android:textSize="18dp" />
+        android:textSize="16sp" />
 
 </RelativeLayout>

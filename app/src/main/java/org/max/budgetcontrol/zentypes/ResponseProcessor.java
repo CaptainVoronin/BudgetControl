@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import androidx.annotation.NonNull;
+
 public class ResponseProcessor {
 
     static SimpleDateFormat sdf;
@@ -43,7 +45,7 @@ public class ResponseProcessor {
             return null;
     }
 
-    public static List<Transaction> getTransactions( JSONObject obj ) throws JSONException, ParseException {
+    public static List<Transaction> getTransactions( @NonNull JSONObject obj ) throws JSONException, ParseException {
         final String deleted = "deleted";
 
         List<Transaction> transactions = null;

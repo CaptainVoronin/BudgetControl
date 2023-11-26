@@ -6,7 +6,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
@@ -21,7 +20,6 @@ import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.ASecondCallback;
@@ -33,7 +31,6 @@ import org.max.budgetcontrol.zentypes.Category;
 import org.max.budgetcontrol.zentypes.ResponseProcessor;
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -42,7 +39,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener{
+public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
     List<Category> categories;
     SettingsHolder settings;
 
@@ -78,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 });
 
         // Создать или открыть БД
-        db();
+        db = BCDBHelper.getInstance( getApplicationContext() );
 
         settings = new SettingsHolder(getApplicationContext());
         boolean completeConfig = settings.init();
@@ -110,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             };
             showSetting(f);
         }
-
     }
 
     void configSpinner(WidgetParams widget )
@@ -130,12 +126,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             }
         });
         sp.setSelection( widget.getStartPeriod().number() );
-    }
-
-    private void db()
-    {
-        db = new BCDBHelper( getApplicationContext() );
-        db.open();
     }
 
     private void loadCategories(  ) {
@@ -201,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         UpdateSelectedWidgetsHandler handler =
                 new UpdateSelectedWidgetsHandler( getApplicationContext(),
                                                   wManager,
-                                                  new int[]{ currentWidget.getAppId() });
+                                                  new int[]{ currentWidget.getAppId() } );
         handler.setAfterCallback( new AfterUpdateWidgetCallback() );
         try {
             ZenMoneyClient client = new ZenMoneyClient( new URL( settings.getParameterAsString( "url") ),
@@ -287,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     class CategoryLoaderHandler implements IZenClientResponseHandler {
 
         @Override
-        public void processResponse(JSONObject jObject) throws JSONException {
+        public void updateWidgets(JSONObject jObject) throws JSONException {
             List<Category> cats = ResponseProcessor.getCategory(jObject);
             final List<Category> cs = ResponseProcessor.makeCategoryTree(cats);
             runOnUiThread(new Runnable()

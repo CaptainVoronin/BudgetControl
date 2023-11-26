@@ -6,12 +6,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
-import org.max.budgetcontrol.datasource.IWidgetUpdater;
-import org.max.budgetcontrol.datasource.WidgetUpdaterFactory;
+import org.max.budgetcontrol.datasource.WidgetOnlineUpdater;
 import org.max.budgetcontrol.db.BCDBHelper;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,16 +32,16 @@ public class OnBootReceiver extends BroadcastReceiver
       int[] appIds = wm.getAppWidgetIds(new ComponentName(
               context, MainActivity.class
       ));
-      WidgetUpdaterFactory factory = new WidgetUpdaterFactory( context, wm, WidgetUpdaterFactory.UpdateType.cash );
-      BCDBHelper bcdbHelper = new BCDBHelper(context);
-      bcdbHelper.open();
+      BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
+      ViewMakerFactory factory = new ViewMakerFactory( context );
       List<WidgetParams> widgets = bcdbHelper.getWidgets( appIds );
 
       for( WidgetParams widget : widgets )
       {
          if(Arrays.stream(appIds).filter(id -> id == widget.getAppId() ).findFirst().isPresent() )
          {
-            IWidgetUpdater updater = factory.getInstance(widget);
+            WidgetOnlineUpdater updater = new WidgetOnlineUpdater( context, wm,
+                                                          factory.getViewMaker( widget ), widget );
             updater.updateWidget(null);
          }
       }

@@ -59,8 +59,7 @@ public class BCWidget extends AppWidgetProvider
     @Override
     public void onDisabled(Context context)
     {
-        BCDBHelper bcdbHelper = new BCDBHelper(  context );
-        bcdbHelper.open();
+        BCDBHelper bcdbHelper = BCDBHelper.getInstance(  context );
         bcdbHelper.clearWidgets();
     }
 

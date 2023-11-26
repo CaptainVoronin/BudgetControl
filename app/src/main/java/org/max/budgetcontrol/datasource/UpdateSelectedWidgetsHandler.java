@@ -6,6 +6,7 @@ import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.max.budgetcontrol.ViewMakerFactory;
 import org.max.budgetcontrol.db.BCDBHelper;
 import org.max.budgetcontrol.zentypes.Category;
 import org.max.budgetcontrol.zentypes.ResponseProcessor;
@@ -28,7 +29,8 @@ public class UpdateSelectedWidgetsHandler implements IZenClientResponseHandler {
 
     ASecondCallback afterCallback;
 
-    public UpdateSelectedWidgetsHandler(Context context, AppWidgetManager appWidgetManager, int[] widgetIdList)
+    public UpdateSelectedWidgetsHandler(Context context, AppWidgetManager appWidgetManager,
+                                        int[] widgetIdList )
     {
         this.context = context;
         this.appWidgetManager = appWidgetManager;
@@ -36,18 +38,29 @@ public class UpdateSelectedWidgetsHandler implements IZenClientResponseHandler {
     }
 
     @Override
-    public void processResponse(JSONObject jObject) throws JSONException {
-        BCDBHelper bcdbHelper = new BCDBHelper(context);
-        bcdbHelper.open();
+    public void updateWidgets(JSONObject jObject) throws JSONException {
+        List<Transaction> transactions = null;
+        ViewMakerFactory factory = new ViewMakerFactory( context );
+
+        BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
         List<WidgetParams> widgets = bcdbHelper.getWidgets( widgetIdList );
         List<Integer> lost = new ArrayList<>();
         try {
-            List<Transaction> transactions = ResponseProcessor.getTransactions( jObject );
+
+            if( jObject != null )
+                transactions = ResponseProcessor.getTransactions( jObject );
 
             for( WidgetParams widget : widgets )
             {
-                if(Arrays.stream(widgetIdList).filter( id -> id == widget.getAppId() ).findFirst().isPresent() )
-                    new WidgetUpdater(context, appWidgetManager, widget).updateWidget(transactions);
+                if(Arrays.stream(widgetIdList).filter( id -> id ==
+                        widget.getAppId() ).findFirst().isPresent() )
+                {
+                    WidgetOnlineUpdater updater = new WidgetOnlineUpdater( context,
+                            appWidgetManager,
+                            factory.getViewMaker( widget ),
+                            widget );
+                    updater.updateWidget(transactions);
+                }
                 else
                     lost.add( widget.getAppId() );
             }
