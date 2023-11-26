@@ -34,8 +34,6 @@ public class Transaction {
 
         UUID uuid = UUID.fromString( obj.getString( "id" ) );
         if( obj.isNull( "tag") ) {
-            Log.w( "org.max.budgetcontrol.zentypes.Transaction", "Transaction hasn't tags");
-            Log.d( "org.max.budgetcontrol.zentypes.Transaction", obj.toString());
             return null;
         }
         JSONArray oTags = obj.getJSONArray( "tag" );

@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.preference.PreferenceManager;
+
 /* Token
 0yteuv8iwTQcJpaBQXJ3XDZ3nnh1RV
  */
@@ -25,15 +27,18 @@ public class SettingsHolder {
 
     public boolean init()
     {
-        SharedPreferences pr = context.getSharedPreferences( "app.properties", Context.MODE_PRIVATE );
+        SharedPreferences pr = PreferenceManager.getDefaultSharedPreferences(context);
         props = (Map<String, Object>) pr.getAll();
-        String strURL = pr.getString( context.getString( R.string.url ), null );
-        isInit = true;
+        Object obj;
 
-        if( pr.getString( context.getString( R.string.token ), null ) == null )
-            return false;
+        if( ( obj = props.get( context.getString( R.string.token ) ) ) == null )
+            isInit = false;
+        else if( obj.toString().trim().length() == 0  )
+            isInit = false;
         else
-            return true;
+            isInit = true;
+
+        return isInit;
     }
 
     public Object getParameter( String name )

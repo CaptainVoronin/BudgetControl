@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import org.max.budgetcontrol.datasource.WidgetOnlineUpdater;
 import org.max.budgetcontrol.db.BCDBHelper;
@@ -21,17 +22,18 @@ public class OnBootReceiver extends BroadcastReceiver
       if (intent != null) {
          if (intent.getAction().equalsIgnoreCase(
                  Intent.ACTION_BOOT_COMPLETED)) {
-            updateWidgets(context);
+            //updateWidgets(context);
          }
       }
    }
 
    private void updateWidgets(Context context)
    {
+      Log.i( this.getClass().getName(), "[updateWidgets] Update widgets after boot" );
       AppWidgetManager wm = AppWidgetManager.getInstance( context );
       int[] appIds = wm.getAppWidgetIds(new ComponentName(
-              context, MainActivity.class
-      ));
+              context, BCWidget.class ));
+
       BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
       ViewMakerFactory factory = new ViewMakerFactory( context );
       List<WidgetParams> widgets = bcdbHelper.getWidgets( appIds );
@@ -43,6 +45,7 @@ public class OnBootReceiver extends BroadcastReceiver
             WidgetOnlineUpdater updater = new WidgetOnlineUpdater( context, wm,
                                                           factory.getViewMaker( widget ), widget );
             updater.updateWidget(null);
+            Log.d ( this.getClass().getName(), "[updateWidgets] " + widget.getTitle() + " updated from cash" );
          }
       }
    }

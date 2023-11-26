@@ -194,7 +194,7 @@ public class BCDBHelper
 
    public List<WidgetParams> getWidgets( int[] ids)
    {
-      Log.d( this.getClass().getName(), "[getWidgets]");
+      Log.d( this.getClass().getName(), "[getWidgets] Is going to be updated " + ids.length);
 
       assert db != null : "Database is not opened";
       final String queryAllWidgets = select + " where app_id in ( ? )";
@@ -211,6 +211,8 @@ public class BCDBHelper
       Cursor crs = db.rawQuery( queryAllWidgets, strIds );
 
       List<WidgetParams> widgets = new ArrayList<>( crs.getCount() );
+
+      Log.d( this.getClass().getName(), "[getWidgets] Has been read " + crs.getCount());
 
       while( crs.moveToNext() )
          widgets.add( createFromCursor( crs ) );
@@ -284,6 +286,7 @@ public class BCDBHelper
       double limit = cursor.getDouble(2);
       String strStartPeriod = cursor.getString(3);
       String title = cursor.getString( 4 );
+      double currentAmount = cursor.getDouble( 5 );
 
       WidgetParams wp = new WidgetParams();
       wp.setAppId( appId );
@@ -291,6 +294,7 @@ public class BCDBHelper
       wp.setLimitAmount( limit );
       wp.setStartPeriod( StartPeriodEncoding.valueOf( strStartPeriod ) );
       wp.setTitle( title );
+      wp.setCurrentAmount( currentAmount );
       return wp;
    }
 }

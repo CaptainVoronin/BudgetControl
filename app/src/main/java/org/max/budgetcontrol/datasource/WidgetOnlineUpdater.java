@@ -2,6 +2,7 @@ package org.max.budgetcontrol.datasource;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import org.max.budgetcontrol.db.BCDBHelper;
@@ -46,6 +47,7 @@ public class WidgetOnlineUpdater
         calculateAmount( transactions, startDate);
         RemoteViews view = viewMaker.getViews( );
         getAppWidgetManager().updateAppWidget( getWidget().getAppId(), view );
+        Log.d( this.getClass().getName(), "[updateWidget] " + getWidget().getTitle() + " has been updated");
         if( transactions != null )
             saveCash(  );
     }
@@ -54,6 +56,7 @@ public class WidgetOnlineUpdater
     {
         BCDBHelper db = BCDBHelper.getInstance( getContext());
         db.updateWidgetParams( getWidget() );
+        Log.d( this.getClass().getName(), "[saveCash] Cash for " + getWidget().getTitle() + " saved");
     }
 
     protected void calculateAmount(List<Transaction> transactions, long startDate) {

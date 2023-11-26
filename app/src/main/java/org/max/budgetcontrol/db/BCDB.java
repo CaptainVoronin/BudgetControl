@@ -17,7 +17,7 @@ public class BCDB extends SQLiteOpenHelper
            "id integer primary key autoincrement," +
            "app_id integer not null unique," +
            "limit_amount real not null default 0, " +
-           "start_period not null," +
+           "start_period not null check ( start_period = 'week' OR start_period = 'month' OR start_period = 'year' )," +
            "title text not null" +
            ");";
 
