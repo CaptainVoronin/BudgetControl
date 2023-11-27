@@ -1,35 +1,33 @@
 package org.max.budgetcontrol;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.RemoteViews;
 
+import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
-class BaseWidgetViewMaker implements IWidgetViewMaker
+class BaseWidgetViewMaker extends AWidgetViewMaker
 {
-    private final Context context;
-
-    private final WidgetParams widget;
-
     SimpleDateFormat sdf;
 
     public BaseWidgetViewMaker(Context context, WidgetParams widget)
     {
-        this.context = context;
-        this.widget = widget;
+        super( context, widget );
         sdf = new SimpleDateFormat( "dd.MM.yyyy" );
     }
 
     @Override
     public RemoteViews getViews()
     {
-        long startDate = calculateStartDate(widget.getStartPeriod());
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.b_c_widget);
-        views.setTextViewText(R.id.tvAmount, Double.toString(widget.getCurrentAmount()));
-        views.setTextViewText(R.id.tvTitle, widget.getTitle() );
+        long startDate = calculateStartDate(getWidget().getStartPeriod());
+        RemoteViews views = new RemoteViews(getContext().getPackageName(), R.layout.b_c_widget);
+        views.setTextViewText(R.id.tvAmount, Double.toString(getWidget().getCurrentAmount()));
+        views.setTextViewText(R.id.tvTitle, getWidget().getTitle() );
         String buff = sdf.format( new Date( startDate ) );
         views.setTextViewText(R.id.tvStartDate, buff );
         return views;

@@ -57,12 +57,12 @@ public class ZenMoneyClient {
      * @param date дата, от которой надо брать тразакции
      * @throws JSONException
      */
-    public void updateWidgets(Date date) {
-        Log.i( this.getClass().getName(), "[updateWidgets] ");
+    public void loadTransactions(Date date) {
+        Log.i( this.getClass().getName(), "[loadTransactions] ");
         try {
             RequestBody body = RequestBody.create(JSON, RequestUtils.getDiffRequestBody(date.getTime()));
             doRequest(body, new InternalCallback(handler));
-        } catch (JSONException e) {
+        } catch (Exception e) {
             handler.processError(e);
         }
     }
@@ -72,7 +72,7 @@ public class ZenMoneyClient {
             Log.i( this.getClass().getName(), "[getAllCategories] ");
             RequestBody body = RequestBody.create(JSON, RequestUtils.getCategoriesRequestBody());
             doRequest(body, new InternalCallback(handler));
-        } catch (JSONException e) {
+        } catch (Exception e) {
             handler.processError(e);
         }
     }
@@ -100,14 +100,19 @@ class InternalCallback implements Callback {
 
     @Override
     public void onResponse(Call call, Response response) throws IOException {
-        Log.i( this.getClass().getName(), "[onResponse] ");
-        JSONObject jsonObject = null;
-        try {
-            jsonObject = new JSONObject(response.body().string());
-            zenResponseHandler.updateWidgets(jsonObject);
-        } catch (JSONException e) {
-            Log.i( this.getClass().getName(), "[onResponse] Exception " + e.getClass().getName());
-            zenResponseHandler.processError(e);
+        Log.i( this.getClass().getName(), "[onResponse] HTTP " + response.code());
+        if( response.code() == 200 ) {
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(response.body().string());
+                zenResponseHandler.updateWidgets(jsonObject);
+            } catch (JSONException e) {
+                Log.i(this.getClass().getName(), "[onResponse] Exception " + e.getClass().getName());
+                zenResponseHandler.processError(e);
+            }
         }
+        else
+            zenResponseHandler.onNon200Code(response);
     }
+
 }

@@ -1,17 +1,38 @@
 package org.max.budgetcontrol;
 
+import android.content.Context;
 import android.util.Log;
 import android.widget.RemoteViews;
 
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
+import org.max.budgetcontrol.zentypes.WidgetParams;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public interface IWidgetViewMaker
+public abstract class AWidgetViewMaker
 {
-    RemoteViews getViews( );
 
-    default long calculateStartDate(StartPeriodEncoding startPeriodCode)
+    private final Context context;
+
+    private final WidgetParams widget;
+
+    public Context getContext() {
+        return context;
+    }
+
+    public WidgetParams getWidget() {
+        return widget;
+    }
+
+    public AWidgetViewMaker(Context context, WidgetParams widget) {
+            this.context = context;
+            this.widget = widget;
+    }
+
+    public abstract RemoteViews getViews( );
+
+    public final long calculateStartDate(StartPeriodEncoding startPeriodCode)
     {
         Calendar current = Calendar.getInstance();
         current.set(Calendar.HOUR, 0);
@@ -33,4 +54,5 @@ public interface IWidgetViewMaker
         Log.d(this.getClass().getName(), "[calculateStartDate] Date is " + current.getTime().toString());
         return current.getTimeInMillis();
     }
+
 }

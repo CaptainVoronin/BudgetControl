@@ -36,7 +36,7 @@ public class BCWidget extends AppWidgetProvider
         }
         UpdateSelectedWidgetsHandler handler = new UpdateSelectedWidgetsHandler( context, appWidgetManager, appWidgetIds );
         ZenMoneyClient client = new ZenMoneyClient( url, token, handler );
-        client.updateWidgets( new Date() );
+        client.loadTransactions( new Date() );
     }
 
     private void updateWithError(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, JSONException e) {

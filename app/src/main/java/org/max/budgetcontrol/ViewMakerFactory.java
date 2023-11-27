@@ -13,8 +13,14 @@ public class ViewMakerFactory
       this.context = context;
    }
 
-   public IWidgetViewMaker getViewMaker(WidgetParams widget )
+   public AWidgetViewMaker getViewMaker(int httpCode, WidgetParams widget )
    {
-      return new BaseWidgetViewMaker( context, widget );
+      switch( httpCode ) {
+         case 200:
+            return new BaseWidgetViewMaker(context, widget);
+         case 401:
+         default:
+            return new NoConnectionViewMaker( context, widget );
+      }
    }
 }

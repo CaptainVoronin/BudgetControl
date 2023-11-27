@@ -6,7 +6,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import org.max.budgetcontrol.db.BCDBHelper;
-import org.max.budgetcontrol.IWidgetViewMaker;
+import org.max.budgetcontrol.AWidgetViewMaker;
 import org.max.budgetcontrol.zentypes.Transaction;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class WidgetOnlineUpdater
 {
-    private final IWidgetViewMaker viewMaker;
+    private final AWidgetViewMaker viewMaker;
     private Context context;
     private AppWidgetManager appWidgetManager;
     private WidgetParams widget;
@@ -34,7 +34,7 @@ public class WidgetOnlineUpdater
         return widget;
     }
 
-    public WidgetOnlineUpdater(Context context, AppWidgetManager appWidgetManager, IWidgetViewMaker viewMaker, WidgetParams widget ) {
+    public WidgetOnlineUpdater(Context context, AppWidgetManager appWidgetManager, AWidgetViewMaker viewMaker, WidgetParams widget ) {
         this.context = context;
         this.appWidgetManager = appWidgetManager;
         this.widget = widget;

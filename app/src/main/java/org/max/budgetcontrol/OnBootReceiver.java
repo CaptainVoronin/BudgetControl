@@ -43,7 +43,7 @@ public class OnBootReceiver extends BroadcastReceiver
          if(Arrays.stream(appIds).filter(id -> id == widget.getAppId() ).findFirst().isPresent() )
          {
             WidgetOnlineUpdater updater = new WidgetOnlineUpdater( context, wm,
-                                                          factory.getViewMaker( widget ), widget );
+                                                          factory.getViewMaker( 200, widget ), widget );
             updater.updateWidget(null);
             Log.d ( this.getClass().getName(), "[updateWidgets] " + widget.getTitle() + " updated from cash" );
          }

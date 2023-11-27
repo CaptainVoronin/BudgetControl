@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import okhttp3.Response;
+
 public class UpdateSelectedWidgetsHandler implements IZenClientResponseHandler {
     Context context;
     AppWidgetManager appWidgetManager;
@@ -30,44 +32,61 @@ public class UpdateSelectedWidgetsHandler implements IZenClientResponseHandler {
     ASecondCallback afterCallback;
 
     public UpdateSelectedWidgetsHandler(Context context, AppWidgetManager appWidgetManager,
-                                        int[] widgetIdList )
-    {
+                                        int[] widgetIdList) {
         this.context = context;
         this.appWidgetManager = appWidgetManager;
         this.widgetIdList = widgetIdList.clone();
     }
 
     @Override
+    public void onNon200Code(Response response) {
+        ViewMakerFactory factory = new ViewMakerFactory(context);
+        BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
+        List<WidgetParams> widgets = bcdbHelper.getWidgets(widgetIdList);
+
+        if (response.code() == 401) {
+            for (WidgetParams widget : widgets) {
+                if (Arrays.stream(widgetIdList).filter(id -> id ==
+                        widget.getAppId()).findFirst().isPresent()) {
+                    factory.getViewMaker(401, widget);
+                    new WidgetOnlineUpdater(context,
+                            appWidgetManager,
+                            factory.getViewMaker(401, widget),
+                            widget).updateWidget(null);
+                }
+            }
+        }
+
+    }
+
+    @Override
     public void updateWidgets(JSONObject jObject) throws JSONException {
         List<Transaction> transactions = null;
-        ViewMakerFactory factory = new ViewMakerFactory( context );
+        ViewMakerFactory factory = new ViewMakerFactory(context);
 
         BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
-        List<WidgetParams> widgets = bcdbHelper.getWidgets( widgetIdList );
+        List<WidgetParams> widgets = bcdbHelper.getWidgets(widgetIdList);
         List<Integer> lost = new ArrayList<>();
         try {
 
-            if( jObject != null )
-                transactions = ResponseProcessor.getTransactions( jObject );
+            if (jObject != null)
+                transactions = ResponseProcessor.getTransactions(jObject);
 
-            for( WidgetParams widget : widgets )
-            {
-                if(Arrays.stream(widgetIdList).filter( id -> id ==
-                        widget.getAppId() ).findFirst().isPresent() )
-                {
-                    WidgetOnlineUpdater updater = new WidgetOnlineUpdater( context,
+            for (WidgetParams widget : widgets) {
+                if (Arrays.stream(widgetIdList).filter(id -> id ==
+                        widget.getAppId()).findFirst().isPresent()) {
+                    WidgetOnlineUpdater updater = new WidgetOnlineUpdater(context,
                             appWidgetManager,
-                            factory.getViewMaker( widget ),
-                            widget );
+                            factory.getViewMaker(200, widget),
+                            widget);
                     updater.updateWidget(transactions);
-                }
-                else
-                    lost.add( widget.getAppId() );
+                } else
+                    lost.add(widget.getAppId());
             }
 
-            if( lost.size() != 0 )
-                bcdbHelper.deleteLost( lost );
-            if( afterCallback != null )
+            if (lost.size() != 0)
+                bcdbHelper.deleteLost(lost);
+            if (afterCallback != null)
                 afterCallback.action();
         } catch (ParseException e) {
 

@@ -42,8 +42,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import okhttp3.Response;
+
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener
 {
+    public static final String CONNECTION_PROBLEM = "connection_problem";
     List<Category> categories;
     SettingsHolder settings;
 
@@ -78,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                         if (settings.init())
                             loadCategories();
                         else
-                            showSetting();
+                            showSetting(true);
                     }
                 });
 
@@ -111,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         if (completeConfig)
             loadCategories();
         else
-            showSetting();
+            showSetting(true);
     }
 
     void configSpinner(WidgetParams widget)
@@ -175,15 +178,17 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             return true;
         } else if (item.getItemId() == R.id.idSettings)
         {
-            showSetting();
+            showSetting(true);
             return true;
         } else
             return super.onOptionsItemSelected(item);
     }
 
-    private void showSetting()
+    private void showSetting(boolean withError)
     {
         Intent intent = new Intent(this, SettingsActivity.class);
+        if( withError)
+            intent.putExtra(  CONNECTION_PROBLEM, true );
 
         launcher.launch(intent);
     }
@@ -210,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                     settings.getParameterAsString("token"),
                     handler);
 
-            client.updateWidgets(Calendar.getInstance().getTime());
+            client.loadTransactions(Calendar.getInstance().getTime());
         } catch (MalformedURLException e)
         {
             handler.processError(e);
@@ -294,18 +299,17 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     {
 
         @Override
+        public void onNon200Code(Response responze) {
+            if( responze.code() == 401 )
+                runOnUiThread(() -> showSetting(true) );
+        }
+
+        @Override
         public void updateWidgets(JSONObject jObject) throws JSONException
         {
             List<Category> cats = ResponseProcessor.getCategory(jObject);
             final List<Category> cs = ResponseProcessor.makeCategoryTree(cats);
-            runOnUiThread(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    bringCategoryListToFront(cs);
-                }
-            });
+            runOnUiThread(()-> bringCategoryListToFront(cs));
         }
 
         @Override
