@@ -25,7 +25,7 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.ASecondCallback;
-import org.max.budgetcontrol.datasource.IZenClientResponseHandler;
+import org.max.budgetcontrol.datasource.AZenClientResponseHandler;
 import org.max.budgetcontrol.datasource.UpdateSelectedWidgetsHandler;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 import org.max.budgetcontrol.db.BCDBHelper;
@@ -295,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             categoryHolder.remove(id);
     }
 
-    class CategoryLoaderHandler implements IZenClientResponseHandler
+    class CategoryLoaderHandler extends AZenClientResponseHandler
     {
 
         @Override

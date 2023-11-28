@@ -1,12 +1,5 @@
 package org.max.budgetcontrol.zentypes;
 
-
-import org.jetbrains.annotations.PropertyKey;
-
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-
 public class BCSetting
 {
    int id;

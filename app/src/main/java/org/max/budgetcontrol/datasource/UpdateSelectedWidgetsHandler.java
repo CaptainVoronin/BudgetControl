@@ -2,13 +2,11 @@ package org.max.budgetcontrol.datasource;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.ViewMakerFactory;
 import org.max.budgetcontrol.db.BCDBHelper;
-import org.max.budgetcontrol.zentypes.Category;
 import org.max.budgetcontrol.zentypes.ResponseProcessor;
 import org.max.budgetcontrol.zentypes.Transaction;
 import org.max.budgetcontrol.zentypes.WidgetParams;
@@ -20,34 +18,41 @@ import java.util.List;
 
 import okhttp3.Response;
 
-public class UpdateSelectedWidgetsHandler implements IZenClientResponseHandler {
+public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
+{
     Context context;
     AppWidgetManager appWidgetManager;
     int[] widgetIdList;
 
-    public void setAfterCallback(ASecondCallback afterCallback) {
+    public void setAfterCallback(ASecondCallback afterCallback)
+    {
         this.afterCallback = afterCallback;
     }
 
     ASecondCallback afterCallback;
 
     public UpdateSelectedWidgetsHandler(Context context, AppWidgetManager appWidgetManager,
-                                        int[] widgetIdList) {
+                                        int[] widgetIdList)
+    {
         this.context = context;
         this.appWidgetManager = appWidgetManager;
         this.widgetIdList = widgetIdList.clone();
     }
 
     @Override
-    public void onNon200Code(Response response) {
+    public void onNon200Code(Response response)
+    {
         ViewMakerFactory factory = new ViewMakerFactory(context);
         BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
         List<WidgetParams> widgets = bcdbHelper.getWidgets(widgetIdList);
 
-        if (response.code() == 401) {
-            for (WidgetParams widget : widgets) {
+        if (response.code() == 401)
+        {
+            for (WidgetParams widget : widgets)
+            {
                 if (Arrays.stream(widgetIdList).filter(id -> id ==
-                        widget.getAppId()).findFirst().isPresent()) {
+                        widget.getAppId()).findFirst().isPresent())
+                {
                     factory.getViewMaker(401, widget);
                     new WidgetOnlineUpdater(context,
                             appWidgetManager,
@@ -60,21 +65,25 @@ public class UpdateSelectedWidgetsHandler implements IZenClientResponseHandler {
     }
 
     @Override
-    public void onResponseReceived(JSONObject jObject) throws JSONException {
+    public void onResponseReceived(JSONObject jObject) throws JSONException
+    {
         List<Transaction> transactions = null;
         ViewMakerFactory factory = new ViewMakerFactory(context);
 
         BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
         List<WidgetParams> widgets = bcdbHelper.getWidgets(widgetIdList);
         List<Integer> lost = new ArrayList<>();
-        try {
+        try
+        {
 
             if (jObject != null)
                 transactions = ResponseProcessor.getTransactions(jObject);
 
-            for (WidgetParams widget : widgets) {
+            for (WidgetParams widget : widgets)
+            {
                 if (Arrays.stream(widgetIdList).filter(id -> id ==
-                        widget.getAppId()).findFirst().isPresent()) {
+                        widget.getAppId()).findFirst().isPresent())
+                {
                     WidgetOnlineUpdater updater = new WidgetOnlineUpdater(context,
                             appWidgetManager,
                             factory.getViewMaker(200, widget),
@@ -88,14 +97,16 @@ public class UpdateSelectedWidgetsHandler implements IZenClientResponseHandler {
                 bcdbHelper.deleteLost(lost);
             if (afterCallback != null)
                 afterCallback.action();
-        } catch (ParseException e) {
+        } catch (ParseException e)
+        {
 
         }
     }
 
     // TODO: не реализовано
     @Override
-    public void processError(Exception e) {
+    public void processError(Exception e)
+    {
         e.printStackTrace();
     }
 }

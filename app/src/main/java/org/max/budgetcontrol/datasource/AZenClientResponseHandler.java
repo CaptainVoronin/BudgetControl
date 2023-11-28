@@ -11,13 +11,18 @@ public abstract class AZenClientResponseHandler
 {
     private UUID tag;
 
-    abstract public void onNon200Code(Response responze);
-    abstract public void onResponseReceived(JSONObject jObject) throws JSONException;
-    abstract public  void processError( Exception e );
+    private ZenMoneyClient client;
 
-    public final void setRequestTag( UUID tag )
+    abstract public void onNon200Code(Response responze);
+
+    abstract public void onResponseReceived(JSONObject jObject) throws JSONException;
+
+    abstract public void processError(Exception e);
+
+    public final void setRequestTag(ZenMoneyClient client, UUID tag)
     {
         this.tag = tag;
+        this.client = client;
     }
 
     public final UUID getRequestTag()
@@ -25,4 +30,8 @@ public abstract class AZenClientResponseHandler
         return tag;
     }
 
+    public void canceRequest()
+    {
+        client.cancel(tag);
+    }
 }

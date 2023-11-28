@@ -85,7 +85,7 @@ public class ZenMoneyClient {
         httpClient.newCall(req).enqueue(callback);
         Log.i( this.getClass().getName(), "[cancel] Request id " + tag.toString() + "has been enqueued");
         if( handler != null )
-            handler.setRequestTag( tag );
+            handler.setRequestTag( this, tag );
         return tag;
     }
 
