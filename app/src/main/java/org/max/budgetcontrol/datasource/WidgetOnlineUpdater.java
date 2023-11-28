@@ -65,7 +65,7 @@ public class WidgetOnlineUpdater
             double amount = transactions.stream().filter(t -> t.getDate().getTime() >= startDate)
                     .filter(t -> t.hasCategory(getWidget().getCategories()))
                     .mapToDouble(t -> t.getAmount()).sum();
-            getWidget().setCurrentAmount( amount );
+            getWidget().setCurrentAmount( -1 * amount );
         }
     }
 }

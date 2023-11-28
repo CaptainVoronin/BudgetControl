@@ -60,7 +60,7 @@ public class UpdateSelectedWidgetsHandler implements IZenClientResponseHandler {
     }
 
     @Override
-    public void updateWidgets(JSONObject jObject) throws JSONException {
+    public void onResponseReceived(JSONObject jObject) throws JSONException {
         List<Transaction> transactions = null;
         ViewMakerFactory factory = new ViewMakerFactory(context);
 

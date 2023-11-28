@@ -22,7 +22,6 @@ import okhttp3.Response;
  */
 public class ZenMoneyClient {
     String token;
-
     OkHttpClient httpClient;
 
     public static final MediaType JSON = MediaType.get("application/json");
@@ -58,7 +57,7 @@ public class ZenMoneyClient {
      * @throws JSONException
      */
     public void loadTransactions(Date date) {
-        Log.i( this.getClass().getName(), "[loadTransactions] ");
+        Log.i(this.getClass().getName(), "[loadTransactions] ");
         try {
             RequestBody body = RequestBody.create(JSON, RequestUtils.getDiffRequestBody(date.getTime()));
             doRequest(body, new InternalCallback(handler));
@@ -69,7 +68,7 @@ public class ZenMoneyClient {
 
     public void getAllCategories() {
         try {
-            Log.i( this.getClass().getName(), "[getAllCategories] ");
+            Log.i(this.getClass().getName(), "[getAllCategories] ");
             RequestBody body = RequestBody.create(JSON, RequestUtils.getCategoriesRequestBody());
             doRequest(body, new InternalCallback(handler));
         } catch (Exception e) {
@@ -80,8 +79,18 @@ public class ZenMoneyClient {
     protected void doRequest(RequestBody body, Callback callback) {
         Request.Builder requestBuilder = getRequestBuilder();
         Request req = requestBuilder.post(body).build();
-        Log.i( this.getClass().getName(), "[doRequest] " + body.toString());
+        Log.i(this.getClass().getName(), "[doRequest] " + body.toString());
         httpClient.newCall(req).enqueue(callback);
+    }
+
+    public void checkConnection() {
+        try {
+            Log.i(this.getClass().getName(), "[checkConnection] ");
+            RequestBody body = RequestBody.create(JSON, RequestUtils.getEmptyBody());
+            doRequest(body, new InternalCallback(handler));
+        } catch (Exception e) {
+            handler.processError(e);
+        }
     }
 }
 
@@ -94,24 +103,23 @@ class InternalCallback implements Callback {
 
     @Override
     public void onFailure(Call call, IOException e) {
-        Log.i( this.getClass().getName(), "[onFailure]");
+        Log.i(this.getClass().getName(), "[onFailure]");
         zenResponseHandler.processError(e);
     }
 
     @Override
     public void onResponse(Call call, Response response) throws IOException {
-        Log.i( this.getClass().getName(), "[onResponse] HTTP " + response.code());
-        if( response.code() == 200 ) {
+        Log.i(this.getClass().getName(), "[onResponse] HTTP " + response.code());
+        if (response.code() == 200) {
             JSONObject jsonObject = null;
             try {
                 jsonObject = new JSONObject(response.body().string());
-                zenResponseHandler.updateWidgets(jsonObject);
+                zenResponseHandler.onResponseReceived(jsonObject);
             } catch (JSONException e) {
                 Log.i(this.getClass().getName(), "[onResponse] Exception " + e.getClass().getName());
                 zenResponseHandler.processError(e);
             }
-        }
-        else
+        } else
             zenResponseHandler.onNon200Code(response);
     }
 

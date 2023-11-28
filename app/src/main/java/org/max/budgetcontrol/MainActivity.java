@@ -305,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         }
 
         @Override
-        public void updateWidgets(JSONObject jObject) throws JSONException
+        public void onResponseReceived(JSONObject jObject) throws JSONException
         {
             List<Category> cats = ResponseProcessor.getCategory(jObject);
             final List<Category> cs = ResponseProcessor.makeCategoryTree(cats);

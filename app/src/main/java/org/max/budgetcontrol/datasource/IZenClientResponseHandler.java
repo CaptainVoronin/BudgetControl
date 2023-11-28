@@ -7,6 +7,6 @@ import okhttp3.Response;
 
 public interface IZenClientResponseHandler {
     void onNon200Code(Response responze);
-    void updateWidgets(JSONObject jObject) throws JSONException;
+    void onResponseReceived(JSONObject jObject) throws JSONException;
     void processError( Exception e );
 }

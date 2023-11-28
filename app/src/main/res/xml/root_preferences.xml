@@ -14,8 +14,8 @@
 
         <EditTextPreference
             app:key="token"
-            app:summary="adskljhsdklfjhalskjdhfasdf"
             app:title="@string/token_title"
+            app:useSimpleSummaryProvider="true"
             />
 
     </PreferenceCategory>
