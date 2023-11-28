@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
+import java.util.UUID;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -28,9 +29,9 @@ public class ZenMoneyClient {
 
     URL url;
 
-    IZenClientResponseHandler handler;
+    AZenClientResponseHandler handler;
 
-    public ZenMoneyClient(URL url, String token, IZenClientResponseHandler handler) {
+    public ZenMoneyClient(URL url, String token, AZenClientResponseHandler handler) {
         this.url = url;
         this.token = token;
         this.handler = handler;
@@ -76,11 +77,36 @@ public class ZenMoneyClient {
         }
     }
 
-    protected void doRequest(RequestBody body, Callback callback) {
+    protected UUID doRequest(RequestBody body, Callback callback) {
+        UUID tag = UUID.randomUUID();
         Request.Builder requestBuilder = getRequestBuilder();
-        Request req = requestBuilder.post(body).build();
+        Request req = requestBuilder.tag( tag ).post(body).build();
         Log.i(this.getClass().getName(), "[doRequest] " + body.toString());
         httpClient.newCall(req).enqueue(callback);
+        Log.i( this.getClass().getName(), "[cancel] Request id " + tag.toString() + "has been enqueued");
+        if( handler != null )
+            handler.setRequestTag( tag );
+        return tag;
+    }
+
+    public void cancel( UUID tag )
+    {
+        for (Call call : httpClient.dispatcher().queuedCalls()) {
+            if (call.request().tag().equals(tag))
+            {
+                call.cancel();
+                Log.i( this.getClass().getName(), "[cancel] Request id " + tag.toString() + " has removed from the queue");
+            }
+        }
+
+        //B) go through the running calls and cancel if the tag matches:
+        for (Call call : httpClient.dispatcher().runningCalls()) {
+            if (call.request().tag().equals(tag))
+            {
+                call.cancel();
+                Log.i( this.getClass().getName(), "[cancel] Request id " + tag.toString() + " has been aborted");
+            }
+        }
     }
 
     public void checkConnection() {
@@ -95,9 +121,9 @@ public class ZenMoneyClient {
 }
 
 class InternalCallback implements Callback {
-    IZenClientResponseHandler zenResponseHandler;
+    AZenClientResponseHandler zenResponseHandler;
 
-    public InternalCallback(IZenClientResponseHandler zenResponseHandler) {
+    public InternalCallback(AZenClientResponseHandler zenResponseHandler) {
         this.zenResponseHandler = zenResponseHandler;
     }
 
