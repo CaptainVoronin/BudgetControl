@@ -40,4 +40,8 @@ public class RequestUtils {
         }
         return job.toString().getBytes(StandardCharsets.UTF_8);
     }
+
+    public static byte[] getEmptyBody() throws JSONException {
+        return getSpecificRequestBody( null, System.currentTimeMillis() );
+    }
 }
