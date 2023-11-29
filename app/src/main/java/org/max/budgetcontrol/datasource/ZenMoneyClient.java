@@ -2,6 +2,9 @@ package org.max.budgetcontrol.datasource;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -55,47 +58,50 @@ public class ZenMoneyClient {
      * Получает транзакции, совершенные после заданной параметром даты
      *
      * @param date дата, от которой надо брать тразакции
-     * @throws JSONException
      */
-    public void loadTransactions(Date date) {
+    public UUID loadTransactions(Date date) {
+        UUID tag = null;
         Log.i(this.getClass().getName(), "[loadTransactions] ");
         try {
             RequestBody body = RequestBody.create(JSON, RequestUtils.getDiffRequestBody(date.getTime()));
-            doRequest(body, new InternalCallback(handler));
+            tag = doRequest(body, new InternalCallback(handler));
         } catch (Exception e) {
             handler.processError(e);
         }
+        return tag;
     }
 
-    public void getAllCategories() {
+    public UUID getAllCategories() {
+        UUID tag = null;
         try {
             Log.i(this.getClass().getName(), "[getAllCategories] ");
             RequestBody body = RequestBody.create(JSON, RequestUtils.getCategoriesRequestBody());
-            doRequest(body, new InternalCallback(handler));
+            tag = doRequest(body, new InternalCallback(handler));
         } catch (Exception e) {
             handler.processError(e);
         }
+        return tag;
     }
 
     protected UUID doRequest(RequestBody body, Callback callback) {
         UUID tag = UUID.randomUUID();
         Request.Builder requestBuilder = getRequestBuilder();
         Request req = requestBuilder.tag( tag ).post(body).build();
-        Log.i(this.getClass().getName(), "[doRequest] " + body.toString());
+        Log.i(this.getClass().getName(), "[doRequest] " + body);
         httpClient.newCall(req).enqueue(callback);
-        Log.i( this.getClass().getName(), "[cancel] Request id " + tag.toString() + "has been enqueued");
+        Log.i( this.getClass().getName(), "[cancel] Request id " + tag + "has been enqueued");
         if( handler != null )
             handler.setRequestTag( this, tag );
         return tag;
     }
 
-    public void cancel( UUID tag )
+    public void cancel( @NonNull UUID tag )
     {
         for (Call call : httpClient.dispatcher().queuedCalls()) {
             if (call.request().tag().equals(tag))
             {
                 call.cancel();
-                Log.i( this.getClass().getName(), "[cancel] Request id " + tag.toString() + " has removed from the queue");
+                Log.i( this.getClass().getName(), "[cancel] Request id " + tag + " has removed from the queue");
             }
         }
 
@@ -104,19 +110,21 @@ public class ZenMoneyClient {
             if (call.request().tag().equals(tag))
             {
                 call.cancel();
-                Log.i( this.getClass().getName(), "[cancel] Request id " + tag.toString() + " has been aborted");
+                Log.i( this.getClass().getName(), "[cancel] Request id " + tag + " has been aborted");
             }
         }
     }
 
-    public void checkConnection() {
+    public UUID checkConnection() {
+        UUID tag = null;
         try {
             Log.i(this.getClass().getName(), "[checkConnection] ");
             RequestBody body = RequestBody.create(JSON, RequestUtils.getEmptyBody());
-            doRequest(body, new InternalCallback(handler));
+            tag = doRequest(body, new InternalCallback(handler));
         } catch (Exception e) {
             handler.processError(e);
         }
+        return tag;
     }
 }
 
@@ -128,16 +136,16 @@ class InternalCallback implements Callback {
     }
 
     @Override
-    public void onFailure(Call call, IOException e) {
+    public void onFailure(@NonNull Call call, @NonNull IOException e) {
         Log.i(this.getClass().getName(), "[onFailure]");
         zenResponseHandler.processError(e);
     }
 
     @Override
-    public void onResponse(Call call, Response response) throws IOException {
+    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
         Log.i(this.getClass().getName(), "[onResponse] HTTP " + response.code());
         if (response.code() == 200) {
-            JSONObject jsonObject = null;
+            JSONObject jsonObject;
             try {
                 jsonObject = new JSONObject(response.body().string());
                 zenResponseHandler.onResponseReceived(jsonObject);
@@ -148,5 +156,4 @@ class InternalCallback implements Callback {
         } else
             zenResponseHandler.onNon200Code(response);
     }
-
 }
