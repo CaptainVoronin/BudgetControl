@@ -2,6 +2,7 @@ package org.max.budgetcontrol.datasource;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -106,6 +107,31 @@ public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
     @Override
     public void processError(Exception e)
     {
-        e.printStackTrace();
+
+        if (isNetWorkError(e))
+        {
+            Log.i( this.getClass().getName(), "[processError] There is network error. " + e.getMessage() + " Load data from cash" );
+            loadFromCash();
+        }
+        else
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadFromCash()
+    {
+        Log.i( this.getClass().getName(), "[loadFromCash] " );
+        ViewMakerFactory factory = new ViewMakerFactory(context);
+        BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
+        List<WidgetParams> widgets = bcdbHelper.getWidgets(widgetIdList);
+        for (WidgetParams widget : widgets)
+        {
+            WidgetOnlineUpdater updater = new WidgetOnlineUpdater(context,
+                    appWidgetManager,
+                    factory.getViewMaker(200, widget),
+                    widget);
+            updater.updateWidget(null);
+        }
     }
 }

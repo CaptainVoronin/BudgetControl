@@ -62,7 +62,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     ActivityResultLauncher<Intent> launcher;
     private CategoryLoaderHandler categoryLoaderHandler;
 
-    AlertDialog loadDataDialog;
+    AlertDialog loadCategoriesDialog;
+    AlertDialog loadTransactionsDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -160,8 +161,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 categoryLoaderHandler.cancelRequest();
             } ));
 
-            loadDataDialog = dlg.create();
-            loadDataDialog.show();
+            loadCategoriesDialog = dlg.create();
+            loadCategoriesDialog.show();
 
         } catch (MalformedURLException e)
         {
@@ -226,6 +227,10 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             ZenMoneyClient client = new ZenMoneyClient(new URL(settings.getParameterAsString("url")),
                     settings.getParameterAsString("token"),
                     handler);
+            AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+            dlg.setView( R.layout.dlg_load_transactions_layout );
+            loadTransactionsDialog = dlg.create();
+            loadTransactionsDialog.show();
 
             client.loadTransactions(Calendar.getInstance().getTime());
         } catch (MalformedURLException e)
@@ -314,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         public void onNon200Code(@NotNull Response response) {
             if( response.code() == 401 || response.code() == 500 )
                 runOnUiThread(() -> {
-                    loadDataDialog.dismiss();
+                    loadCategoriesDialog.dismiss();
                     showSettings(true);
                 } );
         }
@@ -325,7 +330,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             List<Category> cats = ResponseProcessor.getCategory(jObject);
             final List<Category> cs = ResponseProcessor.makeCategoryTree(cats);
             runOnUiThread(()-> {
-                loadDataDialog.dismiss();
+                loadCategoriesDialog.dismiss();
                 bringCategoryListToFront(cs);
             });
         }
@@ -334,7 +339,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         public void processError(Exception e)
         {
             runOnUiThread( () -> {
-                loadDataDialog.dismiss();
+                loadCategoriesDialog.dismiss();
                 if (e instanceof java.net.UnknownHostException) {
 
                     AlertDialog.Builder dlg = new AlertDialog.Builder( MainActivity.this);
@@ -383,10 +388,10 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     class AfterUpdateWidgetCallback extends ASecondCallback
     {
-
         @Override
         public void action()
         {
+            loadTransactionsDialog.dismiss();
             setActivityResult(Activity.RESULT_OK, currentWidget.getAppId());
             finishAndRemoveTask();
         }

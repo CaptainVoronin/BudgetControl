@@ -24,7 +24,7 @@
         android:fontFamily="sans-serif-medium"
         android:gravity="right"
         android:paddingRight="8dp"
-        android:text="TextView"
+        android:text="—//—//—"
         android:textSize="16sp" />
 
     <TextView
@@ -36,7 +36,7 @@
         android:forceDarkAllowed="false"
         android:gravity="right"
         android:paddingRight="8dp"
-        android:text="01.11.2023"
+        android:text="—//—//—"
         android:textSize="16sp" />
 
 </RelativeLayout>
