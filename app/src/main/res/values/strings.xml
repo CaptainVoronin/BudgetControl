@@ -26,4 +26,5 @@
     <string name="year_code">год</string>
     <string name="title_activity_app_settings">AppSettings</string>
     <string name="cancel">Cancel</string>
+    <string name="authentication_failed">Неверное значение токена авторизации.</string>
 </resources>

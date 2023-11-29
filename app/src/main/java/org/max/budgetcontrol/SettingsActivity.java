@@ -58,7 +58,7 @@ public class SettingsActivity extends AppCompatActivity {
             connectionProblems = extras.getBoolean(MainActivity.CONNECTION_PROBLEM, false);
 
         setContentView(R.layout.settings_activity);
-        settingsFragment = new SettingsFragment( this );
+        settingsFragment = new SettingsFragment(this);
 
         if (savedInstanceState == null) {
             getSupportFragmentManager()
@@ -86,14 +86,12 @@ public class SettingsActivity extends AppCompatActivity {
     void checkConnection() {
         if (url != null && token != null) {
             CheckConnectionHandler handler = new CheckConnectionHandler();
-            ZenMoneyClient client = new ZenMoneyClient(url, token, handler );
+            ZenMoneyClient client = new ZenMoneyClient(url, token, handler);
 
-            AlertDialog.Builder dlg = new AlertDialog.Builder( this );
-            dlg.setMessage( "Check connection" ).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
-            {
+            AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+            dlg.setMessage("Check connection").setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialogInterface, int i)
-                {
+                public void onClick(DialogInterface dialogInterface, int i) {
                     handler.canceRequest();
                     dialogInterface.cancel();
                 }
@@ -144,14 +142,20 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    private class CheckConnectionHandler extends AZenClientResponseHandler
-    {
+    private class CheckConnectionHandler extends AZenClientResponseHandler {
         @Override
         public void onNon200Code(Response response) {
             Log.w(this.getClass().getName(), "[onNon200Code] HTTP " + response.code());
             settingsCompleteAndChecked = false;
-            EditTextPreference preference = (EditTextPreference) settingsFragment.findPreference( "token" );
+            EditTextPreference preference = (EditTextPreference) settingsFragment.findPreference("token");
             closeDialog();
+            AlertDialog.Builder dlg = new AlertDialog.Builder(SettingsActivity.this);
+            dlg.setMessage( R.string.authentication_failed ).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.cancel();
+                }
+            });
         }
 
         @Override
@@ -178,8 +182,8 @@ public class SettingsActivity extends AppCompatActivity {
             closeDialog();
         }
     }
-    void closeDialog()
-    {
+
+    void closeDialog() {
         dlgCheckConnection.dismiss();
     }
 }
