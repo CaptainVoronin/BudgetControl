@@ -144,13 +144,24 @@ public class SettingsActivity extends AppCompatActivity {
 
     private class CheckConnectionHandler extends AZenClientResponseHandler {
         @Override
-        public void onNon200Code(Response response) {
+        public void onNon200Code(@NonNull Response response) {
             Log.w(this.getClass().getName(), "[onNon200Code] HTTP " + response.code());
             settingsCompleteAndChecked = false;
             EditTextPreference preference = (EditTextPreference) settingsFragment.findPreference("token");
             closeDialog();
+            String message;
+
+            switch ( response.code() )
+            {
+                case 401:
+                    message = getApplicationContext().getString( R.string.authentication_failed );
+                    break;
+                default:
+                    message = getApplicationContext().getString( R.string.common_http_error )
+                                                                            + " " + response.code();
+            }
             AlertDialog.Builder dlg = new AlertDialog.Builder(SettingsActivity.this);
-            dlg.setMessage( R.string.authentication_failed ).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            dlg.setMessage( message ).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.cancel();
@@ -180,6 +191,15 @@ public class SettingsActivity extends AppCompatActivity {
             e.printStackTrace();
             settingsCompleteAndChecked = false;
             closeDialog();
+            String message = getApplicationContext().getString( R.string.enternal_request_error )
+                                                                          + " " + e.getMessage();
+            AlertDialog.Builder dlg = new AlertDialog.Builder(SettingsActivity.this);
+            dlg.setMessage( message ).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.cancel();
+                }
+            });
         }
     }
 
