@@ -3,6 +3,7 @@ package org.max.budgetcontrol.datasource;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -59,7 +60,7 @@ public class ZenMoneyClient {
      *
      * @param date дата, от которой надо брать тразакции
      */
-    public UUID loadTransactions(Date date) {
+    public @Nullable UUID loadTransactions( @NonNull Date date) {
         UUID tag = null;
         Log.i(this.getClass().getName(), "[loadTransactions] ");
         try {
@@ -71,7 +72,7 @@ public class ZenMoneyClient {
         return tag;
     }
 
-    public UUID getAllCategories() {
+    public @Nullable UUID getAllCategories() {
         UUID tag = null;
         try {
             Log.i(this.getClass().getName(), "[getAllCategories] ");
@@ -83,7 +84,7 @@ public class ZenMoneyClient {
         return tag;
     }
 
-    protected UUID doRequest(RequestBody body, Callback callback) {
+    protected @Nullable UUID doRequest(RequestBody body, Callback callback) {
         UUID tag = UUID.randomUUID();
         Request.Builder requestBuilder = getRequestBuilder();
         Request req = requestBuilder.tag( tag ).post(body).build();
@@ -115,7 +116,7 @@ public class ZenMoneyClient {
         }
     }
 
-    public UUID checkConnection() {
+    public @Nullable UUID checkConnection() {
         UUID tag = null;
         try {
             Log.i(this.getClass().getName(), "[checkConnection] ");
@@ -131,7 +132,7 @@ public class ZenMoneyClient {
 class InternalCallback implements Callback {
     AZenClientResponseHandler zenResponseHandler;
 
-    public InternalCallback(AZenClientResponseHandler zenResponseHandler) {
+    public InternalCallback(@NonNull  AZenClientResponseHandler zenResponseHandler) {
         this.zenResponseHandler = zenResponseHandler;
     }
 
