@@ -1,4 +1,4 @@
-package org.max.budgetcontrol.zentypes;
+package org.max.budgetcontrol.datasource;
 
 
 import android.util.Log;
@@ -7,6 +7,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.ZenEntities;
+import org.max.budgetcontrol.zentypes.Category;
+import org.max.budgetcontrol.zentypes.Transaction;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,7 +31,7 @@ public class ResponseProcessor {
         sdf = new SimpleDateFormat( "yyyy-MM-dd" );
     }
 
-    public static List<Category> getCategory( JSONObject obj ) throws JSONException {
+    public static List<Category> getCategory(JSONObject obj ) throws JSONException {
         if( obj.has( ZenEntities.tag.name() ) )
         {
             JSONArray arr = obj.getJSONArray(ZenEntities.tag.name());
@@ -45,7 +48,7 @@ public class ResponseProcessor {
             return null;
     }
 
-    public static List<Transaction> getTransactions( @NonNull JSONObject obj ) throws JSONException, ParseException {
+    public static List<Transaction> getTransactions(@NonNull JSONObject obj ) throws JSONException, ParseException {
         final String deleted = "deleted";
 
         List<Transaction> transactions = null;
@@ -68,7 +71,7 @@ public class ResponseProcessor {
                 if( tr != null )
                     transactions.add( tr );
                 else
-                    Log.w( "org.max.budgetcontrol.zentypes.ResponseProcessor", "Can't make transaction without category" );
+                    Log.w( "org.max.budgetcontrol.datasource.ResponseProcessor", "Can't make transaction without category" );
             }
         }
         return transactions;

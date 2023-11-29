@@ -18,20 +18,22 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey);
 
-        EditTextPreference etp = (EditTextPreference) findPreference("token");
+        EditTextPreference etp = findPreference("token");
         etp.setOnPreferenceChangeListener(new PreferenceChangeListener("token"));
         String buff = etp.getText();
-        activity.assign( "token", buff );
-        etp = (EditTextPreference) findPreference("url");
-        etp.setOnPreferenceChangeListener(new PreferenceChangeListener( "url"));
+        if (buff != null)
+            activity.assign("token", buff);
+        etp = findPreference("url");
+        etp.setOnPreferenceChangeListener(new PreferenceChangeListener("url"));
         buff = etp.getText();
-        activity.assign( "url", buff );
+        if (buff != null)
+            activity.assign("url", buff);
     }
 
     class PreferenceChangeListener implements Preference.OnPreferenceChangeListener {
         private final String key;
 
-        PreferenceChangeListener( String key) {
+        PreferenceChangeListener(String key) {
             this.key = key;
         }
 

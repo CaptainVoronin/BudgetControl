@@ -26,7 +26,7 @@ class BaseWidgetViewMaker extends AWidgetViewMaker
     {
         long startDate = calculateStartDate(getWidget().getStartPeriod());
         RemoteViews views = new RemoteViews(getContext().getPackageName(), R.layout.b_c_widget);
-        views.setTextViewText(R.id.tvAmount, Double.toString(getWidget().getCurrentAmount()));
+        views.setTextViewText(R.id.tvAmount, formatAmount( getWidget().getCurrentAmount()));
         views.setTextViewText(R.id.tvTitle, getWidget().getTitle() );
         String buff = sdf.format( new Date( startDate ) );
         views.setTextViewText(R.id.tvStartDate, buff );

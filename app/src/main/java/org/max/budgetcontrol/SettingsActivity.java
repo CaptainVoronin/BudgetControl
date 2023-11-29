@@ -9,7 +9,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.EditTextPreference;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,16 +88,13 @@ public class SettingsActivity extends AppCompatActivity {
             ZenMoneyClient client = new ZenMoneyClient(url, token, handler);
 
             AlertDialog.Builder dlg = new AlertDialog.Builder(this);
-            dlg.setMessage("Check connection").setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    handler.canceRequest();
-                    dialogInterface.cancel();
-                }
+            dlg.setMessage("Check connection").setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+                handler.cancelRequest();
+                dialogInterface.cancel();
             });
-
+            dlg.setCancelable( false );
             dlgCheckConnection = dlg.create();
-            dlg.show();
+            dlgCheckConnection.show();
 
             client.checkConnection();
         }
@@ -115,7 +111,6 @@ public class SettingsActivity extends AppCompatActivity {
             buff = value.toString();
             try {
                 if (checkFormat(urlPattern, buff)) {
-                    ret = false;
                     url = null;
                 } else {
                     ret = true;
@@ -135,10 +130,7 @@ public class SettingsActivity extends AppCompatActivity {
             return false;
         else {
             Matcher m = pattern.matcher(buffer);
-            if (m.find())
-                return false;
-            else
-                return true;
+            return !m.find();
         }
     }
 
@@ -146,26 +138,29 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onNon200Code(@NonNull Response response) {
             Log.w(this.getClass().getName(), "[onNon200Code] HTTP " + response.code());
-            settingsCompleteAndChecked = false;
-            EditTextPreference preference = (EditTextPreference) settingsFragment.findPreference("token");
-            closeDialog();
-            String message;
+            runOnUiThread( () -> {
+                settingsCompleteAndChecked = false;
+                //EditTextPreference preference =  settingsFragment.findPreference("token");
+                closeDialog();
+                String message;
 
-            switch ( response.code() )
-            {
-                case 401:
-                    message = getApplicationContext().getString( R.string.authentication_failed );
-                    break;
-                default:
-                    message = getApplicationContext().getString( R.string.common_http_error )
-                                                                            + " " + response.code();
-            }
-            AlertDialog.Builder dlg = new AlertDialog.Builder(SettingsActivity.this);
-            dlg.setMessage( message ).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.cancel();
+                switch (response.code()) {
+                    case 401:
+                        message = getApplicationContext().getString(R.string.authentication_failed);
+                        break;
+                    case 500:
+                        message = getApplicationContext().getString( R.string.message_internal_server_error );
+                        break;
+                    default:
+                        message = getApplicationContext().getString(R.string.common_http_error) + response.code();
                 }
+
+                AlertDialog.Builder dlg = new AlertDialog.Builder(SettingsActivity.this);
+                dlg.setMessage(message).setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    dialogInterface.cancel();
+                });
+                dlg.show();
             });
         }
 
@@ -187,23 +182,25 @@ public class SettingsActivity extends AppCompatActivity {
 
         @Override
         public void processError(Exception e) {
-            Log.e(this.getClass().getName(), "[processError] Exception " + e.getMessage());
-            e.printStackTrace();
-            settingsCompleteAndChecked = false;
-            closeDialog();
-            String message = getApplicationContext().getString( R.string.enternal_request_error )
-                                                                          + " " + e.getMessage();
-            AlertDialog.Builder dlg = new AlertDialog.Builder(SettingsActivity.this);
-            dlg.setMessage( message ).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
+            runOnUiThread( ()-> {
+                Log.e(this.getClass().getName(), "[processError] Exception " + e.getMessage());
+                e.printStackTrace();
+                settingsCompleteAndChecked = false;
+                closeDialog();
+                String message = getApplicationContext().getString(R.string.enternal_request_error)
+                        + " " + e.getMessage();
+                AlertDialog.Builder dlg = new AlertDialog.Builder(SettingsActivity.this);
+                dlg.setMessage(message).setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
                     dialogInterface.cancel();
-                }
+                });
+                dlg.show();
             });
         }
     }
 
     void closeDialog() {
         dlgCheckConnection.dismiss();
+        dlgCheckConnection.cancel();
     }
 }

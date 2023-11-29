@@ -53,7 +53,7 @@ public class SettingsHolder {
         return props.get( name ).toString();
     }
 
-    public Integer getParameterAsInt( String name )
+  /*  public Integer getParameterAsInt( String name )
     {
         assert isInit != false : "Application settings not initialized! Call init()!";
         return Integer.parseInt( props.get( name ).toString() );
@@ -72,5 +72,5 @@ public class SettingsHolder {
         SharedPreferences.Editor ed = pr.edit();
         ed.putString( key, value.toString() );
         ed.commit();
-    }
+    }*/
 }

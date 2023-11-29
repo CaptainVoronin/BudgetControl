@@ -1,17 +1,17 @@
 package org.max.budgetcontrol;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -22,6 +22,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.ASecondCallback;
@@ -30,7 +31,7 @@ import org.max.budgetcontrol.datasource.UpdateSelectedWidgetsHandler;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 import org.max.budgetcontrol.db.BCDBHelper;
 import org.max.budgetcontrol.zentypes.Category;
-import org.max.budgetcontrol.zentypes.ResponseProcessor;
+import org.max.budgetcontrol.datasource.ResponseProcessor;
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
@@ -59,6 +60,9 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     StartPeriodEncoding carrentPeriodCode;
 
     ActivityResultLauncher<Intent> launcher;
+    private CategoryLoaderHandler categoryLoaderHandler;
+
+    AlertDialog loadDataDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -71,18 +75,13 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
         launcher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>()
-                {
-                    @Override
-                    public void onActivityResult(ActivityResult result)
-                    {
-                        // There are no request codes
-                        settings = new SettingsHolder(getApplicationContext());
-                        if (settings.init())
-                            loadCategories();
-                        else
-                            showSetting(true);
-                    }
+                result -> {
+                    // There are no request codes
+                    settings = new SettingsHolder(getApplicationContext());
+                    if (settings.init())
+                        loadCategories();
+                    else
+                        showSettings(true);
                 });
 
         // Создать или открыть БД
@@ -114,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         if (completeConfig)
             loadCategories();
         else
-            showSetting(true);
+            showSettings(true);
     }
 
     void configSpinner(WidgetParams widget)
@@ -143,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     {
         lockUIForWaiting();
         Log.d(this.getClass().getName(), "[loadCategories]");
-        CategoryLoaderHandler categoryLoaderHandler = new CategoryLoaderHandler();
+        categoryLoaderHandler = new CategoryLoaderHandler();
         try
         {
             ZenMoneyClient client = new ZenMoneyClient(
@@ -151,6 +150,19 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                     settings.getParameterAsString("token"),
                     categoryLoaderHandler);
             client.getAllCategories();
+            AlertDialog.Builder dlg = new AlertDialog.Builder( this );
+            LayoutInflater inflater = this.getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.dlg_load_layout, null);
+            dlg.setView(dialogView);
+
+            dlg.setNegativeButton( android.R.string.cancel, ((dialogInterface, i) ->{
+                dialogInterface.dismiss();
+                categoryLoaderHandler.cancelRequest();
+            } ));
+
+            loadDataDialog = dlg.create();
+            loadDataDialog.show();
+
         } catch (MalformedURLException e)
         {
             categoryLoaderHandler.processError(e);
@@ -178,13 +190,13 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             return true;
         } else if (item.getItemId() == R.id.idSettings)
         {
-            showSetting(true);
+            showSettings(true);
             return true;
         } else
             return super.onOptionsItemSelected(item);
     }
 
-    private void showSetting(boolean withError)
+    private void showSettings(boolean withError)
     {
         Intent intent = new Intent(this, SettingsActivity.class);
         if( withError)
@@ -247,9 +259,9 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     private void applyEnteredValues()
     {
         currentWidget.setCategories(categoryHolder.cats);
-        TextView tv = (TextView) findViewById(R.id.edTitle);
+        TextView tv = findViewById(R.id.edTitle);
         currentWidget.setTitle(tv.getText().toString());
-        tv = (TextView) findViewById(R.id.edAmount);
+        tv = findViewById(R.id.edAmount);
         String buff = tv.getText().toString();
         double val = Double.parseDouble(buff);
         currentWidget.setLimitAmount(val);
@@ -299,9 +311,12 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     {
 
         @Override
-        public void onNon200Code(Response responze) {
-            if( responze.code() == 401 || responze.code() == 500 )
-                runOnUiThread(() -> showSetting(true) );
+        public void onNon200Code(@NotNull Response response) {
+            if( response.code() == 401 || response.code() == 500 )
+                runOnUiThread(() -> {
+                    loadDataDialog.dismiss();
+                    showSettings(true);
+                } );
         }
 
         @Override
@@ -309,13 +324,29 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         {
             List<Category> cats = ResponseProcessor.getCategory(jObject);
             final List<Category> cs = ResponseProcessor.makeCategoryTree(cats);
-            runOnUiThread(()-> bringCategoryListToFront(cs));
+            runOnUiThread(()-> {
+                loadDataDialog.dismiss();
+                bringCategoryListToFront(cs);
+            });
         }
 
         @Override
         public void processError(Exception e)
         {
+            runOnUiThread( () -> {
+                loadDataDialog.dismiss();
+                if (e instanceof java.net.UnknownHostException) {
 
+                    AlertDialog.Builder dlg = new AlertDialog.Builder( MainActivity.this);
+                    dlg.setNegativeButton( android.R.string.cancel, (dialog, i )->{
+                        dialog.dismiss();
+                        showSettings(true);
+                    });
+                    dlg.setTitle( R.string.netwotk_error );
+                    dlg.setMessage( e.getMessage() );
+                    dlg.show();
+                }
+            });
         }
     }
 

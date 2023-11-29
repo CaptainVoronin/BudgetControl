@@ -1,5 +1,7 @@
 package org.max.budgetcontrol.datasource;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,24 +15,24 @@ public abstract class AZenClientResponseHandler
 
     private ZenMoneyClient client;
 
-    abstract public void onNon200Code(Response responze);
+    abstract public void onNon200Code(@NonNull Response response);
 
-    abstract public void onResponseReceived(JSONObject jObject) throws JSONException;
+    abstract public void onResponseReceived(@NonNull JSONObject jObject) throws JSONException;
 
-    abstract public void processError(Exception e);
+    abstract public void processError(@NonNull Exception e);
 
-    public final void setRequestTag(ZenMoneyClient client, UUID tag)
+    public final void setRequestTag(@NonNull ZenMoneyClient client, @NonNull UUID tag)
     {
         this.tag = tag;
         this.client = client;
     }
 
-    public final UUID getRequestTag()
+    public final @NonNull UUID getRequestTag()
     {
         return tag;
     }
 
-    public void canceRequest()
+    public void cancelRequest()
     {
         client.cancel(tag);
     }

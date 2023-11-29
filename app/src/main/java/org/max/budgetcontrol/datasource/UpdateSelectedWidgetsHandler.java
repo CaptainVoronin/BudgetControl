@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.ViewMakerFactory;
 import org.max.budgetcontrol.db.BCDBHelper;
-import org.max.budgetcontrol.zentypes.ResponseProcessor;
 import org.max.budgetcontrol.zentypes.Transaction;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 

@@ -90,7 +90,7 @@ public class ZenMoneyClient {
         Request req = requestBuilder.tag( tag ).post(body).build();
         Log.i(this.getClass().getName(), "[doRequest] " + body);
         httpClient.newCall(req).enqueue(callback);
-        Log.i( this.getClass().getName(), "[cancel] Request id " + tag + "has been enqueued");
+        Log.i( this.getClass().getName(), "[doRequest] Request id " + tag + " has been enqueued");
         if( handler != null )
             handler.setRequestTag( this, tag );
         return tag;
@@ -138,7 +138,7 @@ class InternalCallback implements Callback {
 
     @Override
     public void onFailure(@NonNull Call call, @NonNull IOException e) {
-        Log.i(this.getClass().getName(), "[onFailure]");
+        Log.i(this.getClass().getName(), "[onFailure] " + e.getMessage());
         zenResponseHandler.processError(e);
     }
 

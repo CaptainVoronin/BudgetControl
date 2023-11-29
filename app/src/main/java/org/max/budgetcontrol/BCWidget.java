@@ -3,6 +3,7 @@ package org.max.budgetcontrol;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.max.budgetcontrol.datasource.UpdateSelectedWidgetsHandler;
@@ -25,6 +26,7 @@ public class BCWidget extends AppWidgetProvider
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
     {
+        Log.i( this.getClass().getName(), "[onUpdate] begin widgets update");
         try {
             initApp(context);
         } catch (MalformedURLException e) {
