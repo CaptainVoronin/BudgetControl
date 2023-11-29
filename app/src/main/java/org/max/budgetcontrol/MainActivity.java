@@ -300,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
         @Override
         public void onNon200Code(Response responze) {
-            if( responze.code() == 401 )
+            if( responze.code() == 401 || responze.code() == 500 )
                 runOnUiThread(() -> showSetting(true) );
         }
 
