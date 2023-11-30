@@ -3,13 +3,8 @@ package org.max.budgetcontrol;
 import android.content.Context;
 import android.util.Log;
 import android.widget.RemoteViews;
-
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 
 public abstract class AWidgetViewMaker
@@ -57,7 +52,7 @@ public abstract class AWidgetViewMaker
         return current.getTimeInMillis();
     }
 
-    public String formatAmount( double value )
+    protected final String formatAmount( double value )
     {
         String buff = Double.toString( value );
         String[] tokens = buff.split( "[,.]");

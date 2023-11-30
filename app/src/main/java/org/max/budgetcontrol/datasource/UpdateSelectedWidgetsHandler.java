@@ -71,13 +71,17 @@ public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
         ViewMakerFactory factory = new ViewMakerFactory(context);
 
         BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
-        List<WidgetParams> widgets = bcdbHelper.getWidgets(widgetIdList);
-        List<Integer> lost = new ArrayList<>();
         try
         {
+            List<WidgetParams> widgets = bcdbHelper.getWidgets(widgetIdList);
 
+            Log.i( this.getClass().getName(), "[onResponseReceived] " + widgets.size() + " widget(s) is going to be updated" );
+
+            List<Integer> lost = new ArrayList<>();
             if (jObject != null)
                 transactions = ResponseProcessor.getTransactions(jObject);
+
+            Log.i( this.getClass().getName(), "[onResponseReceived] Loaded " + transactions.size() + " transactions" );
 
             for (WidgetParams widget : widgets)
             {
@@ -97,9 +101,10 @@ public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
                 bcdbHelper.deleteLost(lost);
             if (afterCallback != null)
                 afterCallback.action();
-        } catch (ParseException e)
+        } catch (Exception e)
         {
-
+            Log.e( this.getClass().getName(), "[onResponseReceived] Exception: " + e.getMessage() );
+            e.printStackTrace();
         }
     }
 

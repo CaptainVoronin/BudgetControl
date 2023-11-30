@@ -13,7 +13,9 @@ import org.max.budgetcontrol.db.BCDBHelper;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of App Widget functionality.
@@ -26,7 +28,8 @@ public class BCWidget extends AppWidgetProvider
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
     {
-        Log.i( this.getClass().getName(), "[onUpdate] begin widgets update");
+        String strIds = Arrays.stream( appWidgetIds ).mapToObj( id -> Integer.toString( id )).collect(Collectors.joining(","));
+        Log.i( this.getClass().getName(), "[onUpdate] Widgets update. ID list " + strIds );
         try {
             initApp(context);
         } catch (MalformedURLException e) {

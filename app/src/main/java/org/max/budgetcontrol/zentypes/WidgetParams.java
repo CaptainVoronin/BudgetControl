@@ -1,13 +1,18 @@
 package org.max.budgetcontrol.zentypes;
 
-import org.jetbrains.annotations.NotNull;
+import android.graphics.Color;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class WidgetParams
 {
+    public static final String TITLE = "title";
+    public static final String AMOUNT = "amount";
+    public static final String PERIOD = "period";
 
     public static final int INVALID_WIDGET_ID = -1;
 
@@ -75,6 +80,8 @@ public class WidgetParams
 
     List<UUID> categories;
 
+    Map<String, LabelParams> labels;
+
     public WidgetParams( )
     {
         this.limitAmount = 0;
@@ -82,6 +89,7 @@ public class WidgetParams
         this.id = INVALID_WIDGET_ID;
         this.appId = -1;
         categories = new ArrayList<>();
+        labels = new HashMap<>();
     }
 
     public void setId(int id) {
@@ -105,4 +113,57 @@ public class WidgetParams
         categories.add( uuid );
     }
 
+    public void setTitleParams( LabelParams params )
+    {
+        labels.put( TITLE, params );
+    }
+    public void setAmountParams( LabelParams params )
+    {
+        labels.put( AMOUNT, params );
+    }
+
+    public void setPeriodParams( LabelParams params )
+    {
+        labels.put( PERIOD, params );
+    }
+
+    public LabelParams getPeriodParams( )
+    {
+        return labels.get( PERIOD );
+    }
+
+    public LabelParams getAmountParams( )
+    {
+        return labels.get( AMOUNT );
+    }
+
+    public LabelParams getTitleParams( )
+    {
+        return labels.get( TITLE );
+    }
+
+    class LabelParams{
+        private final Color backColor;
+        private final Color fontColor;
+        private final float textSize;
+
+        public Color getBackColor() {
+            return backColor;
+        }
+
+        public Color getFontColor() {
+            return fontColor;
+        }
+
+        public float getTextSize() {
+            return textSize;
+        }
+
+        public LabelParams(Color backColor, Color fontColor, float textSize )
+        {
+            this.backColor = backColor;
+            this.fontColor = fontColor;
+            this.textSize = textSize;
+        }
+    }
 }

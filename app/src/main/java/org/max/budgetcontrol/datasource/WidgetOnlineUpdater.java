@@ -43,11 +43,12 @@ public class WidgetOnlineUpdater
 
     public void updateWidget(List<Transaction> transactions)
     {
+        Log.i( this.getClass().getName(), "[updateWidget] Widget ID " + getWidget().getAppId() + " is going to be updated");
         long startDate = viewMaker.calculateStartDate( getWidget().getStartPeriod() );
         calculateAmount( transactions, startDate);
         RemoteViews view = viewMaker.getViews( );
         getAppWidgetManager().updateAppWidget( getWidget().getAppId(), view );
-        Log.d( this.getClass().getName(), "[updateWidget] " + getWidget().getTitle() + " has been updated");
+        Log.i( this.getClass().getName(), "[updateWidget] " + getWidget().getTitle() + " has been updated");
         if( transactions != null )
             saveCash(  );
     }

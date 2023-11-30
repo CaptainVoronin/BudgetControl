@@ -4,17 +4,20 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.util.Log;
 
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class BCDBHelper
 {
@@ -197,18 +200,17 @@ public class BCDBHelper
       Log.d( this.getClass().getName(), "[getWidgets] Is going to be updated " + ids.length);
 
       assert db != null : "Database is not opened";
-      final String queryAllWidgets = select + " where app_id in ( ? )";
-      final String queryAllWidgetCats = "select widget_id, category_id from widget_cats";
+      SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
-      String[] strIds = new String[ids.length];
 
-      int i = 0;
-      for( int id : ids ) {
-         strIds[i] = Integer.toString(id);
-         i++;
-      }
 
-      Cursor crs = db.rawQuery( queryAllWidgets, strIds );
+      String inArgs = Arrays.stream( ids ).mapToObj(  id -> Integer.toString( id ) ).collect(Collectors.joining(","));
+
+      String queryAllWidgets = select + " where app_id in ( " + inArgs + ")";
+
+      Cursor crs = db.rawQuery( queryAllWidgets, null );
+
+      Log.d( this.getClass().getName(), "[getWidgets] Found in DB " + crs.getCount() + " from " + ids.length);
 
       List<WidgetParams> widgets = new ArrayList<>( crs.getCount() );
 
@@ -218,6 +220,11 @@ public class BCDBHelper
          widgets.add( createFromCursor( crs ) );
 
       crs.close();
+
+      String strWIds = widgets.stream().map( w -> Integer.toString( w.getId()) ).collect(Collectors.joining(","));
+
+      String queryAllWidgetCats = "select widget_id, category_id from widget_cats where widget_id in ("
+              + strWIds + ")";
 
       crs = db.rawQuery( queryAllWidgetCats, null );
       Map<UUID, Integer> cats = new HashMap<>(crs.getCount());
