@@ -7,81 +7,27 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-   <androidx.appcompat.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        />
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <TableLayout
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabs"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:tabGravity="fill"
+        app:tabMode="fixed">
 
-        <TableRow>
+    </com.google.android.material.tabs.TabLayout>
 
-            <TextView
-                android:id="@+id/tvStateHader"
-                android:text="Новый виджет"
-                android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/edTitle"
-                android:layout_weight="1"
-                android:ems="10"
-                android:hint="Заголовок виджета"
-                android:inputType="text"
-                android:text="Name" />
-        </TableRow>
-
-        <TableRow>
-
-            <TextView
-                android:id="@+id/textView2"
-                android:text="Период"
-                android:textSize="18sp" />
-
-            <Spinner
-                android:id="@+id/spStartPeriod"
-                android:layout_height="48dp"
-                android:entries="@array/period_codes"></Spinner>
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
-
-            <EditText
-                android:id="@+id/edAmount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="numberDecimal"
-                android:text="0" />
-
-        </TableRow>
-    </TableLayout>
-
-    <ScrollView
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp">
-        <ListView
-            android:id="@+id/lvCategories"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </ScrollView>
-
+        android:layout_height="wrap_content" />
 </LinearLayout>

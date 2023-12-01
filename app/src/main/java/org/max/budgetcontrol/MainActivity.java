@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager.widget.ViewPager;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -21,6 +22,8 @@ import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.google.android.material.tabs.TabLayout;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -43,12 +46,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import kotlin.NotImplementedError;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener
+public class MainActivity extends AppCompatActivity
 {
     public static final String CONNECTION_PROBLEM = "connection_problem";
-    List<Category> categories;
+
     SettingsHolder settings;
 
     BCDBHelper db;
@@ -59,15 +63,14 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     WidgetParams currentWidget;
 
-    WidgetCategoryHolder categoryHolder;
-
-    StartPeriodEncoding carrentPeriodCode;
-
     ActivityResultLauncher<Intent> launcher;
-    private CategoryLoaderHandler categoryLoaderHandler;
 
     AlertDialog loadCategoriesDialog;
     AlertDialog loadTransactionsDialog;
+
+    public SettingsHolder getSettings() {
+        return settings;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -83,10 +86,11 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 result -> {
                     // There are no request codes
                     settings = new SettingsHolder(getApplicationContext());
-                    if (settings.init())
-                        loadCategories();
-                    else
+                    if (!settings.init())
                         showSettings(true);
+                    /*else
+                        loadCategories();*/
+
                 });
 
         // Создать или открыть БД
@@ -105,73 +109,26 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                     AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
             setActivityResult(Activity.RESULT_CANCELED, appWidgetId);
-            makeWidgetParams(appWidgetId);
+            currentWidget = getWidgetParams(appWidgetId);
         } else
         {
             currentWidget = new WidgetParams();
             currentWidget.setAppId(AppWidgetManager.INVALID_APPWIDGET_ID);
-            categoryHolder = new WidgetCategoryHolder(currentWidget.getCategories());
+
         }
 
-        configSpinner(currentWidget);
+        ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
+        BCPagerAdapter viewPagerAdapter = new BCPagerAdapter (getSupportFragmentManager(), this );
+        viewPager.setAdapter(viewPagerAdapter);
+        TabLayout tabLayout =  findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
 
-        if (completeConfig)
-            loadCategories();
-        else
+
+        if (!completeConfig)
             showSettings(true);
-    }
-
-    void configSpinner(WidgetParams widget)
-    {
-        Spinner sp = findViewById(R.id.spStartPeriod);
-        sp.setAdapter(new StartPeriodSpinAdapter(getApplicationContext(), widget));
-        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-        {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
-            {
-                Object obj = view.getTag();
-                carrentPeriodCode = (StartPeriodEncoding) obj;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView)
-            {
-
-            }
-        });
-        sp.setSelection(widget.getStartPeriod().number());
-    }
-
-    private void loadCategories()
-    {
-        lockUIForWaiting();
-        Log.d(this.getClass().getName(), "[loadCategories]");
-        categoryLoaderHandler = new CategoryLoaderHandler();
-        try
-        {
-            ZenMoneyClient client = new ZenMoneyClient(
-                    new URL(settings.getParameterAsString("url")),
-                    settings.getParameterAsString("token"),
-                    categoryLoaderHandler);
-            client.getAllCategories();
-            AlertDialog.Builder dlg = new AlertDialog.Builder( this );
-            LayoutInflater inflater = this.getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.dlg_load_layout, null);
-            dlg.setView(dialogView);
-
-            dlg.setNegativeButton( android.R.string.cancel, ((dialogInterface, i) ->{
-                dialogInterface.dismiss();
-                categoryLoaderHandler.cancelRequest();
-            } ));
-
-            loadCategoriesDialog = dlg.create();
-            loadCategoriesDialog.show();
-
-        } catch (MalformedURLException e)
-        {
-            categoryLoaderHandler.processError(e);
-        }
+        /*
+        else
+            loadCategories();*/
     }
 
     @Override
@@ -201,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             return super.onOptionsItemSelected(item);
     }
 
-    private void showSettings(boolean withError)
+    void showSettings(boolean withError)
     {
         Intent intent = new Intent(this, SettingsActivity.class);
         if( withError)
@@ -265,16 +222,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     }
 
-    private void applyEnteredValues()
-    {
-        currentWidget.setCategories(categoryHolder.cats);
-        TextView tv = findViewById(R.id.edTitle);
-        currentWidget.setTitle(tv.getText().toString());
-        tv = findViewById(R.id.edAmount);
-        String buff = tv.getText().toString();
-        double val = Double.parseDouble(buff);
-        currentWidget.setLimitAmount(val);
-        currentWidget.setStartPeriod(carrentPeriodCode);
+    private void applyEnteredValues() {
+        throw new NotImplementedError( "applyEnteredValues is not implemented" );
     }
 
     private void exitApp()
@@ -289,12 +238,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         setResult(result, intent);
     }
 
-    private void makeWidgetParams(int appWidgetId)
-    {
-        currentWidget = getWidgetParams(appWidgetId);
-        categoryHolder = new WidgetCategoryHolder(currentWidget.getCategories());
-    }
-
     private WidgetParams getWidgetParams(int appWidgetId)
     {
         WidgetParams wp = db.loadWidgetParamsByAppId(appWidgetId);
@@ -304,90 +247,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             wp.setAppId(appWidgetId);
         }
         return wp;
-    }
-
-    @Override
-    public void onCheckedChanged(CompoundButton compoundButton, boolean checked)
-    {
-        UUID id = (UUID) compoundButton.getTag();
-        if (checked)
-            categoryHolder.add(id);
-        else
-            categoryHolder.remove(id);
-    }
-
-    class CategoryLoaderHandler extends AZenClientResponseHandler
-    {
-
-        @Override
-        public void onNon200Code(@NotNull Response response) {
-            if( response.code() == 401 || response.code() == 500 )
-                runOnUiThread(() -> {
-                    loadCategoriesDialog.dismiss();
-                    showSettings(true);
-                } );
-        }
-
-        @Override
-        public void onResponseReceived(JSONObject jObject) throws JSONException
-        {
-            List<Category> cats = ResponseProcessor.getCategory(jObject);
-            final List<Category> cs = ResponseProcessor.makeCategoryTree(cats);
-            runOnUiThread(()-> {
-                loadCategoriesDialog.dismiss();
-                bringCategoryListToFront(cs);
-            });
-        }
-
-        @Override
-        public void processError(Exception e)
-        {
-            runOnUiThread( () -> {
-                loadCategoriesDialog.dismiss();
-                if (e instanceof java.net.UnknownHostException) {
-
-                    AlertDialog.Builder dlg = new AlertDialog.Builder( MainActivity.this);
-                    dlg.setNegativeButton( android.R.string.cancel, (dialog, i )->{
-                        dialog.dismiss();
-                        showSettings(true);
-                    });
-                    dlg.setTitle( R.string.netwotk_error );
-                    dlg.setMessage( e.getMessage() );
-                    dlg.show();
-                }
-            });
-        }
-    }
-
-    private void bringCategoryListToFront(List<Category> cats)
-    {
-        categories = cats;
-        List<Category> flatList = new ArrayList<>();
-        for (Category c : categories)
-        {
-            flatList.add(c);
-            if (c.getChild().size() != 0)
-                flatList.addAll(c.getChild());
-        }
-        ListView lv = (ListView) findViewById(R.id.lvCategories);
-
-        flatList = flatList.stream().filter(c -> c.isOutcome()).collect(Collectors.toList());
-        List<UUID> widgetCats = null;
-        if (currentWidget != null)
-            widgetCats = currentWidget.getCategories();
-
-        lv.setAdapter(new CategoryListViewAdapter(getApplicationContext(), MainActivity.this, flatList, widgetCats));
-        unlockUIOnResult();
-    }
-
-    private void lockUIForWaiting()
-    {
-
-    }
-
-    private void unlockUIOnResult()
-    {
-
     }
 
     class AfterUpdateWidgetCallback extends ASecondCallback
