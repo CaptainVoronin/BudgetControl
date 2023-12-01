@@ -1,7 +1,5 @@
 package org.max.budgetcontrol.zentypes;
 
-import android.util.Log;
-
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -10,10 +8,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Transaction {
+public class Transaction implements Comparable<Transaction>{
     UUID id;
     double amount;
-    Date date;
+    long timestamp;
     List<UUID> category;
 
     static SimpleDateFormat sdf;
@@ -22,11 +20,11 @@ public class Transaction {
         sdf = new SimpleDateFormat( "yyyy-MM-dd" );
     }
 
-    protected Transaction( UUID id, double amount, @NotNull Date date, @NotNull List<UUID> category)
+    protected Transaction( UUID id, double amount, @NotNull long timestamp, @NotNull List<UUID> category)
     {
         this.id = id;
         this.amount = amount;
-        this.date = date;
+        this.timestamp = timestamp;
         this.category = category;
     }
 
@@ -45,9 +43,9 @@ public class Transaction {
         double inc = obj.getDouble( "income" );
         double out = obj.getDouble( "outcome" );
         double amount = out != 0 ? (out * -1) : inc;
-        String buff = obj.getString( "date" );
-        Date date = sdf.parse( buff );
-        return new Transaction( uuid, amount, date, uuids );
+        String buff = obj.getString( "created" );
+        long timestamp = Long.parseLong( buff ) * 1000;
+        return new Transaction( uuid, amount, timestamp, uuids );
     }
 
     /*private static void getCategories(List<UUID> trTagIds, List<Category> categories, List<Category> transCats ) {
@@ -67,8 +65,12 @@ public class Transaction {
         return amount;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
     public Date getDate() {
-        return date;
+        return new Date( timestamp ) ;
     }
 
     public List<UUID> getCategory() {
@@ -90,5 +92,11 @@ public class Transaction {
                 return true;
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(Transaction t)
+    {
+        return Long.compare( timestamp, t.getTimestamp() );
     }
 }
