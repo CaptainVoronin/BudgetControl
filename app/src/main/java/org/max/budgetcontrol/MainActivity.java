@@ -109,12 +109,21 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             categoryHolder = new WidgetCategoryHolder(currentWidget.getCategories());
         }
 
-        configSpinner(currentWidget);
+        brintWidgetToUI();
 
         if (completeConfig)
             loadCategories();
         else
             showSettings(true);
+    }
+
+    private void brintWidgetToUI()
+    {
+        TextView tv = findViewById(R.id.edTitle);
+        tv.setText(currentWidget.getTitle());
+        tv = findViewById(R.id.edAmount);
+        tv.setText("" + currentWidget.getLimitAmount());
+        configSpinner(currentWidget);
     }
 
     void configSpinner(WidgetParams widget)
@@ -151,15 +160,15 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                     settings.getParameterAsString("token"),
                     categoryLoaderHandler);
             client.getAllCategories();
-            AlertDialog.Builder dlg = new AlertDialog.Builder( this );
+            AlertDialog.Builder dlg = new AlertDialog.Builder(this);
             LayoutInflater inflater = this.getLayoutInflater();
             View dialogView = inflater.inflate(R.layout.dlg_load_layout, null);
             dlg.setView(dialogView);
 
-            dlg.setNegativeButton( android.R.string.cancel, ((dialogInterface, i) ->{
+            dlg.setNegativeButton(android.R.string.cancel, ((dialogInterface, i) -> {
                 dialogInterface.dismiss();
                 categoryLoaderHandler.cancelRequest();
-            } ));
+            }));
 
             loadCategoriesDialog = dlg.create();
             loadCategoriesDialog.show();
@@ -200,8 +209,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     private void showSettings(boolean withError)
     {
         Intent intent = new Intent(this, SettingsActivity.class);
-        if( withError)
-            intent.putExtra(  CONNECTION_PROBLEM, true );
+        if (withError)
+            intent.putExtra(CONNECTION_PROBLEM, true);
 
         launcher.launch(intent);
     }
@@ -214,51 +223,37 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         if (currentWidget.getId() == WidgetParams.INVALID_WIDGET_ID)
             db.insertWidgetParams(currentWidget);
         else
+
             db.updateWidgetParams(currentWidget);
 
         AppWidgetManager wManager = AppWidgetManager.getInstance(getApplicationContext());
+        List<WidgetParams> wds = new ArrayList<>();
+        wds.add(currentWidget);
+
         UpdateSelectedWidgetsHandler handler =
                 new UpdateSelectedWidgetsHandler(getApplicationContext(),
                         wManager,
-                        new int[]{currentWidget.getAppId()});
+                        new int[]{currentWidget.getAppId()},
+                        wds);
         handler.setAfterCallback(new AfterUpdateWidgetCallback());
+
         try
         {
             ZenMoneyClient client = new ZenMoneyClient(new URL(settings.getParameterAsString("url")),
                     settings.getParameterAsString("token"),
                     handler);
             AlertDialog.Builder dlg = new AlertDialog.Builder(this);
-            dlg.setView( R.layout.dlg_load_transactions_layout );
+            dlg.setView(R.layout.dlg_load_transactions_layout);
             loadTransactionsDialog = dlg.create();
             loadTransactionsDialog.show();
 
-            client.loadTransactions(Calendar.getInstance().getTime());
+            long timestamp = AWidgetViewMaker.calculateStartDate(currentWidget.getStartPeriod());
+            client.loadTransactions(timestamp);
         } catch (MalformedURLException e)
         {
             handler.processError(e);
         }
-
-    /*    AppWidgetProviderInfo myWidgetProviderInfo = new AppWidgetProviderInfo();
-        ComponentName myProvider = myWidgetProviderInfo.provider;
-
-        if (mAppWidgetManager.isRequestPinAppWidgetSupported()) {
-            // Create the PendingIntent object only if your app needs to be notified
-            // that the user allowed the widget to be pinned. Note that, if the pinning
-            // operation fails, your app isn't notified.
-            Intent pinnedWidgetCallbackIntent = new Intent( getApplicationContext(), this.getClass() );
-
-            // Configure the intent so that your app's broadcast receiver gets
-            // the callback successfully. This callback receives the ID of the
-            // newly-pinned widget (EXTRA_APPWIDGET_ID).
-            PendingIntent successCallback = PendingIntent.getBroadcast( getApplicationContext(), 0,
-                    pinnedWidgetCallbackIntent, PendingIntent.FLAG_IMMUTABLE);
-
-            mAppWidgetManager.requestPinAppWidget(myProvider, null, successCallback);
-        }*/
-
         setActivityResult(Activity.RESULT_OK, currentWidget.getAppId());
-        //finishAndRemoveTask();
-
     }
 
     private void applyEnteredValues()
@@ -316,12 +311,13 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     {
 
         @Override
-        public void onNon200Code(@NotNull Response response) {
-            if( response.code() == 401 || response.code() == 500 )
+        public void onNon200Code(@NotNull Response response)
+        {
+            if (response.code() == 401 || response.code() == 500)
                 runOnUiThread(() -> {
                     loadCategoriesDialog.dismiss();
                     showSettings(true);
-                } );
+                });
         }
 
         @Override
@@ -329,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         {
             List<Category> cats = ResponseProcessor.getCategory(jObject);
             final List<Category> cs = ResponseProcessor.makeCategoryTree(cats);
-            runOnUiThread(()-> {
+            runOnUiThread(() -> {
                 loadCategoriesDialog.dismiss();
                 bringCategoryListToFront(cs);
             });
@@ -338,17 +334,18 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         @Override
         public void processError(Exception e)
         {
-            runOnUiThread( () -> {
+            runOnUiThread(() -> {
                 loadCategoriesDialog.dismiss();
-                if (e instanceof java.net.UnknownHostException) {
+                if (e instanceof java.net.UnknownHostException)
+                {
 
-                    AlertDialog.Builder dlg = new AlertDialog.Builder( MainActivity.this);
-                    dlg.setNegativeButton( android.R.string.cancel, (dialog, i )->{
+                    AlertDialog.Builder dlg = new AlertDialog.Builder(MainActivity.this);
+                    dlg.setNegativeButton(android.R.string.cancel, (dialog, i) -> {
                         dialog.dismiss();
                         showSettings(true);
                     });
-                    dlg.setTitle( R.string.netwotk_error );
-                    dlg.setMessage( e.getMessage() );
+                    dlg.setTitle(R.string.netwotk_error);
+                    dlg.setMessage(e.getMessage());
                     dlg.show();
                 }
             });

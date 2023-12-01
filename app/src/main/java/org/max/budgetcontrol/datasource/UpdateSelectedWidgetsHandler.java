@@ -8,12 +8,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.ViewMakerFactory;
 import org.max.budgetcontrol.db.BCDBHelper;
+import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.Transaction;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import okhttp3.Response;
@@ -32,7 +33,7 @@ public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
     ASecondCallback afterCallback;
 
     public UpdateSelectedWidgetsHandler(Context context, AppWidgetManager appWidgetManager,
-                                        int[] widgetIdList)
+                                        int[] widgetIdList, List<WidgetParams> widgets)
     {
         this.context = context;
         this.appWidgetManager = appWidgetManager;
@@ -64,24 +65,53 @@ public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
 
     }
 
+    // TODO: Длинная, надо разбить
     @Override
     public void onResponseReceived(JSONObject jObject) throws JSONException
     {
         List<Transaction> transactions = null;
+
         ViewMakerFactory factory = new ViewMakerFactory(context);
 
         BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
+
         try
         {
             List<WidgetParams> widgets = bcdbHelper.getWidgets(widgetIdList);
+            widgets.sort(new Comparator<WidgetParams>()
+            {
+                @Override
+                public int compare(WidgetParams a, WidgetParams b)
+                {
+                    if (a.getStartPeriod() == b.getStartPeriod())
+                        return 0;
+                    else if ((a.getStartPeriod() == StartPeriodEncoding.week) &&
+                            (b.getStartPeriod() == StartPeriodEncoding.month ||
+                                    b.getStartPeriod() == StartPeriodEncoding.year))
+                        return -1;
+                    else if (a.getStartPeriod() == StartPeriodEncoding.month &&
+                            b.getStartPeriod() == StartPeriodEncoding.year)
+                        return -1;
+                    else
+                        return 1;
+                }
+            });
 
-            Log.i( this.getClass().getName(), "[onResponseReceived] " + widgets.size() + " widget(s) is going to be updated" );
+            StartPeriodEncoding maxPeriod = widgets.get(widgets.size() - 1).getStartPeriod();
+
+            Log.i(this.getClass().getName(), "[onResponseReceived] " + widgets.size() + " widget(s) is going to be updated");
 
             List<Integer> lost = new ArrayList<>();
+
             if (jObject != null)
                 transactions = ResponseProcessor.getTransactions(jObject);
 
-            Log.i( this.getClass().getName(), "[onResponseReceived] Loaded " + transactions.size() + " transactions" );
+            if (transactions != null)
+            {
+                Log.i(this.getClass().getName(), "[onResponseReceived] Loaded "
+                        + transactions.size() + " transactions.");
+            } else
+                Log.i(this.getClass().getName(), "[onResponseReceived] No transactions loaded");
 
             for (WidgetParams widget : widgets)
             {
@@ -103,7 +133,7 @@ public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
                 afterCallback.action();
         } catch (Exception e)
         {
-            Log.e( this.getClass().getName(), "[onResponseReceived] Exception: " + e.getMessage() );
+            Log.e(this.getClass().getName(), "[onResponseReceived] Exception: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -115,10 +145,9 @@ public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
 
         if (isNetWorkError(e))
         {
-            Log.i( this.getClass().getName(), "[processError] There is network error. " + e.getMessage() + " Load data from cash" );
+            Log.i(this.getClass().getName(), "[processError] There is network error. " + e.getMessage() + " Load data from cash");
             loadFromCash();
-        }
-        else
+        } else
         {
             e.printStackTrace();
         }
@@ -126,7 +155,7 @@ public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
 
     private void loadFromCash()
     {
-        Log.i( this.getClass().getName(), "[loadFromCash] " );
+        Log.i(this.getClass().getName(), "[loadFromCash] ");
         ViewMakerFactory factory = new ViewMakerFactory(context);
         BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
         List<WidgetParams> widgets = bcdbHelper.getWidgets(widgetIdList);

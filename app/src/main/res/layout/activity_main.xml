@@ -19,47 +19,48 @@
 
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp">
 
         <TableRow>
 
             <TextView
                 android:id="@+id/tvStateHader"
-                android:text="Новый виджет"
+                android:text="@string/label_widget_title"
                 android:textSize="18sp" />
 
             <EditText
                 android:id="@+id/edTitle"
                 android:layout_weight="1"
                 android:ems="10"
-                android:hint="Заголовок виджета"
-                android:inputType="text"
-                android:text="Name" />
+                android:inputType="textCapSentences" />
         </TableRow>
 
         <TableRow>
 
             <TextView
                 android:id="@+id/textView2"
-                android:text="Период"
+                android:text="@string/label_period"
                 android:textSize="18sp" />
 
             <Spinner
                 android:id="@+id/spStartPeriod"
                 android:layout_height="48dp"
-                android:entries="@array/period_codes"></Spinner>
+                android:entries="@array/period_codes" />
 
         </TableRow>
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="@string/label_limit_amount"
+                android:textSize="18sp" />
 
             <EditText
                 android:id="@+id/edAmount"
@@ -67,7 +68,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="numberDecimal"
-                android:text="0" />
+                android:text="0"
+                android:textAlignment="textEnd" />
 
         </TableRow>
     </TableLayout>

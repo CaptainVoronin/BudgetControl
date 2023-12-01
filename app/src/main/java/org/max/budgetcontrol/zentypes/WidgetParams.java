@@ -90,6 +90,7 @@ public class WidgetParams
         this.appId = -1;
         categories = new ArrayList<>();
         labels = new HashMap<>();
+        title = "";
     }
 
     public void setId(int id) {

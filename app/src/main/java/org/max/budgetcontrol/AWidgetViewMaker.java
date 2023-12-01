@@ -29,10 +29,10 @@ public abstract class AWidgetViewMaker
 
     public abstract RemoteViews getViews( );
 
-    public final long calculateStartDate(StartPeriodEncoding startPeriodCode)
+    public static long calculateStartDate(StartPeriodEncoding startPeriodCode)
     {
         Calendar current = Calendar.getInstance();
-        current.set(Calendar.HOUR, 0);
+        current.set(Calendar.HOUR_OF_DAY, 0);
         current.set(Calendar.MINUTE, 0);
         current.set(Calendar.SECOND, 0);
 
@@ -48,7 +48,7 @@ public abstract class AWidgetViewMaker
                 current.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
                 break;
         }
-        Log.d(this.getClass().getName(), "[calculateStartDate] Date is " + current.getTime().toString());
+        Log.d( "org.max.budgetcontrol.AWidgetViewMaker", "[calculateStartDate] Date is " + current.getTime().toString());
         return current.getTimeInMillis();
     }
 

@@ -18,7 +18,8 @@ public class BCDB extends SQLiteOpenHelper
            "app_id integer not null unique," +
            "limit_amount real not null default 0, " +
            "start_period not null check ( start_period = 'week' OR start_period = 'month' OR start_period = 'year' )," +
-           "title text not null" +
+           "title text not null," +
+           "current_amount real not null default 0" +
            ");";
 
    public static final String create_widget_cats_table = "create table widget_cats ( " +

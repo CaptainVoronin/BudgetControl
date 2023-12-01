@@ -60,11 +60,11 @@ public class ZenMoneyClient {
      *
      * @param date дата, от которой надо брать тразакции
      */
-    public @Nullable UUID loadTransactions( @NonNull Date date) {
+    public @Nullable UUID loadTransactions( @NonNull long timestamp) {
         UUID tag = null;
         Log.i(this.getClass().getName(), "[loadTransactions] ");
         try {
-            RequestBody body = RequestBody.create(JSON, RequestUtils.getDiffRequestBody(date.getTime()));
+            RequestBody body = RequestBody.create(JSON, RequestUtils.getDiffRequestBody(timestamp));
             tag = doRequest(body, new InternalCallback(handler));
         } catch (Exception e) {
             handler.processError(e);

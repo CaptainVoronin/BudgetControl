@@ -44,9 +44,10 @@ public class WidgetOnlineUpdater
     public void updateWidget(List<Transaction> transactions)
     {
         Log.i( this.getClass().getName(), "[updateWidget] Widget ID " + getWidget().getAppId() + " is going to be updated");
-        long startDate = viewMaker.calculateStartDate( getWidget().getStartPeriod() );
+        long startDate = AWidgetViewMaker.calculateStartDate( getWidget().getStartPeriod() );
         calculateAmount( transactions, startDate);
         RemoteViews view = viewMaker.getViews( );
+        Log.i( this.getClass().getName(), "[updateWidget] Widget ID " + getWidget().getAppId() + " current amount is " + getWidget().getCurrentAmount() );
         getAppWidgetManager().updateAppWidget( getWidget().getAppId(), view );
         Log.i( this.getClass().getName(), "[updateWidget] " + getWidget().getTitle() + " has been updated");
         if( transactions != null )
@@ -63,10 +64,10 @@ public class WidgetOnlineUpdater
     protected void calculateAmount(List<Transaction> transactions, long startDate) {
         if( transactions != null )
         {
-            double amount = transactions.stream().filter(t -> t.getDate().getTime() >= startDate)
+            double amount = transactions.stream().filter(t -> t.getTimestamp() >= startDate)
                     .filter(t -> t.hasCategory(getWidget().getCategories()))
                     .mapToDouble(t -> t.getAmount()).sum();
-            getWidget().setCurrentAmount( -1 * amount );
+            getWidget().setCurrentAmount( Math.abs(amount) );
         }
     }
 }

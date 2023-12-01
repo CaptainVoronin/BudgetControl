@@ -36,6 +36,7 @@
     <string name="message_for_month">за месяц</string>
     <string name="message_for_year">за год</string>
     <string name="message_load_transactions">Обработка данных...</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="label_period">Период\n</string>
+    <string name="label_widget_title">Заголовок</string>
+    <string name="label_limit_amount">Лимит</string>
 </resources>
