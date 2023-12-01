@@ -16,7 +16,9 @@
             style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.25" />
+            android:layout_weight="0.25"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp" />
 
         <TextView
             android:id="@+id/textView4"
@@ -24,6 +26,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.75"
             android:text="@string/message_load_data"
-            android:textSize="14dp" />
+            android:textSize="14sp" />
     </LinearLayout>
 </LinearLayout>
