@@ -53,6 +53,10 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     BCDBHelper db;
 
+    public WidgetParams getCurrentWidget() {
+        return currentWidget;
+    }
+
     WidgetParams currentWidget;
 
     WidgetCategoryHolder categoryHolder;
