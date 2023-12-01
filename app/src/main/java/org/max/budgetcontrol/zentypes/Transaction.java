@@ -14,12 +14,6 @@ public class Transaction implements Comparable<Transaction>{
     long timestamp;
     List<UUID> category;
 
-    static SimpleDateFormat sdf;
-
-    static{
-        sdf = new SimpleDateFormat( "yyyy-MM-dd" );
-    }
-
     protected Transaction( UUID id, double amount, @NotNull long timestamp, @NotNull List<UUID> category)
     {
         this.id = id;
