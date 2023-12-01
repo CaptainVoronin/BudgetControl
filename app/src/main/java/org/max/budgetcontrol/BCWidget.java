@@ -9,12 +9,17 @@ import org.json.JSONException;
 import org.max.budgetcontrol.datasource.UpdateSelectedWidgetsHandler;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 import org.max.budgetcontrol.db.BCDBHelper;
+import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
+import org.max.budgetcontrol.zentypes.WidgetParams;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -39,9 +44,29 @@ public class BCWidget extends AppWidgetProvider
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        UpdateSelectedWidgetsHandler handler = new UpdateSelectedWidgetsHandler( context, appWidgetManager, appWidgetIds );
+
+        BCDBHelper db = BCDBHelper.getInstance( context );
+        List<WidgetParams> widgets = db.getWidgets( appWidgetIds );
+
+        // При создании виджета его ID уже существует,
+        // а сам виджет еще нет. Его нет и в БД.
+        // Соответственно, и обновлять пока нечего.
+        // Поэтому просто выходим
+        if( widgets.size() == 0 )
+        {
+            Log.i( this.getClass().getName(), "[onUpdate] Nothing to update. Exit function");
+            return;
+        }
+
+        StartPeriodEncoding period = StartPeriodEncoding.year;
+
+        Collections.sort(widgets, (a, b) -> Integer.compare( a.getStartPeriod().number(), b.getStartPeriod().number() ));
+        StartPeriodEncoding maxPeriod = widgets.get( widgets.size() - 1 ).getStartPeriod();
+        long timestamp = AWidgetViewMaker.calculateStartDate( maxPeriod ) / 1000l;
+
+        UpdateSelectedWidgetsHandler handler = new UpdateSelectedWidgetsHandler( context, appWidgetManager, appWidgetIds, widgets );
         ZenMoneyClient client = new ZenMoneyClient( url, token, handler );
-        client.loadTransactions( new Date() );
+        client.loadTransactions( timestamp );
     }
 
     private void updateWithError(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, JSONException e) {
