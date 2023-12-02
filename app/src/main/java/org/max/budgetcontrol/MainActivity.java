@@ -7,7 +7,11 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,7 +42,6 @@ import org.max.budgetcontrol.zentypes.WidgetParams;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -48,6 +51,7 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener
 {
     public static final String CONNECTION_PROBLEM = "connection_problem";
+    private static final int WINDGET_WAS_PINNED = 876876;
     List<Category> categories;
     SettingsHolder settings;
 
@@ -109,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             categoryHolder = new WidgetCategoryHolder(currentWidget.getCategories());
         }
 
-        brintWidgetToUI();
+        bringWidgetToUI();
 
         if (completeConfig)
             loadCategories();
@@ -117,13 +121,35 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             showSettings(true);
     }
 
-    private void brintWidgetToUI()
+    private void bringWidgetToUI()
     {
         TextView tv = findViewById(R.id.edTitle);
         tv.setText(currentWidget.getTitle());
         tv = findViewById(R.id.edAmount);
         tv.setText("" + currentWidget.getLimitAmount());
         configSpinner(currentWidget);
+    }
+
+    private void pinNewWidget()
+    {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance( this );
+        ComponentName myProvider = new ComponentName(this, BCWidget.class);
+
+        if (appWidgetManager.isRequestPinAppWidgetSupported()) {
+            // Create the PendingIntent object only if your app needs to be notified
+            // when the user chooses to pin the widget. Note that if the pinning
+            // operation fails, your app isn't notified. This callback receives the ID
+            // of the newly pinned widget (EXTRA_APPWIDGET_ID).
+            Intent intent = new Intent(this, WidgetPinnedReceiver.class );
+            intent.putExtra( "widget_id", currentWidget.getId() );
+            PendingIntent successCallback = PendingIntent.getBroadcast(
+                    /* context = */ this,
+                    /* requestCode = */ WINDGET_WAS_PINNED,
+                    /* intent = */ intent,
+            /* flags = */ PendingIntent.FLAG_UPDATE_CURRENT);
+
+            appWidgetManager.requestPinAppWidget(myProvider, null, successCallback);
+        }
     }
 
     void configSpinner(WidgetParams widget)
@@ -223,8 +249,13 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         if (currentWidget.getId() == WidgetParams.INVALID_WIDGET_ID)
             db.insertWidgetParams(currentWidget);
         else
-
             db.updateWidgetParams(currentWidget);
+
+        if( currentWidget.getAppId() == AppWidgetManager.INVALID_APPWIDGET_ID )
+        {
+            pinNewWidget();
+            return;
+        }
 
         AppWidgetManager wManager = AppWidgetManager.getInstance(getApplicationContext());
         List<WidgetParams> wds = new ArrayList<>();
@@ -393,4 +424,5 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             finishAndRemoveTask();
         }
     }
+
 }

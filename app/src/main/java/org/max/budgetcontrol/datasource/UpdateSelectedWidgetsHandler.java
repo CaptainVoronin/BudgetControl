@@ -21,6 +21,7 @@ import okhttp3.Response;
 
 public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
 {
+    private final List<WidgetParams> widgets;
     Context context;
     AppWidgetManager appWidgetManager;
     int[] widgetIdList;
@@ -38,6 +39,7 @@ public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
         this.context = context;
         this.appWidgetManager = appWidgetManager;
         this.widgetIdList = widgetIdList.clone();
+        this.widgets = widgets;
     }
 
     @Override
@@ -77,7 +79,6 @@ public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
 
         try
         {
-            List<WidgetParams> widgets = bcdbHelper.getWidgets(widgetIdList);
             widgets.sort(new Comparator<WidgetParams>()
             {
                 @Override
@@ -97,7 +98,7 @@ public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
                 }
             });
 
-            StartPeriodEncoding maxPeriod = widgets.get(widgets.size() - 1).getStartPeriod();
+            //StartPeriodEncoding maxPeriod = widgets.get(widgets.size() - 1).getStartPeriod();
 
             Log.i(this.getClass().getName(), "[onResponseReceived] " + widgets.size() + " widget(s) is going to be updated");
 

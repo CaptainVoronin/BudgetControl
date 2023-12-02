@@ -22,7 +22,7 @@ public class OnBootReceiver extends BroadcastReceiver
       if (intent != null) {
          if (intent.getAction().equalsIgnoreCase(
                  Intent.ACTION_BOOT_COMPLETED)) {
-            //updateWidgets(context);
+            updateWidgets(context);
          }
       }
    }
