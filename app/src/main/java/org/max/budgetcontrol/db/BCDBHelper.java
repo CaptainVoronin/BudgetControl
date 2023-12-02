@@ -81,6 +81,37 @@ public class BCDBHelper
       return wp;
    }
 
+   public WidgetParams loadWidgetParamsById( Integer id )
+   {
+      assert db != null : "Database is not opened";
+
+      WidgetParams wp = null;
+      String queryWidget = select +  "where id = ?";
+      String queryCats = "select category_id from widget_cats where widget_id = ?";
+
+      Cursor crs = db.rawQuery( queryWidget, new String[]{ id.toString() } );
+
+      if( crs.getCount() != 0 )
+      {
+         crs.moveToNext();
+         wp = createFromCursor( crs );
+         crs.close();
+
+         crs = db.rawQuery( queryCats, new String[]{ Integer.toString( wp.getId() ) } );
+         List<UUID> cats = new ArrayList<>();
+
+         while( crs.moveToNext() )
+         {
+            String strStartPeriod = crs.getString( 0 );
+            cats.add( UUID.fromString( strStartPeriod ) );
+         }
+         crs.close();
+         wp.setCategories( cats );
+
+      }
+      return wp;
+   }
+
    public WidgetParams insertWidgetParams( WidgetParams wp )
    {
       Log.d( this.getClass().getName(), "[insertWidgetParams]");
