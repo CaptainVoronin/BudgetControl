@@ -11,4 +11,12 @@
     <color name="light_blue_200">#FF81D4FA</color>
     <color name="light_blue_600">#FF039BE5</color>
     <color name="light_blue_900">#FF01579B</color>
+    <color name="cbb0404">#bb0404</color> <!-- >= 100% -->
+    <color name="c000000">#000000</color> <!-- 84 - 100 -->
+    <color name="c484848">#484848</color> <!-- 70 - 83 -->
+    <color name="c717171">#717171</color> <!-- 56 - 69 -->
+    <color name="ca1a1a1">#a1a1a1</color> <!-- 42 - 55 -->
+    <color name="ccacaca">#cacaca</color> <!-- 28 - 41 -->
+    <color name="cececec">#ececec</color> <!-- 14 - 27 -->
+    <color name="cffffff">#fffffff</color> <!-- 0 - 13 -->
 </resources>
