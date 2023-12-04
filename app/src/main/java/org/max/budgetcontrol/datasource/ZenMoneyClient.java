@@ -88,7 +88,7 @@ public class ZenMoneyClient {
         UUID tag = UUID.randomUUID();
         Request.Builder requestBuilder = getRequestBuilder();
         Request req = requestBuilder.tag( tag ).post(body).build();
-        Log.i(this.getClass().getName(), "[doRequest] " + body);
+        Log.i(this.getClass().getName(), "[doRequest] " + req.url().toString() );
         httpClient.newCall(req).enqueue(callback);
         Log.i( this.getClass().getName(), "[doRequest] Request id " + tag + " has been enqueued");
         if( handler != null )

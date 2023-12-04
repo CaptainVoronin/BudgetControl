@@ -146,7 +146,7 @@ public class UpdateSelectedWidgetsHandler extends AZenClientResponseHandler
 
         if (isNetWorkError(e))
         {
-            Log.i(this.getClass().getName(), "[processError] There is network error. " + e.getMessage() + " Load data from cash");
+            Log.i(this.getClass().getName(), "[processError] There is a network error. " + e.getMessage() + " Load data from the cash");
             loadFromCash();
         } else
         {
