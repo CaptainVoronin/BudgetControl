@@ -9,47 +9,62 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.UpdateSelectedWidgetsHandler;
 import org.max.budgetcontrol.datasource.WidgetOnlineUpdater;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 import org.max.budgetcontrol.db.BCDBHelper;
 import org.max.budgetcontrol.zentypes.WidgetParams;
+import org.max.budgetcontrol.zentypes.WidgetParamsConverter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class WidgetPinnedReceiver extends BroadcastReceiver
-{
+public class WidgetPinnedReceiver extends BroadcastReceiver {
     @Override
-    public void onReceive(Context context, Intent intent)
-    {
+    public void onReceive(Context context, Intent intent) {
 
         Bundle extras = intent.getExtras();
-        Log.i(this.getClass().getName(), "[onReceive] Widget was successfully pinned");
 
-        if (extras.containsKey("widget_id"))
+        if (extras.containsKey(MainActivity.BUNDLE_KEY_WIDGET)) {
+            Log.i(this.getClass().getName(), "[onReceive] Widget was successfully pinned");
+
+            int appId = extras.getInt(MainActivity.BUNDLE_KEY_APP_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+            if (appId == AppWidgetManager.INVALID_APPWIDGET_ID)
+                throw new InvalidParameterException("The APP WIDGET ID is incorrect");
+
+            String buff = extras.getString(MainActivity.BUNDLE_KEY_WIDGET);
+            JSONObject job = null;
+            try {
+                job = new JSONObject(buff);
+
+                WidgetParams widget = WidgetParamsConverter.toWidget(job);
+                widget.setAppId(appId);
+                Log.i(this.getClass().getName(), "[onReceive] Widget app_id=" + appId + " is going to be updated");
+                updateWidget(context, widget);
+            } catch (JSONException e) {
+                Log.e(this.getClass().getName(), "[onReceive] " + e.getMessage());
+                throw new RuntimeException(e);
+            }
+        }
+        else
         {
-            int id = extras.getInt("widget_id");
-            int appId = extras.getInt("appWidgetId");
-
-            Log.i(this.getClass().getName(), "[onReceive] Widget id=" + id + " is going to be updated");
-            updateWidget(context, id, appId );
+            Log.e(this.getClass().getName(), "[onReceive] Intent doesn't have BUNDLE_KEY_WIDGET. Nothing to pin");
+            throw new InvalidParameterException( "Intent doesn't have BUNDLE_KEY_WIDGET" );
         }
     }
 
-    private void updateWidget(Context context, int id, int appId)
-    {
+    private void updateWidget(Context context, WidgetParams widget) {
         AppWidgetManager wm = AppWidgetManager.getInstance(context);
 
         BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
-        ViewMakerFactory factory = new ViewMakerFactory(context);
-        WidgetParams widget = bcdbHelper.loadWidgetParamsById(id);
-        widget.setAppId( appId );
 
-        bcdbHelper.updateWidgetParams( widget );
+        bcdbHelper.insertWidgetParams(widget);
         AppWidgetManager wManager = AppWidgetManager.getInstance(context);
         List<WidgetParams> wds = new ArrayList<>();
 
@@ -64,16 +79,14 @@ public class WidgetPinnedReceiver extends BroadcastReceiver
         SettingsHolder settings = new SettingsHolder(context);
         settings.init();
 
-        try
-        {
+        try {
             ZenMoneyClient client = new ZenMoneyClient(new URL(settings.getParameterAsString("url")),
                     settings.getParameterAsString("token"),
                     handler);
 
             long timestamp = AWidgetViewMaker.calculateStartDate(widget.getStartPeriod());
             client.loadTransactions(timestamp);
-        } catch (MalformedURLException e)
-        {
+        } catch (MalformedURLException e) {
             handler.processError(e);
         }
     }

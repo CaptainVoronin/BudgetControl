@@ -151,6 +151,7 @@ public class BCDBHelper
 
       ContentValues cv = new ContentValues();
 
+      cv.put( "app_id", wp.getAppId() );
       cv.put( "limit_amount", wp.getLimitAmount() );
       cv.put( "start_period", wp.getStartPeriod().toString() );
       cv.put( "title", wp.getTitle() );
@@ -158,8 +159,9 @@ public class BCDBHelper
 
       db.beginTransaction();
 
-      db.update( BCDB.TABLE_WIDGET, cv, "id=" + wp.getId(), null );
+      int updated = db.update( BCDB.TABLE_WIDGET, cv, "id=" + wp.getId(), null );
       cv.clear();
+      Log.d( this.getClass().getName(), "[updateWidgetParams] Updated " + updated);
 
       List<UUID> cats = wp.getCategories();
 
