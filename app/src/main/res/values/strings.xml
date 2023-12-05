@@ -30,12 +30,12 @@
     <string name="common_http_error">"Соединение не удалось. Код ошибки "</string>
     <string name="enternal_request_error">Внутренняя ошибка при обращении к серверу</string>
     <string name="message_internal_server_error">Внутренняя ошибка сервера</string>
-    <string name="message_load_data">Получение данных с сервера...</string>
+    <string name="message_load_data">Получение данных с сервера…</string>
     <string name="netwotk_error">Ошибка сети</string>
     <string name="message_for_week">за месяц</string>
     <string name="message_for_month">за месяц</string>
     <string name="message_for_year">за год</string>
-    <string name="message_load_transactions">Обработка данных...</string>
+    <string name="message_load_transactions">Обработка данных…</string>
     <string name="widget_limit_amount_title">Лимит</string>
     <string name="tab_title_common_settings">Параметры виджета</string>
     <string name="tab_title_categories">Категории</string>

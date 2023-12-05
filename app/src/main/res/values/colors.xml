@@ -18,5 +18,5 @@
     <color name="ca1a1a1">#a1a1a1</color> <!-- 42 - 55 -->
     <color name="ccacaca">#cacaca</color> <!-- 28 - 41 -->
     <color name="cececec">#ececec</color> <!-- 14 - 27 -->
-    <color name="cffffff">#fffffff</color> <!-- 0 - 13 -->
+    <color name="cffffff">#ffffff</color> <!-- 0 - 13 -->
 </resources>
