@@ -1,18 +1,15 @@
 package org.max.budgetcontrol;
 
-import android.app.AlertDialog;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.util.Log;
-
-import org.json.JSONException;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.UpdateSelectedWidgetsHandler;
-import org.max.budgetcontrol.datasource.WidgetOnlineUpdater;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 import org.max.budgetcontrol.db.BCDBHelper;
 import org.max.budgetcontrol.zentypes.WidgetParams;
@@ -22,7 +19,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class WidgetPinnedReceiver extends BroadcastReceiver {
@@ -32,22 +28,22 @@ public class WidgetPinnedReceiver extends BroadcastReceiver {
         Bundle extras = intent.getExtras();
 
         if (extras.containsKey(MainActivity.BUNDLE_KEY_WIDGET)) {
-            Log.i(this.getClass().getName(), "[onReceive] Widget was successfully pinned");
+            Log.i(this.getClass().getName(), "[onReceive] We are going to pin a widget");
 
             int appId = extras.getInt(MainActivity.BUNDLE_KEY_APP_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
             if (appId == AppWidgetManager.INVALID_APPWIDGET_ID)
                 throw new InvalidParameterException("The APP WIDGET ID is incorrect");
 
             String buff = extras.getString(MainActivity.BUNDLE_KEY_WIDGET);
-            JSONObject job = null;
+
             try {
-                job = new JSONObject(buff);
+                JSONObject job = new JSONObject(buff);
 
                 WidgetParams widget = WidgetParamsConverter.toWidget(job);
                 widget.setAppId(appId);
-                Log.i(this.getClass().getName(), "[onReceive] Widget app_id=" + appId + " is going to be updated");
+                Log.i(this.getClass().getName(), "[onReceive] Widget app_id=" + appId + " is going to be pinned");
                 updateWidget(context, widget);
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 Log.e(this.getClass().getName(), "[onReceive] " + e.getMessage());
                 throw new RuntimeException(e);
             }
@@ -59,12 +55,12 @@ public class WidgetPinnedReceiver extends BroadcastReceiver {
         }
     }
 
-    private void updateWidget(Context context, WidgetParams widget) {
-        AppWidgetManager wm = AppWidgetManager.getInstance(context);
-
+    private void updateWidget(@NotNull Context context, @NotNull WidgetParams widget) throws SQLiteException,
+            MalformedURLException
+    {
         BCDBHelper bcdbHelper = BCDBHelper.getInstance(context);
-
         bcdbHelper.insertWidgetParams(widget);
+
         AppWidgetManager wManager = AppWidgetManager.getInstance(context);
         List<WidgetParams> wds = new ArrayList<>();
 
@@ -78,16 +74,11 @@ public class WidgetPinnedReceiver extends BroadcastReceiver {
 
         SettingsHolder settings = new SettingsHolder(context);
         settings.init();
-
-        try {
             ZenMoneyClient client = new ZenMoneyClient(new URL(settings.getParameterAsString("url")),
                     settings.getParameterAsString("token"),
                     handler);
 
             long timestamp = AWidgetViewMaker.calculateStartDate(widget.getStartPeriod());
             client.loadTransactions(timestamp);
-        } catch (MalformedURLException e) {
-            handler.processError(e);
-        }
     }
 }
