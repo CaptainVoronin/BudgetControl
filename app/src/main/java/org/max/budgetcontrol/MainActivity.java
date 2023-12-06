@@ -9,9 +9,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -51,9 +50,10 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
     public static final String CONNECTION_PROBLEM = "connection_problem";
-    private static final int WINDGET_WAS_PINNED = 876876;
+    private static final int WIDGET_WAS_PINNED = 876876;
     public static final String BUNDLE_KEY_WIDGET = "pinnedWidget";
     public static final String BUNDLE_KEY_APP_ID = "appWidgetId";
+    public static final String BUNDLE_KEY_EXIT_APP = "bc_action_exit_app";
 
     List<Category> categories;
     SettingsHolder settings;
@@ -80,6 +80,18 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+        if( extras != null )
+        {
+            boolean exitApp = extras.getBoolean( BUNDLE_KEY_EXIT_APP, false );
+            if( exitApp )
+            {
+                Log.i( this.getClass().getName(), "[onCreate] Finish signal received. Exit" );
+                finish();
+            }
+        }
+
         launcher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -96,10 +108,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
         settings = new SettingsHolder(getApplicationContext());
         boolean completeConfig = settings.init();
-
-        Intent intent = getIntent();
-
-        Bundle extras = intent.getExtras();
 
         if (extras != null) {
             int appWidgetId = extras.getInt(
@@ -134,19 +142,20 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         ComponentName myProvider = new ComponentName(this, BCWidget.class);
 
         if (appWidgetManager.isRequestPinAppWidgetSupported()) {
-            // Create the PendingIntent object only if your app needs to be notified
-            // when the user chooses to pin the widget. Note that if the pinning
-            // operation fails, your app isn't notified. This callback receives the ID
-            // of the newly pinned widget (EXTRA_APPWIDGET_ID).
             Intent intent = new Intent(this, WidgetPinnedReceiver.class);
             String json = packWidgetIntoBundle();
             if (json == null) {
-
+                AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+                dlg.setMessage(R.string.internal_application_error)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setNegativeButton(android.R.string.cancel, (dialog, id) -> dialog.dismiss());
+                dlg.show();
+                return;
             }
             intent.putExtra(BUNDLE_KEY_WIDGET, json);
             PendingIntent successCallback = PendingIntent.getBroadcast(
                     /* context = */ this,
-                    /* requestCode = */ WINDGET_WAS_PINNED,
+                    /* requestCode = */ WIDGET_WAS_PINNED,
                     /* intent = */ intent,
                     /* flags = */ PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
 
@@ -402,5 +411,4 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             finishAndRemoveTask();
         }
     }
-
 }

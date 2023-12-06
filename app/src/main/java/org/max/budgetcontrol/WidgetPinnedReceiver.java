@@ -43,6 +43,7 @@ public class WidgetPinnedReceiver extends BroadcastReceiver {
                 widget.setAppId(appId);
                 Log.i(this.getClass().getName(), "[onReceive] Widget app_id=" + appId + " is going to be pinned");
                 updateWidget(context, widget);
+                closeActivity(context);
             } catch (Exception e) {
                 Log.e(this.getClass().getName(), "[onReceive] " + e.getMessage());
                 throw new RuntimeException(e);
@@ -53,6 +54,12 @@ public class WidgetPinnedReceiver extends BroadcastReceiver {
             Log.e(this.getClass().getName(), "[onReceive] Intent doesn't have BUNDLE_KEY_WIDGET. Nothing to pin");
             throw new InvalidParameterException( "Intent doesn't have BUNDLE_KEY_WIDGET" );
         }
+    }
+
+    private void closeActivity(Context context ) {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.putExtra( MainActivity.BUNDLE_KEY_EXIT_APP, true );
+        context.startActivity( intent );
     }
 
     private void updateWidget(@NotNull Context context, @NotNull WidgetParams widget) throws SQLiteException,
