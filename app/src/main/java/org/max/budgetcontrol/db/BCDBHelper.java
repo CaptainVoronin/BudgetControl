@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.util.Log;
 
@@ -19,322 +20,294 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class BCDBHelper
-{
-   private Context context;
-   private BCDB bcdb;
-   private SQLiteDatabase db;
-
-   private static BCDBHelper instance;
-
-   String select = "select id, app_id, limit_amount, start_period, title, current_amount from widget ";
-
-   protected BCDBHelper( Context context )
-   {
-      this.context = context;
-   }
-
-   public static BCDBHelper getInstance(Context context)
-   {
-      if( instance == null )
-      {
-         instance = new BCDBHelper(context);
-         instance.open();
-      }
-      return instance;
-   }
-
-   private void open()
-   {
-      bcdb = new BCDB( context );
-      db = bcdb.getWritableDatabase();
-   }
-
-   public WidgetParams loadWidgetParamsByAppId( Integer appId )
-   {
-      assert db != null : "Database is not opened";
-
-      WidgetParams wp = null;
-      String queryWidget = select +  "where app_id = ?";
-      String queryCats = "select category_id from widget_cats where widget_id = ?";
-
-      Cursor crs = db.rawQuery( queryWidget, new String[]{ appId.toString() } );
-
-      if( crs.getCount() != 0 )
-      {
-         crs.moveToNext();
-         wp = createFromCursor( crs );
-         crs.close();
-
-         crs = db.rawQuery( queryCats, new String[]{ Integer.toString( wp.getId() ) } );
-         List<UUID> cats = new ArrayList<>();
-
-         while( crs.moveToNext() )
-         {
-            String strStartPeriod = crs.getString( 0 );
-            cats.add( UUID.fromString( strStartPeriod ) );
-         }
-         crs.close();
-         wp.setCategories( cats );
-
-      }
-      return wp;
-   }
-
-   public WidgetParams loadWidgetParamsById( Integer id )
-   {
-      assert db != null : "Database is not opened";
-
-      WidgetParams wp = null;
-      String queryWidget = select +  "where id = ?";
-      String queryCats = "select category_id from widget_cats where widget_id = ?";
-
-      Cursor crs = db.rawQuery( queryWidget, new String[]{ id.toString() } );
-
-      if( crs.getCount() != 0 )
-      {
-         crs.moveToNext();
-         wp = createFromCursor( crs );
-         crs.close();
-
-         crs = db.rawQuery( queryCats, new String[]{ Integer.toString( wp.getId() ) } );
-         List<UUID> cats = new ArrayList<>();
-
-         while( crs.moveToNext() )
-         {
-            String strStartPeriod = crs.getString( 0 );
-            cats.add( UUID.fromString( strStartPeriod ) );
-         }
-         crs.close();
-         wp.setCategories( cats );
-
-      }
-      return wp;
-   }
-
-   public WidgetParams insertWidgetParams( WidgetParams wp )
-   {
-      Log.d( this.getClass().getName(), "[insertWidgetParams]");
-      assert db != null : "Database is not opened";
-
-      ContentValues cv = new ContentValues();
-
-      cv.put( "app_id", wp.getAppId() );
-      cv.put( "limit_amount", wp.getLimitAmount() );
-      cv.put( "start_period", wp.getStartPeriod().toString() );
-      cv.put( "title", wp.getTitle() );
-      cv.put( "current_amount", wp.getCurrentAmount() );
-
-      db.beginTransaction();
+public class BCDBHelper {
+    private Context context;
+    private BCDB bcdb;
+    private SQLiteDatabase db;
 
-      long id = db.insert( BCDB.TABLE_WIDGET, null, cv );
-      cv.clear();
+    private static BCDBHelper instance;
+
+    String select = "select id, app_id, limit_amount, start_period, title, current_amount from widget ";
 
-      List<UUID> cats = wp.getCategories();
+    protected BCDBHelper(Context context) {
+        this.context = context;
+    }
+
+    public static BCDBHelper getInstance(Context context) {
+        if (instance == null) {
+            instance = new BCDBHelper(context);
+            instance.open();
+        }
+        return instance;
+    }
 
-      for ( UUID uuid : cats )
-      {
-         cv.put( "widget_id", id );
-         cv.put( "category_id", uuid.toString() );
-         db.insert( BCDB.TABLE_WIDGET_CATS, null, cv );
-      }
+    private void open() throws SQLiteException {
+        bcdb = new BCDB(context);
+        db = bcdb.getWritableDatabase();
+    }
+
+    public WidgetParams loadWidgetParamsByAppId(Integer appId) {
+        assert db != null : "Database is not opened";
 
-      db.setTransactionSuccessful();
-      db.endTransaction();
-      wp.setId( ( int ) id );
-      return wp;
-   }
+        WidgetParams wp = null;
+        String queryWidget = select + "where app_id = ?";
+        String queryCats = "select category_id from widget_cats where widget_id = ?";
 
-   public void updateWidgetParams( WidgetParams wp )
-   {
-      Log.d( this.getClass().getName(), "[updateWidgetParams]");
+        Cursor crs = db.rawQuery(queryWidget, new String[]{appId.toString()});
 
-      ContentValues cv = new ContentValues();
+        if (crs.getCount() != 0) {
+            crs.moveToNext();
+            wp = createFromCursor(crs);
+            crs.close();
 
-      cv.put( "app_id", wp.getAppId() );
-      cv.put( "limit_amount", wp.getLimitAmount() );
-      cv.put( "start_period", wp.getStartPeriod().toString() );
-      cv.put( "title", wp.getTitle() );
-      cv.put( "current_amount", wp.getCurrentAmount() );
+            crs = db.rawQuery(queryCats, new String[]{Integer.toString(wp.getId())});
+            List<UUID> cats = new ArrayList<>();
+
+            while (crs.moveToNext()) {
+                String strStartPeriod = crs.getString(0);
+                cats.add(UUID.fromString(strStartPeriod));
+            }
+            crs.close();
+            wp.setCategories(cats);
+
+        }
+        return wp;
+    }
+
+    public WidgetParams loadWidgetParamsById(Integer id) {
+        assert db != null : "Database is not opened";
 
-      db.beginTransaction();
+        WidgetParams wp = null;
+        String queryWidget = select + "where id = ?";
+        String queryCats = "select category_id from widget_cats where widget_id = ?";
 
-      int updated = db.update( BCDB.TABLE_WIDGET, cv, "id=" + wp.getId(), null );
-      cv.clear();
-      Log.d( this.getClass().getName(), "[updateWidgetParams] Updated " + updated);
+        Cursor crs = db.rawQuery(queryWidget, new String[]{id.toString()});
 
-      List<UUID> cats = wp.getCategories();
+        if (crs.getCount() != 0) {
+            crs.moveToNext();
+            wp = createFromCursor(crs);
+            crs.close();
 
-      db.delete( BCDB.TABLE_WIDGET_CATS, "widget_id=?", new String[]{ Integer.toString( wp.getId() )});
+            crs = db.rawQuery(queryCats, new String[]{Integer.toString(wp.getId())});
+            List<UUID> cats = new ArrayList<>();
 
-      for ( UUID uuid : cats )
-      {
-         cv.put( "widget_id", wp.getId() );
-         cv.put( "category_id", uuid.toString() );
-         db.insert( BCDB.TABLE_WIDGET_CATS, null, cv );
-         cv.clear();
-      }
-      db.setTransactionSuccessful();
-      db.endTransaction();
-   }
+            while (crs.moveToNext()) {
+                String strStartPeriod = crs.getString(0);
+                cats.add(UUID.fromString(strStartPeriod));
+            }
+            crs.close();
+            wp.setCategories(cats);
 
-   protected void onDestroy()
-   {
-      bcdb.close();
-   }
+        }
+        return wp;
+    }
 
-   public List<WidgetParams> getAllWidgets()
-   {
-      Log.d( this.getClass().getName(), "[getAllWidgets]");
+    public WidgetParams insertWidgetParams(WidgetParams wp) {
+        Log.d(this.getClass().getName(), "[insertWidgetParams]");
+        assert db != null : "Database is not opened";
 
-      assert db != null : "Database is not opened";
-      final String queryAllWidgets = select;
-      final String queryAllWidgetCats = "select widget_id, category_id from widget_cats";
+        ContentValues cv = new ContentValues();
 
-      Cursor crs = db.rawQuery( queryAllWidgets, null );
+        cv.put("app_id", wp.getAppId());
+        cv.put("limit_amount", wp.getLimitAmount());
+        cv.put("start_period", wp.getStartPeriod().toString());
+        cv.put("title", wp.getTitle());
+        cv.put("current_amount", wp.getCurrentAmount());
 
-      List<WidgetParams> widgets = new ArrayList<>( crs.getCount() );
+        db.beginTransaction();
 
-      while( crs.moveToNext() )
-         widgets.add( createFromCursor( crs ) );
+        long id = db.insert(BCDB.TABLE_WIDGET, null, cv);
+        cv.clear();
 
-      crs.close();
+        List<UUID> cats = wp.getCategories();
 
-      crs = db.rawQuery( queryAllWidgetCats, null );
-      Map<UUID, Integer> cats = new HashMap<>(crs.getCount());
+        for (UUID uuid : cats) {
+            cv.put("widget_id", id);
+            cv.put("category_id", uuid.toString());
+            db.insert(BCDB.TABLE_WIDGET_CATS, null, cv);
+        }
 
-      while( crs.moveToNext() )
-      {
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        wp.setId((int) id);
+        return wp;
+    }
 
-         Integer widgetId = crs.getInt( 0 );
-         UUID catId = UUID.fromString( crs.getString( 1 ) );
+    public void updateWidgetParams(WidgetParams wp) {
+        Log.d(this.getClass().getName(), "[updateWidgetParams]");
 
-         cats.put( catId, widgetId );
-      }
-      crs.close();
+        ContentValues cv = new ContentValues();
 
-      for( WidgetParams w : widgets )
-      {
-         Iterator<UUID> it = cats.keySet().iterator();
+        cv.put("app_id", wp.getAppId());
+        cv.put("limit_amount", wp.getLimitAmount());
+        cv.put("start_period", wp.getStartPeriod().toString());
+        cv.put("title", wp.getTitle());
+        cv.put("current_amount", wp.getCurrentAmount());
 
-         while(it.hasNext())
-         {
-            UUID uuid = it.next();
-            Integer wId = cats.get( uuid );
-            if( w.getId() == wId.intValue() ) w.addCategoryId( uuid );
-         }
-      }
+        db.beginTransaction();
 
-      return widgets;
-   }
+        int updated = db.update(BCDB.TABLE_WIDGET, cv, "id=" + wp.getId(), null);
+        cv.clear();
+        Log.d(this.getClass().getName(), "[updateWidgetParams] Updated " + updated);
 
-   public List<WidgetParams> getWidgets( int[] ids)
-   {
-      Log.d( this.getClass().getName(), "[getWidgets] Is going to be updated " + ids.length);
+        List<UUID> cats = wp.getCategories();
 
-      assert db != null : "Database is not opened";
-      SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+        db.delete(BCDB.TABLE_WIDGET_CATS, "widget_id=?", new String[]{Integer.toString(wp.getId())});
 
+        for (UUID uuid : cats) {
+            cv.put("widget_id", wp.getId());
+            cv.put("category_id", uuid.toString());
+            db.insert(BCDB.TABLE_WIDGET_CATS, null, cv);
+            cv.clear();
+        }
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
 
+    protected void onDestroy() {
+        bcdb.close();
+    }
 
-      String inArgs = Arrays.stream( ids ).mapToObj(  id -> Integer.toString( id ) ).collect(Collectors.joining(","));
+    public List<WidgetParams> getAllWidgets() {
+        Log.d(this.getClass().getName(), "[getAllWidgets]");
 
-      String queryAllWidgets = select + " where app_id in ( " + inArgs + ")";
+        assert db != null : "Database is not opened";
+        final String queryAllWidgets = select;
+        final String queryAllWidgetCats = "select widget_id, category_id from widget_cats";
 
-      Cursor crs = db.rawQuery( queryAllWidgets, null );
+        Cursor crs = db.rawQuery(queryAllWidgets, null);
 
-      Log.d( this.getClass().getName(), "[getWidgets] Found in DB " + crs.getCount() + " from " + ids.length);
+        List<WidgetParams> widgets = new ArrayList<>(crs.getCount());
 
-      List<WidgetParams> widgets = new ArrayList<>( crs.getCount() );
+        while (crs.moveToNext())
+            widgets.add(createFromCursor(crs));
 
-      Log.d( this.getClass().getName(), "[getWidgets] Has been read " + crs.getCount());
+        crs.close();
 
-      while( crs.moveToNext() )
-         widgets.add( createFromCursor( crs ) );
+        crs = db.rawQuery(queryAllWidgetCats, null);
+        Map<UUID, Integer> cats = new HashMap<>(crs.getCount());
 
-      crs.close();
+        while (crs.moveToNext()) {
 
-      String strWIds = widgets.stream().map( w -> Integer.toString( w.getId()) ).collect(Collectors.joining(","));
+            Integer widgetId = crs.getInt(0);
+            UUID catId = UUID.fromString(crs.getString(1));
 
-      String queryAllWidgetCats = "select widget_id, category_id from widget_cats where widget_id in ("
-              + strWIds + ")";
+            cats.put(catId, widgetId);
+        }
+        crs.close();
 
-      crs = db.rawQuery( queryAllWidgetCats, null );
-      Map<UUID, Integer> cats = new HashMap<>(crs.getCount());
+        for (WidgetParams w : widgets) {
+            Iterator<UUID> it = cats.keySet().iterator();
 
-      while( crs.moveToNext() )
-      {
-         Integer widgetId = crs.getInt( 0 );
-         UUID catId = UUID.fromString( crs.getString( 1 ) );
+            while (it.hasNext()) {
+                UUID uuid = it.next();
+                Integer wId = cats.get(uuid);
+                if (w.getId() == wId.intValue()) w.addCategoryId(uuid);
+            }
+        }
 
-         cats.put( catId, widgetId );
-      }
-      crs.close();
+        return widgets;
+    }
 
-      for( WidgetParams w : widgets )
-      {
-         Iterator<UUID> it = cats.keySet().iterator();
+    public List<WidgetParams> getWidgets(int[] ids) {
+        Log.d(this.getClass().getName(), "[getWidgets] Is going to be updated " + ids.length);
 
-         while(it.hasNext())
-         {
-            UUID uuid = it.next();
-            Integer wId = cats.get( uuid );
-            if( w.getId() == wId.intValue() ) w.addCategoryId( uuid );
-         }
-      }
+        assert db != null : "Database is not opened";
+        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
-      return widgets;
-   }
 
-   public int deleteLost(List<Integer> lost)
-   {
-      Log.d( this.getClass().getName(), "[deleteLost]");
+        String inArgs = Arrays.stream(ids).mapToObj(id -> Integer.toString(id)).collect(Collectors.joining(","));
 
-      assert db != null : "Database is not opened";
+        String queryAllWidgets = select + " where app_id in ( " + inArgs + ")";
 
-      String[] strIds = new String[lost.size()];
+        Cursor crs = db.rawQuery(queryAllWidgets, null);
 
-      for( int i = 0; i < lost.size(); i++  )
-         strIds[i] = lost.get(i).toString();
+        Log.d(this.getClass().getName(), "[getWidgets] Found in DB " + crs.getCount() + " from " + ids.length);
 
-      long count = db.delete( BCDB.TABLE_WIDGET, "id in ?", strIds);
+        List<WidgetParams> widgets = new ArrayList<>(crs.getCount());
 
-      Log.d( this.getClass().getName(), "[deleteLost] Deleted " + count );
+        Log.d(this.getClass().getName(), "[getWidgets] Has been read " + crs.getCount());
 
-      return (int) count;
-   }
+        while (crs.moveToNext())
+            widgets.add(createFromCursor(crs));
 
-   //TODO: Обработать исключение в транзакции
-   public void clearWidgets()
-   {
-      Log.d( this.getClass().getName(), "[clearWidgets]");
+        crs.close();
 
-      assert db != null : "Database is not opened";
+        String strWIds = widgets.stream().map(w -> Integer.toString(w.getId())).collect(Collectors.joining(","));
 
-      db.beginTransaction();
-      long count = db.delete( BCDB.TABLE_WIDGET_CATS, null, null );
-      db.delete( BCDB.TABLE_WIDGET, null, null );
-      db.setTransactionSuccessful();
-      db.endTransaction();
-      Log.d( this.getClass().getName(), "[clearWidgets] Deleted " + count );
-   }
+        String queryAllWidgetCats = "select widget_id, category_id from widget_cats where widget_id in ("
+                + strWIds + ")";
 
-   WidgetParams createFromCursor( Cursor cursor )
-   {
-      int wID = cursor.getInt(0);
-      int appId = cursor.getInt( 1 );
-      double limit = cursor.getDouble(2);
-      String strStartPeriod = cursor.getString(3);
-      String title = cursor.getString( 4 );
-      double currentAmount = cursor.getDouble( 5 );
+        crs = db.rawQuery(queryAllWidgetCats, null);
+        Map<UUID, Integer> cats = new HashMap<>(crs.getCount());
 
-      WidgetParams wp = new WidgetParams();
-      wp.setAppId( appId );
-      wp.setId( wID );
-      wp.setLimitAmount( limit );
-      wp.setStartPeriod( StartPeriodEncoding.valueOf( strStartPeriod ) );
-      wp.setTitle( title );
-      wp.setCurrentAmount( currentAmount );
-      return wp;
-   }
+        while (crs.moveToNext()) {
+            Integer widgetId = crs.getInt(0);
+            UUID catId = UUID.fromString(crs.getString(1));
+
+            cats.put(catId, widgetId);
+        }
+        crs.close();
+
+        for (WidgetParams w : widgets) {
+            Iterator<UUID> it = cats.keySet().iterator();
+
+            while (it.hasNext()) {
+                UUID uuid = it.next();
+                Integer wId = cats.get(uuid);
+                if (w.getId() == wId.intValue()) w.addCategoryId(uuid);
+            }
+        }
+
+        return widgets;
+    }
+
+    public int deleteLost(List<Integer> lost) {
+        Log.d(this.getClass().getName(), "[deleteLost]");
+
+        assert db != null : "Database is not opened";
+
+        String[] strIds = new String[lost.size()];
+
+        for (int i = 0; i < lost.size(); i++)
+            strIds[i] = lost.get(i).toString();
+
+        long count = db.delete(BCDB.TABLE_WIDGET, "id in ?", strIds);
+
+        Log.d(this.getClass().getName(), "[deleteLost] Deleted " + count);
+
+        return (int) count;
+    }
+
+    //TODO: Обработать исключение в транзакции
+    public void clearWidgets() {
+        Log.d(this.getClass().getName(), "[clearWidgets]");
+
+        assert db != null : "Database is not opened";
+
+        db.beginTransaction();
+        long count = db.delete(BCDB.TABLE_WIDGET_CATS, null, null);
+        db.delete(BCDB.TABLE_WIDGET, null, null);
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        Log.d(this.getClass().getName(), "[clearWidgets] Deleted " + count);
+    }
+
+    WidgetParams createFromCursor(Cursor cursor) {
+        int wID = cursor.getInt(0);
+        int appId = cursor.getInt(1);
+        double limit = cursor.getDouble(2);
+        String strStartPeriod = cursor.getString(3);
+        String title = cursor.getString(4);
+        double currentAmount = cursor.getDouble(5);
+
+        WidgetParams wp = new WidgetParams();
+        wp.setAppId(appId);
+        wp.setId(wID);
+        wp.setLimitAmount(limit);
+        wp.setStartPeriod(StartPeriodEncoding.valueOf(strStartPeriod));
+        wp.setTitle(title);
+        wp.setCurrentAmount(currentAmount);
+        return wp;
+    }
 }

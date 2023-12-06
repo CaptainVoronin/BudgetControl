@@ -23,4 +23,11 @@ public class ViewMakerFactory
             return new NoConnectionViewMaker( context, widget );
       }
    }
+
+   private AWidgetViewMaker getViewFor200Code(WidgetParams widget) {
+      if( widget.getLimitAmount() > 1 )
+         return new AmountLimitViewMaker( context, widget );
+      else
+         return new BaseWidgetViewMaker1(context, widget);
+   }
 }

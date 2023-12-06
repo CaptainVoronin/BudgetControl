@@ -82,15 +82,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
-        if( extras != null )
-        {
-            boolean exitApp = extras.getBoolean( BUNDLE_KEY_EXIT_APP, false );
-            if( exitApp )
-            {
-                Log.i( this.getClass().getName(), "[onCreate] Finish signal received. Exit" );
-                finish();
-            }
-        }
 
         launcher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -401,6 +392,21 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     private void unlockUIOnResult() {
 
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Bundle extras = intent.getExtras();
+        if( extras != null )
+        {
+            boolean exitApp = extras.getBoolean( BUNDLE_KEY_EXIT_APP, false );
+            if( exitApp )
+            {
+                Log.i( this.getClass().getName(), "[onCreate] Finish signal received. Exit" );
+                finish();
+            }
+        }
     }
 
     class AfterUpdateWidgetCallback extends ASecondCallback {

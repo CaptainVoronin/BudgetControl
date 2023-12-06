@@ -58,6 +58,8 @@ public class WidgetPinnedReceiver extends BroadcastReceiver {
 
     private void closeActivity(Context context ) {
         Intent intent = new Intent(context, MainActivity.class);
+        intent.setAction( Intent.ACTION_SEND );
+        intent.setFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
         intent.putExtra( MainActivity.BUNDLE_KEY_EXIT_APP, true );
         context.startActivity( intent );
     }
