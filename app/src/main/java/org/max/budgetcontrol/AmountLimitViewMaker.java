@@ -16,10 +16,10 @@ public class AmountLimitViewMaker extends AWidgetViewMaker {
 
     @Override
     public RemoteViews getViews() {
-        RemoteViews views = new RemoteViews(getContext().getPackageName(), R.layout.b_c_widget);
+        RemoteViews views = new RemoteViews(getContext().getPackageName(), R.layout.b_c_amount_limit_widget);
         views.setTextViewText(R.id.tvAmount, formatAmount(getWidget().getCurrentAmount()));
         views.setTextViewText(R.id.tvTitle, getWidget().getTitle());
-        views.setTextViewText(R.id.tvStartDate, getPeriodMessage());
+        views.setTextViewText(R.id.tvStartDate, formatAmount(getWidget().getLimitAmount()) );
         Color color = getScaleColor(getContext(), getWidget().getLimitAmount(), getWidget().getCurrentAmount());
         views.setInt(R.id.tvAmount, "setTextColor", color.toArgb());
         return views;
@@ -29,15 +29,15 @@ public class AmountLimitViewMaker extends AWidgetViewMaker {
         double percent = 100 * currentAmount / amountLimit;
         if (percent >= 100)
             return Color.valueOf(context.getColor(R.color.cbb0404));
-        else if (percent >= 84 && percent <= 100)
+        else if (percent >= 68 && percent <= 100)
             return Color.valueOf(context.getColor(R.color.c000000));
-        else if (percent >= 70 && percent <= 83)
+        else if (percent >= 54 && percent < 68)
             return Color.valueOf(context.getColor(R.color.c484848));
-        else if (percent >= 69 && percent <= 56)
+        else if (percent >= 40 && percent < 54)
             return Color.valueOf(context.getColor(R.color.c717171));
-        else if (percent >= 42 && percent <= 55)
+        else if (percent >= 26 && percent < 40)
             return Color.valueOf(context.getColor(R.color.ca1a1a1));
-        else if (percent >= 28 && percent <= 41)
+        else if (percent >= 13 && percent < 26)
             return Color.valueOf(context.getColor(R.color.cececec));
         else
             return Color.valueOf(context.getColor(R.color.cffffff));

@@ -247,6 +247,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             }
         };
 
+
+
         amountListener = new ValueChangeListener(edAmount, paramsStateListener, value -> {
             if (value == null)
                 return false;
@@ -275,6 +277,9 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         } catch (NumberFormatException e) {
             paramsStateListener.setAmountLimitComplete(false);
         }
+
+        buff = edTitle.getText().toString();
+        paramsStateListener.setTitleComplete( buff.trim().length() > 0 );
     }
 
     @Override
@@ -363,7 +368,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
         setResult(result, intent);
     }
-
 
     private WidgetParams getWidgetParams(int appWidgetId) {
         WidgetParams wp = db.loadWidgetParamsByAppId(appWidgetId);
