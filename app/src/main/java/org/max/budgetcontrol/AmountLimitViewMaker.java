@@ -5,7 +5,9 @@ import android.graphics.Color;
 import android.widget.RemoteViews;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
-
+/*
+Формирует вид виджета, в котором задан лимит
+ */
 public class AmountLimitViewMaker extends AWidgetViewMaker {
 
     public AmountLimitViewMaker(Context context, WidgetParams widget) {
