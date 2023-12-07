@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FragmentWidgetParams">
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/tvStateHader"
+                android:text="Новый виджет"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/edTitle"
+                android:layout_weight="1"
+                android:ems="10"
+                android:hint="Заголовок виджета"
+                android:inputType="text"
+                android:text="Name" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/textView2"
+                android:text="Период"
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/spStartPeriod"
+                android:layout_height="48dp"
+                android:entries="@array/period_codes"></Spinner>
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/widget_limit_amount_title" />
+
+            <EditText
+                android:id="@+id/edAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="numberDecimal"
+                android:text="0" />
+
+        </TableRow>
+    </TableLayout>
+</androidx.core.widget.NestedScrollView>
