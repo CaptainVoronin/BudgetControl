@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.util.Log;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.UpdateSelectedWidgetsHandler;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
@@ -47,7 +46,6 @@ public class WidgetPinnedReceiver extends BroadcastReceiver {
             } catch (Exception e) {
                 Log.e(this.getClass().getName(), "[onReceive] " + e.getMessage());
                 sendError( context, e );
-                //throw new RuntimeException(e);
             }
         }
         else
