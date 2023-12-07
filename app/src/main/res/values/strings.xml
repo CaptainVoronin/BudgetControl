@@ -40,4 +40,5 @@
     <string name="label_widget_title">Заголовок</string>
     <string name="label_limit_amount">Лимит</string>
     <string name="internal_application_error">Внутренняя ошибка приложения</string>
+    <string name="error_title">Ошибка</string>
 </resources>

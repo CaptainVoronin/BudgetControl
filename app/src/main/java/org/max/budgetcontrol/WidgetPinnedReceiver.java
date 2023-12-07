@@ -46,6 +46,7 @@ public class WidgetPinnedReceiver extends BroadcastReceiver {
                 closeActivity(context);
             } catch (Exception e) {
                 Log.e(this.getClass().getName(), "[onReceive] " + e.getMessage());
+                sendError( context, e );
                 throw new RuntimeException(e);
             }
         }
@@ -54,6 +55,15 @@ public class WidgetPinnedReceiver extends BroadcastReceiver {
             Log.e(this.getClass().getName(), "[onReceive] Intent doesn't have BUNDLE_KEY_WIDGET. Nothing to pin");
             throw new InvalidParameterException( "Intent doesn't have BUNDLE_KEY_WIDGET" );
         }
+    }
+
+    private void sendError(Context context, Exception e)
+    {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setAction( Intent.ACTION_SEND );
+        intent.setFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
+        intent.putExtra( MainActivity.BUNDLE_KEY_PIN_ERROR, e.getMessage() );
+        context.startActivity( intent );
     }
 
     private void closeActivity(Context context ) {
