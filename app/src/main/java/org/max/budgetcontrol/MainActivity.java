@@ -163,7 +163,9 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                     /* intent = */ intent,
                     /* flags = */ PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
 
-            appWidgetManager.requestPinAppWidget(myProvider, null, successCallback);
+           boolean ret = appWidgetManager.requestPinAppWidget(myProvider, null, successCallback);
+           if( !ret )
+            Log.d( this.getClass().getName(), "[pinNewWidget] Launcher doesn't support widget pinning" );
         }
     }
 
