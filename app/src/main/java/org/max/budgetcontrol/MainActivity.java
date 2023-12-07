@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         setSupportActionBar(toolbar);
 
         Intent intent = getIntent();
+
         Bundle extras = intent.getExtras();
 
         launcher = registerForActivityResult(
@@ -116,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                     AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
             setActivityResult(Activity.RESULT_CANCELED, appWidgetId);
+
             currentWidget = getWidgetParams(appWidgetId);
         } else {
             currentWidget = new WidgetParams();
@@ -163,9 +165,9 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                     /* intent = */ intent,
                     /* flags = */ PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
 
-           boolean ret = appWidgetManager.requestPinAppWidget(myProvider, null, successCallback);
-           if( !ret )
-            Log.d( this.getClass().getName(), "[pinNewWidget] Launcher doesn't support widget pinning" );
+            boolean ret = appWidgetManager.requestPinAppWidget(myProvider, null, successCallback);
+            if (!ret)
+                Log.d(this.getClass().getName(), "[pinNewWidget] Launcher doesn't support widget pinning");
         }
     }
 
@@ -250,7 +252,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         };
 
 
-
         amountListener = new ValueChangeListener(edAmount, paramsStateListener, value -> {
             if (value == null)
                 return false;
@@ -281,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         }
 
         buff = edTitle.getText().toString();
-        paramsStateListener.setTitleComplete( buff.trim().length() > 0 );
+        paramsStateListener.setTitleComplete(buff.trim().length() > 0);
     }
 
     @Override
@@ -308,46 +309,52 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     }
 
     private void saveChanges() {
+
         Log.d(this.getClass().getName(), "[saveChanges]");
         applyEnteredValues();
 
-        // Если это новый виджет, у него еще нет APP ID
+        // Виджет добавляется через приложение, у него еще нет APP ID
         // Он будет добавляться через WidgetPinnedReceiver
         if (currentWidget.getAppId() == AppWidgetManager.INVALID_APPWIDGET_ID) {
             pinNewWidget();
-            return;
+        } else {
+
+            // Виджет или добавляется через ланчер,
+            // или конфигурится.
+            // и его надо или вставить в БД, или проапдейтить
+            // Это зависит от значение ID
+            if (currentWidget.getId() == WidgetParams.INVALID_WIDGET_ID)
+                db.insertWidgetParams(currentWidget);
+            else
+                db.updateWidgetParams(currentWidget);
+
+            AppWidgetManager wManager = AppWidgetManager.getInstance(getApplicationContext());
+            List<WidgetParams> wds = new ArrayList<>();
+            wds.add(currentWidget);
+
+            UpdateSelectedWidgetsHandler handler =
+                    new UpdateSelectedWidgetsHandler(getApplicationContext(),
+                            wManager,
+                            new int[]{currentWidget.getAppId()},
+                            wds);
+            handler.setAfterCallback(new AfterUpdateWidgetCallback());
+
+            try {
+                ZenMoneyClient client = new ZenMoneyClient(new URL(settings.getParameterAsString("url")),
+                        settings.getParameterAsString("token"),
+                        handler);
+                AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+                dlg.setView(R.layout.dlg_load_transactions_layout);
+                loadTransactionsDialog = dlg.create();
+                loadTransactionsDialog.show();
+
+                long timestamp = AWidgetViewMaker.calculateStartDate(currentWidget.getStartPeriod());
+                client.loadTransactions(timestamp);
+            } catch (MalformedURLException e) {
+                handler.processError(e);
+            }
+            setActivityResult(Activity.RESULT_OK, currentWidget.getAppId());
         }
-
-        // А это если виджет уже существовал,
-        // и его надо просто проапдейтить
-        db.updateWidgetParams(currentWidget);
-
-        AppWidgetManager wManager = AppWidgetManager.getInstance(getApplicationContext());
-        List<WidgetParams> wds = new ArrayList<>();
-        wds.add(currentWidget);
-
-        UpdateSelectedWidgetsHandler handler =
-                new UpdateSelectedWidgetsHandler(getApplicationContext(),
-                        wManager,
-                        new int[]{currentWidget.getAppId()},
-                        wds);
-        handler.setAfterCallback(new AfterUpdateWidgetCallback());
-
-        try {
-            ZenMoneyClient client = new ZenMoneyClient(new URL(settings.getParameterAsString("url")),
-                    settings.getParameterAsString("token"),
-                    handler);
-            AlertDialog.Builder dlg = new AlertDialog.Builder(this);
-            dlg.setView(R.layout.dlg_load_transactions_layout);
-            loadTransactionsDialog = dlg.create();
-            loadTransactionsDialog.show();
-
-            long timestamp = AWidgetViewMaker.calculateStartDate(currentWidget.getStartPeriod());
-            client.loadTransactions(timestamp);
-        } catch (MalformedURLException e) {
-            handler.processError(e);
-        }
-        setActivityResult(Activity.RESULT_OK, currentWidget.getAppId());
     }
 
     private void applyEnteredValues() {
