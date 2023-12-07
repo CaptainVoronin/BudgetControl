@@ -24,9 +24,9 @@ public class CategoryListViewAdapter extends ArrayAdapter<Category>
 
     Context context;
 
-    FragmentCategories setChangeListener;
+    MainActivity setChangeListener;
 
-    public CategoryListViewAdapter(Context context, FragmentCategories setChangeListener, List<Category> flatList, List<UUID> widgetCts)
+    public CategoryListViewAdapter(Context context, MainActivity setChangeListener, List<Category> flatList, List<UUID> widgetCts)
     {
         super(context, R.layout.category_list_item, flatList );
         this.context = context;
