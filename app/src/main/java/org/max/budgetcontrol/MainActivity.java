@@ -10,7 +10,6 @@ import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -67,19 +67,27 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     WidgetCategoryHolder categoryHolder;
 
-    StartPeriodEncoding carrentPeriodCode;
+    StartPeriodEncoding currentPeriodCode;
 
     ActivityResultLauncher<Intent> launcher;
     private CategoryLoaderHandler categoryLoaderHandler;
 
     AlertDialog loadCategoriesDialog;
+
     AlertDialog loadTransactionsDialog;
+
+    ValueChangeListener titleListener;
+
+    ValueChangeListener amountListener;
+
+    EditText edTitle;
+
+    EditText edAmount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -108,11 +116,10 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                     AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
             setActivityResult(Activity.RESULT_CANCELED, appWidgetId);
-            makeWidgetParams(appWidgetId);
+            currentWidget = getWidgetParams(appWidgetId);
         } else {
             currentWidget = new WidgetParams();
             currentWidget.setAppId(AppWidgetManager.INVALID_APPWIDGET_ID);
-            categoryHolder = new WidgetCategoryHolder(currentWidget.getCategories());
         }
 
         bringWidgetToUI();
@@ -124,11 +131,14 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     }
 
     private void bringWidgetToUI() {
-        TextView tv = findViewById(R.id.edTitle);
-        tv.setText(currentWidget.getTitle());
-        tv = findViewById(R.id.edAmount);
-        tv.setText("" + currentWidget.getLimitAmount());
+        edTitle = findViewById(R.id.edTitle);
+        edTitle.setText(currentWidget.getTitle());
+
         configSpinner(currentWidget);
+
+        edAmount = findViewById(R.id.edAmount);
+        edAmount.setText("" + currentWidget.getLimitAmount());
+
     }
 
     private void pinNewWidget() {
@@ -174,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 Object obj = view.getTag();
-                carrentPeriodCode = (StartPeriodEncoding) obj;
+                currentPeriodCode = (StartPeriodEncoding) obj;
             }
 
             @Override
@@ -217,7 +227,54 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater i = getMenuInflater();
         i.inflate(R.menu.action_bar_menu, menu);
+        initListeners(menu.findItem(R.id.idSave));
+
         return true;
+    }
+
+    private void initListeners(MenuItem item) {
+
+        WidgetParamsStateListener paramsStateListener = new WidgetParamsStateListener(item);
+
+        titleListener = new ValueChangeListener(edTitle, paramsStateListener, value -> {
+            if (value == null)
+                return false;
+            return value.toString().trim().length() > 0;
+        }) {
+            @Override
+            protected void valueChanged(boolean checkResult) {
+                paramsStateListener.setTitleComplete(checkResult);
+            }
+        };
+
+        amountListener = new ValueChangeListener(edAmount, paramsStateListener, value -> {
+            if (value == null)
+                return false;
+            if (value.toString().trim().length() == 0) return false;
+
+            double amount = -1;
+            try {
+                amount = Double.parseDouble(value.toString());
+            } catch (NumberFormatException e) {
+                return false;
+            }
+
+            return amount >= 0;
+        }) {
+            @Override
+            protected void valueChanged(boolean checkResult) {
+                paramsStateListener.setAmountLimitComplete(checkResult);
+            }
+        };
+
+        categoryHolder = new WidgetCategoryHolder(paramsStateListener, currentWidget.getCategories());
+        String buff = edAmount.getText().toString();
+        try {
+            double d = Double.parseDouble(buff);
+            paramsStateListener.setAmountLimitComplete(d >= 0);
+        } catch (NumberFormatException e) {
+            paramsStateListener.setAmountLimitComplete(false);
+        }
     }
 
     @Override
@@ -294,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         String buff = tv.getText().toString();
         double val = Double.parseDouble(buff);
         currentWidget.setLimitAmount(val);
-        currentWidget.setStartPeriod(carrentPeriodCode);
+        currentWidget.setStartPeriod(currentPeriodCode);
     }
 
     private void exitApp() {
@@ -307,10 +364,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         setResult(result, intent);
     }
 
-    private void makeWidgetParams(int appWidgetId) {
-        currentWidget = getWidgetParams(appWidgetId);
-        categoryHolder = new WidgetCategoryHolder(currentWidget.getCategories());
-    }
 
     private WidgetParams getWidgetParams(int appWidgetId) {
         WidgetParams wp = db.loadWidgetParamsByAppId(appWidgetId);
@@ -435,4 +488,5 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             finishAndRemoveTask();
         }
     }
+
 }
