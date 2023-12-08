@@ -1,10 +1,10 @@
 package org.max.budgetcontrol;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -21,6 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import okhttp3.Response;
+import androidx.appcompat.widget.Toolbar;
 
 public class SettingsActivity extends AppCompatActivity {
     boolean connectionProblems;
@@ -66,10 +67,13 @@ public class SettingsActivity extends AppCompatActivity {
                     .commit();
         }
 
-       /* ActionBar actionBar = getSupportActionBar();
+       Toolbar tb = findViewById( R.id.toolbar );
+       setSupportActionBar( tb );
+       ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-        }*/
+            actionBar.setTitle( R.string.settings_avtivity_title );
+        }
     }
 
     @Override
@@ -79,6 +83,18 @@ public class SettingsActivity extends AppCompatActivity {
         else {
             backAcquired = true;
             checkConnection();
+        }
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+
+            case android.R.id.home:
+                // app icon in action bar clicked; go home
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 

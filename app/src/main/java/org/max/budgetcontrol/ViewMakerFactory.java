@@ -17,7 +17,7 @@ public class ViewMakerFactory
    {
       switch( httpCode ) {
          case 200:
-            return new BaseWidgetViewMaker1(context, widget);
+            return getViewFor200Code( widget );
          case 401:
          default:
             return new NoConnectionViewMaker( context, widget );

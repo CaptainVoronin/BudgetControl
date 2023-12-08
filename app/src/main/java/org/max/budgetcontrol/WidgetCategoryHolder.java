@@ -4,39 +4,44 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-class WidgetCategoryHolder
-{
-   List<UUID> cats;
+class WidgetCategoryHolder {
+    List<UUID> cats;
+    WidgetParamsStateListener paramsStateListener;
 
-   public boolean isChanged()
+   /*public boolean isChanged()
    {
       return isChanged;
-   }
+   }*/
 
-   boolean isChanged;
+    boolean isChanged;
 
-   public WidgetCategoryHolder(List<UUID> cats )
-   {
-      this.cats = new ArrayList<>();
-      this.cats.addAll( cats );
-      isChanged = false;
-   }
+    public WidgetCategoryHolder(WidgetParamsStateListener paramsStateListener, List<UUID> cats) {
+        assert paramsStateListener != null : "ParamsStateListener can not be null";
+        assert cats != null : "Category list can not be null";
 
-   public void add( UUID uuid )
-   {
-      if( !cats.contains( uuid ) )
-      {
-         cats.add( uuid );
-         isChanged = true;
-      }
-   }
+        this.cats = new ArrayList<>();
+        this.cats.addAll(cats);
+        this.paramsStateListener = paramsStateListener;
+        isChanged = false;
+        this.paramsStateListener.setCategoriesComplete(cats.size() != 0);
+    }
 
-   public void remove( UUID uuid )
-   {
-      if( cats.contains( uuid ) )
-      {
-         cats.remove( uuid );
-         isChanged = true;
-      }
-   }
+    public void add(UUID uuid) {
+        assert uuid != null : "Category id can not be null";
+
+        if (!cats.contains(uuid)) {
+            cats.add(uuid);
+            isChanged = true;
+            paramsStateListener.setCategoriesComplete(true);
+        }
+    }
+
+    public void remove(UUID uuid) {
+        assert uuid != null : "Category id can not be null";
+        if (cats.contains(uuid)) {
+            cats.remove(uuid);
+            isChanged = true;
+            paramsStateListener.setCategoriesComplete(cats.size() != 0);
+        }
+    }
 }

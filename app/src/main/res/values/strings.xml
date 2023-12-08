@@ -41,4 +41,7 @@
     <string name="label_limit_amount">Лимит</string>
     <string name="internal_application_error">Внутренняя ошибка приложения</string>
     <string name="error_title">Ошибка</string>
+    <string name="complete_dlg_title">Выполнено</string>
+    <string name="widget_pinned_message">Виджет %s создан</string>
+    <string name="settings_avtivity_title">"Настройки подключения "</string>
 </resources>

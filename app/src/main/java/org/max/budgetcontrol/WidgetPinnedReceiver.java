@@ -38,16 +38,14 @@ public class WidgetPinnedReceiver extends BroadcastReceiver {
 
             try {
                 JSONObject job = new JSONObject(buff);
-
                 WidgetParams widget = WidgetParamsConverter.toWidget(job);
                 widget.setAppId(appId);
                 Log.i(this.getClass().getName(), "[onReceive] Widget app_id=" + appId + " is going to be pinned");
                 updateWidget(context, widget);
-                closeActivity(context);
+                sendOkToMainActivity(context, widget );
             } catch (Exception e) {
                 Log.e(this.getClass().getName(), "[onReceive] " + e.getMessage());
                 sendError( context, e );
-                throw new RuntimeException(e);
             }
         }
         else
@@ -66,11 +64,13 @@ public class WidgetPinnedReceiver extends BroadcastReceiver {
         context.startActivity( intent );
     }
 
-    private void closeActivity(Context context ) {
+    private void sendOkToMainActivity(Context context, WidgetParams widget) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction( Intent.ACTION_SEND );
         intent.setFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
         intent.putExtra( MainActivity.BUNDLE_KEY_EXIT_APP, true );
+        intent.putExtra( MainActivity.BUNDLE_KEY_NEW_WIDGET_TITLE, widget.getTitle() );
+
         context.startActivity( intent );
     }
 

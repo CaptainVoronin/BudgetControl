@@ -39,6 +39,8 @@ public class CategoryListViewAdapter extends ArrayAdapter<Category>
             selectedCats = new ArrayList<>();
     }
 
+
+
     @Override
     public void registerDataSetObserver(DataSetObserver dataSetObserver)
     {
