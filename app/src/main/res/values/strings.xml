@@ -43,4 +43,5 @@
     <string name="error_title">Ошибка</string>
     <string name="complete_dlg_title">Выполнено</string>
     <string name="widget_pinned_message">Виджет %s создан</string>
+    <string name="settings_avtivity_title">"Настройки подключения "</string>
 </resources>
