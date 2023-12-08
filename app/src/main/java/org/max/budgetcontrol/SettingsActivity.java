@@ -1,7 +1,6 @@
 package org.max.budgetcontrol;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import okhttp3.Response;
+import androidx.appcompat.widget.Toolbar;
 
 public class SettingsActivity extends AppCompatActivity {
     boolean connectionProblems;
@@ -66,10 +66,13 @@ public class SettingsActivity extends AppCompatActivity {
                     .commit();
         }
 
-       /* ActionBar actionBar = getSupportActionBar();
+       Toolbar tb = findViewById( R.id.toolbar );
+       setSupportActionBar( tb );
+       ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-        }*/
+            actionBar.setTitle( R.string.settings_avtivity_title );
+        }
     }
 
     @Override
