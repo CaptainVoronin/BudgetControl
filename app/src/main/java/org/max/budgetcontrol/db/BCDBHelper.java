@@ -42,8 +42,11 @@ public class BCDBHelper {
     }
 
     private void open() throws SQLiteException {
+        String startPragma = "PRAGMA foreign_keys = ON;";
         bcdb = new BCDB(context);
         db = bcdb.getWritableDatabase();
+        db.rawQuery( startPragma, null );
+
     }
 
     public WidgetParams loadWidgetParamsByAppId(Integer appId) {
@@ -309,5 +312,19 @@ public class BCDBHelper {
         wp.setTitle(title);
         wp.setCurrentAmount(currentAmount);
         return wp;
+    }
+
+    public void deleteWidgets(int[] ids)
+    {
+        Log.d(this.getClass().getName(), "[deleteWidgets] ");
+
+        assert db != null : "Database is not opened";
+
+        db.beginTransaction();
+        long count = db.delete(BCDB.TABLE_WIDGET_CATS, null, null);
+        db.delete(BCDB.TABLE_WIDGET, null, null);
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        Log.d(this.getClass().getName(), "[clearWidgets] Deleted " + count);
     }
 }
