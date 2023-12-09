@@ -314,17 +314,17 @@ public class BCDBHelper {
         return wp;
     }
 
-    public void deleteWidgets(int[] ids)
+    public void deleteWidgetsByAppId(int[] ids)
     {
-        Log.d(this.getClass().getName(), "[deleteWidgets] ");
-
         assert db != null : "Database is not opened";
 
-        db.beginTransaction();
-        long count = db.delete(BCDB.TABLE_WIDGET_CATS, null, null);
-        db.delete(BCDB.TABLE_WIDGET, null, null);
-        db.setTransactionSuccessful();
-        db.endTransaction();
-        Log.d(this.getClass().getName(), "[clearWidgets] Deleted " + count);
+        String strIds = Arrays.stream( ids )
+                .mapToObj( String::valueOf ).collect(Collectors.joining(","));
+
+        Log.d(this.getClass().getName(), "[deleteWidgetsByAppId] " + strIds );
+
+        long count = db.delete(BCDB.TABLE_WIDGET, null, null);
+        db.delete(BCDB.TABLE_WIDGET, "app_id in (?)", new String[]{ strIds });
+        Log.d(this.getClass().getName(), "[deleteWidgetsByAppId] Deleted " + count);
     }
 }
