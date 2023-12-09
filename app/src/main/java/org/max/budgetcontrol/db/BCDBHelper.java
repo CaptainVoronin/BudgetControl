@@ -20,7 +20,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class BCDBHelper {
+public class BCDBHelper
+{
     private Context context;
     private BCDB bcdb;
     private SQLiteDatabase db;
@@ -29,27 +30,32 @@ public class BCDBHelper {
 
     String select = "select id, app_id, limit_amount, start_period, title, current_amount from widget ";
 
-    protected BCDBHelper(Context context) {
+    protected BCDBHelper(Context context)
+    {
         this.context = context;
     }
 
-    public static BCDBHelper getInstance(Context context) {
-        if (instance == null) {
+    public static BCDBHelper getInstance(Context context)
+    {
+        if (instance == null)
+        {
             instance = new BCDBHelper(context);
             instance.open();
         }
         return instance;
     }
 
-    private void open() throws SQLiteException {
+    private void open() throws SQLiteException
+    {
         String startPragma = "PRAGMA foreign_keys = ON;";
         bcdb = new BCDB(context);
         db = bcdb.getWritableDatabase();
-        db.rawQuery( startPragma, null );
+        db.rawQuery(startPragma, null);
 
     }
 
-    public WidgetParams loadWidgetParamsByAppId(Integer appId) {
+    public WidgetParams loadWidgetParamsByAppId(Integer appId)
+    {
         assert db != null : "Database is not opened";
 
         WidgetParams wp = null;
@@ -58,7 +64,8 @@ public class BCDBHelper {
 
         Cursor crs = db.rawQuery(queryWidget, new String[]{appId.toString()});
 
-        if (crs.getCount() != 0) {
+        if (crs.getCount() != 0)
+        {
             crs.moveToNext();
             wp = createFromCursor(crs);
             crs.close();
@@ -66,7 +73,8 @@ public class BCDBHelper {
             crs = db.rawQuery(queryCats, new String[]{Integer.toString(wp.getId())});
             List<UUID> cats = new ArrayList<>();
 
-            while (crs.moveToNext()) {
+            while (crs.moveToNext())
+            {
                 String strStartPeriod = crs.getString(0);
                 cats.add(UUID.fromString(strStartPeriod));
             }
@@ -77,7 +85,8 @@ public class BCDBHelper {
         return wp;
     }
 
-    public WidgetParams loadWidgetParamsById(Integer id) {
+    public WidgetParams loadWidgetParamsById(Integer id)
+    {
         assert db != null : "Database is not opened";
 
         WidgetParams wp = null;
@@ -86,7 +95,8 @@ public class BCDBHelper {
 
         Cursor crs = db.rawQuery(queryWidget, new String[]{id.toString()});
 
-        if (crs.getCount() != 0) {
+        if (crs.getCount() != 0)
+        {
             crs.moveToNext();
             wp = createFromCursor(crs);
             crs.close();
@@ -94,7 +104,8 @@ public class BCDBHelper {
             crs = db.rawQuery(queryCats, new String[]{Integer.toString(wp.getId())});
             List<UUID> cats = new ArrayList<>();
 
-            while (crs.moveToNext()) {
+            while (crs.moveToNext())
+            {
                 String strStartPeriod = crs.getString(0);
                 cats.add(UUID.fromString(strStartPeriod));
             }
@@ -105,7 +116,8 @@ public class BCDBHelper {
         return wp;
     }
 
-    public WidgetParams insertWidgetParams(WidgetParams wp) {
+    public WidgetParams insertWidgetParams(WidgetParams wp)
+    {
         Log.d(this.getClass().getName(), "[insertWidgetParams]");
         assert db != null : "Database is not opened";
 
@@ -124,7 +136,8 @@ public class BCDBHelper {
 
         List<UUID> cats = wp.getCategories();
 
-        for (UUID uuid : cats) {
+        for (UUID uuid : cats)
+        {
             cv.put("widget_id", id);
             cv.put("category_id", uuid.toString());
             db.insert(BCDB.TABLE_WIDGET_CATS, null, cv);
@@ -136,7 +149,8 @@ public class BCDBHelper {
         return wp;
     }
 
-    public void updateWidgetParams(WidgetParams wp) {
+    public void updateWidgetParams(WidgetParams wp)
+    {
         Log.d(this.getClass().getName(), "[updateWidgetParams]");
 
         ContentValues cv = new ContentValues();
@@ -157,7 +171,8 @@ public class BCDBHelper {
 
         db.delete(BCDB.TABLE_WIDGET_CATS, "widget_id=?", new String[]{Integer.toString(wp.getId())});
 
-        for (UUID uuid : cats) {
+        for (UUID uuid : cats)
+        {
             cv.put("widget_id", wp.getId());
             cv.put("category_id", uuid.toString());
             db.insert(BCDB.TABLE_WIDGET_CATS, null, cv);
@@ -167,11 +182,13 @@ public class BCDBHelper {
         db.endTransaction();
     }
 
-    protected void onDestroy() {
+    protected void onDestroy()
+    {
         bcdb.close();
     }
 
-    public List<WidgetParams> getAllWidgets() {
+    public List<WidgetParams> getAllWidgets()
+    {
         Log.d(this.getClass().getName(), "[getAllWidgets]");
 
         assert db != null : "Database is not opened";
@@ -190,7 +207,8 @@ public class BCDBHelper {
         crs = db.rawQuery(queryAllWidgetCats, null);
         Map<UUID, Integer> cats = new HashMap<>(crs.getCount());
 
-        while (crs.moveToNext()) {
+        while (crs.moveToNext())
+        {
 
             Integer widgetId = crs.getInt(0);
             UUID catId = UUID.fromString(crs.getString(1));
@@ -199,10 +217,12 @@ public class BCDBHelper {
         }
         crs.close();
 
-        for (WidgetParams w : widgets) {
+        for (WidgetParams w : widgets)
+        {
             Iterator<UUID> it = cats.keySet().iterator();
 
-            while (it.hasNext()) {
+            while (it.hasNext())
+            {
                 UUID uuid = it.next();
                 Integer wId = cats.get(uuid);
                 if (w.getId() == wId.intValue()) w.addCategoryId(uuid);
@@ -212,7 +232,8 @@ public class BCDBHelper {
         return widgets;
     }
 
-    public List<WidgetParams> getWidgets(int[] ids) {
+    public List<WidgetParams> getWidgets(int[] ids)
+    {
         Log.d(this.getClass().getName(), "[getWidgets] Is going to be updated " + ids.length);
 
         assert db != null : "Database is not opened";
@@ -244,7 +265,8 @@ public class BCDBHelper {
         crs = db.rawQuery(queryAllWidgetCats, null);
         Map<UUID, Integer> cats = new HashMap<>(crs.getCount());
 
-        while (crs.moveToNext()) {
+        while (crs.moveToNext())
+        {
             Integer widgetId = crs.getInt(0);
             UUID catId = UUID.fromString(crs.getString(1));
 
@@ -252,10 +274,12 @@ public class BCDBHelper {
         }
         crs.close();
 
-        for (WidgetParams w : widgets) {
+        for (WidgetParams w : widgets)
+        {
             Iterator<UUID> it = cats.keySet().iterator();
 
-            while (it.hasNext()) {
+            while (it.hasNext())
+            {
                 UUID uuid = it.next();
                 Integer wId = cats.get(uuid);
                 if (w.getId() == wId.intValue()) w.addCategoryId(uuid);
@@ -265,7 +289,8 @@ public class BCDBHelper {
         return widgets;
     }
 
-    public int deleteLost(List<Integer> lost) {
+    public int deleteLost(List<Integer> lost)
+    {
         Log.d(this.getClass().getName(), "[deleteLost]");
 
         assert db != null : "Database is not opened";
@@ -283,7 +308,8 @@ public class BCDBHelper {
     }
 
     //TODO: Обработать исключение в транзакции
-    public void clearWidgets() {
+    public void clearWidgets()
+    {
         Log.d(this.getClass().getName(), "[clearWidgets]");
 
         assert db != null : "Database is not opened";
@@ -296,7 +322,8 @@ public class BCDBHelper {
         Log.d(this.getClass().getName(), "[clearWidgets] Deleted " + count);
     }
 
-    WidgetParams createFromCursor(Cursor cursor) {
+    WidgetParams createFromCursor(Cursor cursor)
+    {
         int wID = cursor.getInt(0);
         int appId = cursor.getInt(1);
         double limit = cursor.getDouble(2);
@@ -318,13 +345,12 @@ public class BCDBHelper {
     {
         assert db != null : "Database is not opened";
 
-        String strIds = Arrays.stream( ids )
-                .mapToObj( String::valueOf ).collect(Collectors.joining(","));
+        String strIds = Arrays.stream(ids)
+                .mapToObj(String::valueOf).collect(Collectors.joining(","));
 
-        Log.d(this.getClass().getName(), "[deleteWidgetsByAppId] " + strIds );
+        Log.d(this.getClass().getName(), "[deleteWidgetsByAppId] " + strIds);
 
-        long count = db.delete(BCDB.TABLE_WIDGET, null, null);
-        db.delete(BCDB.TABLE_WIDGET, "app_id in (?)", new String[]{ strIds });
+        int count = db.delete(BCDB.TABLE_WIDGET, "app_id in ( ? )", new String[]{strIds});
         Log.d(this.getClass().getName(), "[deleteWidgetsByAppId] Deleted " + count);
     }
 }
