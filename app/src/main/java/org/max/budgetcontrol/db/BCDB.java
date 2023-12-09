@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class BCDB extends SQLiteOpenHelper
 {
    // If you change the database schema, you must increment the database version.
-   public static final int DATABASE_VERSION = 4;
+   public static final int DATABASE_VERSION = 5;
    public static final String DATABASE_NAME = "bcbd.db";
 
    public static final String TABLE_WIDGET = "widget";
@@ -25,7 +25,7 @@ public class BCDB extends SQLiteOpenHelper
    public static final String create_widget_cats_table = "create table widget_cats ( " +
            "widget_id integer not null," +
            "category_id text not null, " +
-           "foreign key ( widget_id ) references widget ( id )" +
+           "constraint fk_widget_id foreign key ( widget_id ) references widget ( id ) on delete cascade" +
            ");";
 
    public static final String create_settings = "create table settings ( " +
@@ -49,18 +49,11 @@ public class BCDB extends SQLiteOpenHelper
    @Override
    public void onUpgrade(SQLiteDatabase db, int i, int newVersion)
    {
-      if( newVersion != 4 )
-      {
          db.execSQL("drop table if exists widget_cats");
          db.execSQL("drop table if exists widget");
          //db.execSQL( "delete from settings" );
 
          db.execSQL(create_widget_table);
          db.execSQL(create_widget_cats_table);
-      }
-      else if( newVersion == 4)
-      {
-         db.execSQL( "alter table widget add column current_amount real not null default 0" );
-      }
    }
 }
