@@ -3,8 +3,11 @@ plugins {
 }
 
 android {
+
+    def targetSDKVersion = 33
+
     namespace 'org.max.budgetcontrol'
-    compileSdk 33
+    compileSdk targetSDKVersion
 
     def versionPropsFile = file('version.properties')
     def value = 0
@@ -56,7 +59,7 @@ android {
     defaultConfig {
         applicationId "org.max.budgetcontrol"
         minSdk 29
-        targetSdk 33
+        targetSdk targetSDKVersion
         versionCode 1
         versionName "1.0"
         versionCode versionProps['VERSION_NUMBER'].toInteger()
