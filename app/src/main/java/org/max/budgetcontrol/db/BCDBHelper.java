@@ -36,9 +36,9 @@ public class BCDBHelper
             "title, " +
             "current_amount," +
             "title_bg_color, " +
-            "title_text_color " +
+            "title_text_color, " +
             "amount_bg_color, " +
-            "amount_text_color " +
+            "amount_text_color, " +
             "period_bg_color, " +
             "period_text_color " +
             "from widget ";

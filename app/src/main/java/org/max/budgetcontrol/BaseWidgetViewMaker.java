@@ -1,6 +1,7 @@
 package org.max.budgetcontrol;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -24,12 +25,20 @@ class BaseWidgetViewMaker extends AWidgetViewMaker
     @Override
     public RemoteViews getViews()
     {
-        long startDate = calculateStartDate(getWidget().getStartPeriod());
         RemoteViews views = new RemoteViews(getContext().getPackageName(), R.layout.b_c_widget);
+
         views.setTextViewText(R.id.tvAmount, formatAmount( getWidget().getCurrentAmount()));
+        views.setInt(R.id.tvAmount, "setTextColor", getWidget().getAmountParams().getFontColor().toArgb() );
+        views.setInt(R.id.tvAmount, "setBackgroundColor", getWidget().getAmountParams().getBackColor().toArgb());
+
         views.setTextViewText(R.id.tvTitle, getWidget().getTitle() );
-        String buff = sdf.format( new Date( startDate ) );
-        views.setTextViewText(R.id.tvStartDate, buff );
+        views.setInt(R.id.tvTitle, "setTextColor", getWidget().getTitleParams().getFontColor().toArgb() );
+        views.setInt(R.id.tvTitle, "setBackgroundColor", getWidget().getTitleParams().getBackColor().toArgb());
+
+        views.setTextViewText(R.id.tvStartDate, getPeriodMessage());
+        views.setInt(R.id.tvStartDate, "setTextColor", getWidget().getPeriodParams().getFontColor().toArgb() );
+        views.setInt(R.id.tvStartDate, "setBackgroundColor", getWidget().getPeriodParams().getBackColor().toArgb());
+
         return views;
     }
 }

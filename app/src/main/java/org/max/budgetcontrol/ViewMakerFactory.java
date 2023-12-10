@@ -28,6 +28,6 @@ public class ViewMakerFactory
       if( widget.getLimitAmount() > 1 )
          return new AmountLimitViewMaker( context, widget );
       else
-         return new BaseWidgetViewMaker1(context, widget);
+         return new BaseWidgetViewMaker(context, widget);
    }
 }
