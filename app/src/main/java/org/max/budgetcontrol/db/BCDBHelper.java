@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.graphics.Color;
 import android.util.Log;
 
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
@@ -28,7 +29,19 @@ public class BCDBHelper
 
     private static BCDBHelper instance;
 
-    String select = "select id, app_id, limit_amount, start_period, title, current_amount from widget ";
+    final String select = "select id, " +
+            "app_id, " +
+            "limit_amount, " +
+            "start_period, " +
+            "title, " +
+            "current_amount," +
+            "title_bg_color, " +
+            "title_text_color " +
+            "amount_bg_color, " +
+            "amount_text_color " +
+            "period_bg_color, " +
+            "period_text_color " +
+            "from widget ";
 
     protected BCDBHelper(Context context)
     {
@@ -121,13 +134,7 @@ public class BCDBHelper
         Log.d(this.getClass().getName(), "[insertWidgetParams]");
         assert db != null : "Database is not opened";
 
-        ContentValues cv = new ContentValues();
-
-        cv.put("app_id", wp.getAppId());
-        cv.put("limit_amount", wp.getLimitAmount());
-        cv.put("start_period", wp.getStartPeriod().toString());
-        cv.put("title", wp.getTitle());
-        cv.put("current_amount", wp.getCurrentAmount());
+        ContentValues cv = makeContentValues( wp );
 
         db.beginTransaction();
 
@@ -153,13 +160,7 @@ public class BCDBHelper
     {
         Log.d(this.getClass().getName(), "[updateWidgetParams]");
 
-        ContentValues cv = new ContentValues();
-
-        cv.put("app_id", wp.getAppId());
-        cv.put("limit_amount", wp.getLimitAmount());
-        cv.put("start_period", wp.getStartPeriod().toString());
-        cv.put("title", wp.getTitle());
-        cv.put("current_amount", wp.getCurrentAmount());
+        ContentValues cv = makeContentValues( wp ); //
 
         db.beginTransaction();
 
@@ -180,6 +181,24 @@ public class BCDBHelper
         }
         db.setTransactionSuccessful();
         db.endTransaction();
+    }
+
+    private ContentValues makeContentValues(WidgetParams wp)
+    {
+        ContentValues cv = new ContentValues();
+        cv.put(BCDB.TW_APP_ID, wp.getAppId());
+        cv.put(BCDB.TW_LIMIT_AMOUNT, wp.getLimitAmount());
+        cv.put(BCDB.TW_START_PERIOD, wp.getStartPeriod().toString());
+        cv.put(BCDB.TW_TITLE, wp.getTitle());
+        cv.put(BCDB.TW_CURRENT_AMOUNT, wp.getCurrentAmount());
+        cv.put(BCDB.TW_LIMIT_AMOUNT, wp.getLimitAmount());
+        cv.put(BCDB.TW_TITLE_TEXT_COLOR, wp.getTitleParams().getFontColor().toArgb());
+        cv.put(BCDB.TW_TITLE_BGCOLOR, wp.getTitleParams().getBackColor().toArgb());
+        cv.put(BCDB.TW_AMOUNT_TEXT_COLOR, wp.getAmountParams().getFontColor().toArgb());
+        cv.put(BCDB.TW_AMOUNT_BGCOLOR, wp.getAmountParams().getBackColor().toArgb());
+        cv.put(BCDB.TW_PERIOD_TEXT_COLOR, wp.getPeriodParams().getFontColor().toArgb());
+        cv.put(BCDB.TW_PERIOD_BGCOLOR, wp.getPeriodParams().getBackColor().toArgb());
+        return cv;
     }
 
     protected void onDestroy()
@@ -338,6 +357,23 @@ public class BCDBHelper
         wp.setStartPeriod(StartPeriodEncoding.valueOf(strStartPeriod));
         wp.setTitle(title);
         wp.setCurrentAmount(currentAmount);
+        // title
+        int bgColor = cursor.getInt(6);
+        int textColor = cursor.getInt(7);
+        WidgetParams.LabelParams lp = new WidgetParams.LabelParams(Color.valueOf(bgColor), Color.valueOf(textColor));
+        wp.setTitleParams(lp);
+
+        // Amount
+        bgColor = cursor.getInt(8);
+        textColor = cursor.getInt(9);
+        lp = new WidgetParams.LabelParams(Color.valueOf(bgColor), Color.valueOf(textColor));
+        wp.setAmountParams(lp);
+        // Period
+        bgColor = cursor.getInt(10);
+        textColor = cursor.getInt(11);
+        lp = new WidgetParams.LabelParams(Color.valueOf(bgColor), Color.valueOf(textColor));
+        wp.setPeriodParams(lp);
+
         return wp;
     }
 

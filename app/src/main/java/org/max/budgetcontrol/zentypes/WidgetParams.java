@@ -90,6 +90,10 @@ public class WidgetParams
         this.appId = -1;
         categories = new ArrayList<>();
         labels = new HashMap<>();
+        labels.put( TITLE, new LabelParams( ) );
+        labels.put( AMOUNT, new LabelParams( Color.valueOf( 0xD6D6D6 ), Color.valueOf( Color.BLACK ) ) );
+        labels.put( PERIOD, new LabelParams( ) );
+
         title = "";
     }
 
@@ -143,10 +147,9 @@ public class WidgetParams
         return labels.get( TITLE );
     }
 
-    class LabelParams{
+    public static class LabelParams{
         private final Color backColor;
         private final Color fontColor;
-        private final float textSize;
 
         public Color getBackColor() {
             return backColor;
@@ -156,15 +159,16 @@ public class WidgetParams
             return fontColor;
         }
 
-        public float getTextSize() {
-            return textSize;
-        }
-
-        public LabelParams(Color backColor, Color fontColor, float textSize )
+        public LabelParams(Color backColor, Color fontColor )
         {
             this.backColor = backColor;
             this.fontColor = fontColor;
-            this.textSize = textSize;
+        }
+
+        public LabelParams( )
+        {
+            this.backColor = Color.valueOf( Color.WHITE );
+            this.fontColor = Color.valueOf( Color.BLACK );
         }
     }
 }
