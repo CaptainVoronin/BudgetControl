@@ -2,6 +2,7 @@ package org.max.budgetcontrol;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -14,12 +15,10 @@ import java.util.Date;
 
 class BaseWidgetViewMaker extends AWidgetViewMaker
 {
-    SimpleDateFormat sdf;
 
     public BaseWidgetViewMaker(Context context, WidgetParams widget)
     {
         super( context, widget );
-        sdf = new SimpleDateFormat( "dd.MM.yyyy" );
     }
 
     @Override
@@ -29,7 +28,8 @@ class BaseWidgetViewMaker extends AWidgetViewMaker
 
         views.setTextViewText(R.id.tvAmount, formatAmount( getWidget().getCurrentAmount()));
         views.setInt(R.id.tvAmount, "setTextColor", getWidget().getAmountParams().getFontColor().toArgb() );
-        views.setInt(R.id.tvAmount, "setBackgroundColor", getWidget().getAmountParams().getBackColor().toArgb());
+        int color = getWidget().getAmountParams().getBackColor().toArgb();
+        views.setInt(R.id.tvAmount, "setBackgroundColor", color );
 
         views.setTextViewText(R.id.tvTitle, getWidget().getTitle() );
         views.setInt(R.id.tvTitle, "setTextColor", getWidget().getTitleParams().getFontColor().toArgb() );

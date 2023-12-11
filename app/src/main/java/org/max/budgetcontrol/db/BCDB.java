@@ -3,6 +3,7 @@ package org.max.budgetcontrol.db;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class BCDB extends SQLiteOpenHelper
 {
@@ -72,5 +73,6 @@ public class BCDB extends SQLiteOpenHelper
 
          db.execSQL(create_widget_table);
          db.execSQL(create_widget_cats_table);
+         Log.i( this.getClass().getName(), "[onUpgrade] DB is upgraded successfully to the version " + newVersion );
    }
 }

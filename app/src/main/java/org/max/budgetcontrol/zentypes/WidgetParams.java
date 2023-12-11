@@ -91,7 +91,7 @@ public class WidgetParams
         categories = new ArrayList<>();
         labels = new HashMap<>();
         labels.put( TITLE, new LabelParams( ) );
-        labels.put( AMOUNT, new LabelParams( Color.valueOf( 0xD6D6D6 ), Color.valueOf( Color.BLACK ) ) );
+        labels.put( AMOUNT, new LabelParams( Color.valueOf( 0xFFD6D6D6 ), Color.valueOf( Color.BLACK ) ) );
         labels.put( PERIOD, new LabelParams( ) );
 
         title = "";
