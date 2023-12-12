@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager.widget.ViewPager;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -24,6 +25,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.google.android.material.tabs.TabLayout;
+
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -128,6 +132,12 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
         settings = new SettingsHolder(getApplicationContext());
         boolean completeConfig = settings.init();
+
+        ViewPager viewPager = findViewById(R.id.pager);
+        BCPagerAdapter viewPagerAdapter = new BCPagerAdapter (getSupportFragmentManager(), this );
+        viewPager.setAdapter(viewPagerAdapter);
+        TabLayout tabLayout =  findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
 
         if (extras != null) {
             int appWidgetId = extras.getInt(
