@@ -7,83 +7,27 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-   <androidx.appcompat.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        />
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <TableLayout
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp">
+        app:tabGravity="fill"
+        app:tabMode="fixed">
 
-        <TableRow>
+    </com.google.android.material.tabs.TabLayout>
 
-            <TextView
-                android:id="@+id/tvStateHader"
-                android:text="@string/label_widget_title"
-                android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/edTitle"
-                android:layout_weight="1"
-                android:ems="10"
-                android:inputType="textCapSentences" />
-        </TableRow>
-
-        <TableRow>
-
-            <TextView
-                android:id="@+id/textView2"
-                android:text="@string/label_period"
-                android:textSize="18sp" />
-
-            <Spinner
-                android:id="@+id/spStartPeriod"
-                android:layout_height="48dp"
-                android:entries="@array/period_codes" />
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_limit_amount"
-                android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/edAmount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="numberDecimal"
-                android:text="0"
-                android:textAlignment="textEnd" />
-
-        </TableRow>
-    </TableLayout>
-
-    <ScrollView
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp">
-        <ListView
-            android:id="@+id/lvCategories"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </ScrollView>
-
+        android:layout_height="wrap_content" />
 </LinearLayout>

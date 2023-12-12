@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
@@ -59,6 +60,11 @@ public class FragmentCategories extends ABCFragment implements CompoundButton.On
         return getMainActivity().getString( R.string.tab_title_categories );
     }
 
+    @Override
+    public void initListeners(MenuItem item) {
+
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -66,7 +72,7 @@ public class FragmentCategories extends ABCFragment implements CompoundButton.On
                              @Nullable Bundle savedInstanceState) {
 
         if( getMainActivity().getCurrentWidget() != null )
-            categoryHolder = new WidgetCategoryHolder( getMainActivity().getCurrentWidget().getCategories());
+            categoryHolder = getMainActivity().getCategoryHolder();
         fragmentView = inflater.inflate(R.layout.fragment_categories, container, false); 
         return fragmentView;
     }
@@ -167,7 +173,7 @@ public class FragmentCategories extends ABCFragment implements CompoundButton.On
             if (c.getChild().size() != 0)
                 flatList.addAll(c.getChild());
         }
-        ListView lv = (ListView) fragmentView.findViewById(R.id.lvCategories);
+        ListView lv = fragmentView.findViewById(R.id.lvCategories);
 
         flatList = flatList.stream().filter(c -> c.isOutcome()).collect(Collectors.toList());
         List<UUID> widgetCats = null;

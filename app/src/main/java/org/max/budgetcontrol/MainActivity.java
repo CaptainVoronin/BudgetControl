@@ -24,7 +24,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,15 +54,27 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     public static final String BUNDLE_KEY_WIDGET = "pinnedWidget";
     public static final String BUNDLE_KEY_APP_ID = "appWidgetId";
     public static final String BUNDLE_KEY_EXIT_APP = "bc_action_exit_app";
-
     public static final String BUNDLE_KEY_PIN_ERROR = "bc_pin_widget_error";
 
     List<Category> categories;
+
+    public SettingsHolder getSettings() {
+        return settings;
+    }
+
     SettingsHolder settings;
 
     BCDBHelper db;
 
+    public WidgetParams getCurrentWidget() {
+        return currentWidget;
+    }
+
     WidgetParams currentWidget;
+
+    public WidgetCategoryHolder getCategoryHolder() {
+        return categoryHolder;
+    }
 
     WidgetCategoryHolder categoryHolder;
 
@@ -79,6 +90,12 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     ValueChangeListener titleListener;
 
     ValueChangeListener amountListener;
+
+    public WidgetParamsStateListener getParamsStateListener() {
+        return paramsStateListener;
+    }
+
+    WidgetParamsStateListener paramsStateListener;
 
     EditText edTitle;
 
@@ -238,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     private void initListeners(MenuItem item) {
 
-        WidgetParamsStateListener paramsStateListener = new WidgetParamsStateListener(item);
+        paramsStateListener = new WidgetParamsStateListener(item);
 
         titleListener = new ValueChangeListener(edTitle, paramsStateListener, value -> {
             if (value == null)
@@ -300,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             return super.onOptionsItemSelected(item);
     }
 
-    private void showSettings(boolean withError) {
+    public void showSettings(boolean withError) {
         Intent intent = new Intent(this, SettingsActivity.class);
         if (withError)
             intent.putExtra(CONNECTION_PROBLEM, true);
