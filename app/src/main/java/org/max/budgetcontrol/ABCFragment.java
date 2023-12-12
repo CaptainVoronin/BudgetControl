@@ -1,11 +1,19 @@
 package org.max.budgetcontrol;
 
-import android.view.MenuItem;
-
 import androidx.fragment.app.Fragment;
 
 public abstract class ABCFragment extends Fragment
 {
+    public WidgetParamsStateListener getParamsStateListener() {
+        return paramsStateListener;
+    }
+
+    public void setParamsStateListener(WidgetParamsStateListener paramsStateListener) {
+        this.paramsStateListener = paramsStateListener;
+    }
+
+    private WidgetParamsStateListener paramsStateListener;
+
     public MainActivity getMainActivity() {
         return mainActivity;
     }
@@ -18,6 +26,6 @@ public abstract class ABCFragment extends Fragment
 
     public abstract String getTitle();
 
-    public abstract void initListeners( MenuItem item );
+    public abstract void initListeners(WidgetParamsStateListener item );
 
 }
