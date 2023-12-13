@@ -46,4 +46,5 @@
     <string name="settings_avtivity_title">"Настройки подключения "</string>
     <string name="tab_title_categories">Категории</string>
     <string name="tab_title_common_settings">Параметры виджета</string>
+    <string name="widget_limit_amount_title">Бюджет</string>
 </resources>

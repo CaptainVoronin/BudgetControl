@@ -16,6 +16,10 @@ public class SettingsHolder {
 
     Map<String, Object> props;
 
+    public boolean isInit() {
+        return isInit;
+    }
+
     boolean isInit;
 
     public SettingsHolder( Context context )

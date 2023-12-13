@@ -28,4 +28,6 @@ public abstract class ABCFragment extends Fragment
 
     public abstract void initListeners(WidgetParamsStateListener item );
 
+    public abstract void applyEnteredValues();
+
 }

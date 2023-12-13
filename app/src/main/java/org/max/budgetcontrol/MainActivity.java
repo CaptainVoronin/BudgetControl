@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
+public class MainActivity extends AppCompatActivity {
     public static final String CONNECTION_PROBLEM = "connection_problem";
     public static final String BUNDLE_KEY_NEW_WIDGET_TITLE = "NEW_WIDGET_TITLE";
     private static final int WIDGET_WAS_PINNED = 876876;
@@ -59,8 +59,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     public static final String BUNDLE_KEY_APP_ID = "appWidgetId";
     public static final String BUNDLE_KEY_EXIT_APP = "bc_action_exit_app";
     public static final String BUNDLE_KEY_PIN_ERROR = "bc_pin_widget_error";
-
-    List<Category> categories;
 
     public SettingsHolder getSettings() {
         return settings;
@@ -76,34 +74,17 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     WidgetParams currentWidget;
 
-    public WidgetCategoryHolder getCategoryHolder() {
-        return categoryHolder;
-    }
-
     WidgetCategoryHolder categoryHolder;
 
     StartPeriodEncoding currentPeriodCode;
 
     ActivityResultLauncher<Intent> launcher;
-    private CategoryLoaderHandler categoryLoaderHandler;
-
-    AlertDialog loadCategoriesDialog;
 
     AlertDialog loadTransactionsDialog;
 
-    ValueChangeListener titleListener;
-
-    ValueChangeListener amountListener;
-
-    public WidgetParamsStateListener getParamsStateListener() {
-        return paramsStateListener;
-    }
-
     WidgetParamsStateListener paramsStateListener;
 
-    EditText edTitle;
-
-    EditText edAmount;
+    BCPagerAdapter viewPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,9 +102,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 result -> {
                     // There are no request codes
                     settings = new SettingsHolder(getApplicationContext());
-                    if (settings.init())
-                        loadCategories();
-                    else
+                    if (!settings.init())
                         showSettings(true);
                 });
 
@@ -134,9 +113,9 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         boolean completeConfig = settings.init();
 
         ViewPager viewPager = findViewById(R.id.pager);
-        BCPagerAdapter viewPagerAdapter = new BCPagerAdapter (getSupportFragmentManager(), this );
+        viewPagerAdapter = new BCPagerAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(viewPagerAdapter);
-        TabLayout tabLayout =  findViewById(R.id.tabs);
+        TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
         if (extras != null) {
@@ -151,23 +130,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             currentWidget.setAppId(AppWidgetManager.INVALID_APPWIDGET_ID);
         }
 
-        bringWidgetToUI();
-
-        if (completeConfig)
-            loadCategories();
-        else
+        if (!completeConfig)
             showSettings(true);
-    }
-
-    private void bringWidgetToUI() {
-        edTitle = findViewById(R.id.edTitle);
-        edTitle.setText(currentWidget.getTitle());
-
-        configSpinner(currentWidget);
-
-        edAmount = findViewById(R.id.edAmount);
-        edAmount.setText("" + currentWidget.getLimitAmount());
-
     }
 
     private void pinNewWidget() {
@@ -208,58 +172,11 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         }
     }
 
-    void configSpinner(WidgetParams widget) {
-        Spinner sp = findViewById(R.id.spStartPeriod);
-        sp.setAdapter(new StartPeriodSpinAdapter(getApplicationContext(), widget));
-        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Object obj = view.getTag();
-                currentPeriodCode = (StartPeriodEncoding) obj;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-        sp.setSelection(widget.getStartPeriod().number());
-    }
-
-    private void loadCategories() {
-        lockUIForWaiting();
-        Log.d(this.getClass().getName(), "[loadCategories]");
-        categoryLoaderHandler = new CategoryLoaderHandler();
-        try {
-            ZenMoneyClient client = new ZenMoneyClient(
-                    new URL(settings.getParameterAsString("url")),
-                    settings.getParameterAsString("token"),
-                    categoryLoaderHandler);
-            client.getAllCategories();
-            AlertDialog.Builder dlg = new AlertDialog.Builder(this);
-            LayoutInflater inflater = this.getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.dlg_load_layout, null);
-            dlg.setView(dialogView);
-
-            dlg.setNegativeButton(android.R.string.cancel, ((dialogInterface, i) -> {
-                dialogInterface.dismiss();
-                categoryLoaderHandler.cancelRequest();
-            }));
-
-            loadCategoriesDialog = dlg.create();
-            loadCategoriesDialog.show();
-
-        } catch (MalformedURLException e) {
-            categoryLoaderHandler.processError(e);
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater i = getMenuInflater();
         i.inflate(R.menu.action_bar_menu, menu);
         initListeners(menu.findItem(R.id.idSave));
-
         return true;
     }
 
@@ -267,49 +184,10 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
         paramsStateListener = new WidgetParamsStateListener(item);
 
-        titleListener = new ValueChangeListener(edTitle, paramsStateListener, value -> {
-            if (value == null)
-                return false;
-            return value.toString().trim().length() > 0;
-        }) {
-            @Override
-            protected void valueChanged(boolean checkResult) {
-                paramsStateListener.setTitleComplete(checkResult);
-            }
-        };
-
-
-        amountListener = new ValueChangeListener(edAmount, paramsStateListener, value -> {
-            if (value == null)
-                return false;
-            if (value.toString().trim().length() == 0) return false;
-
-            double amount = -1;
-            try {
-                amount = Double.parseDouble(value.toString());
-            } catch (NumberFormatException e) {
-                return false;
-            }
-
-            return amount >= 0;
-        }) {
-            @Override
-            protected void valueChanged(boolean checkResult) {
-                paramsStateListener.setAmountLimitComplete(checkResult);
-            }
-        };
-
-        categoryHolder = new WidgetCategoryHolder(paramsStateListener, currentWidget.getCategories());
-        String buff = edAmount.getText().toString();
-        try {
-            double d = Double.parseDouble(buff);
-            paramsStateListener.setAmountLimitComplete(d >= 0);
-        } catch (NumberFormatException e) {
-            paramsStateListener.setAmountLimitComplete(false);
+        for (int i = 0; i < viewPagerAdapter.getCount(); i++) {
+            ABCFragment fragment = (ABCFragment) viewPagerAdapter.getItem(i);
+            fragment.initListeners(paramsStateListener);
         }
-
-        buff = edTitle.getText().toString();
-        paramsStateListener.setTitleComplete(buff.trim().length() > 0);
     }
 
     @Override
@@ -385,14 +263,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     }
 
     private void applyEnteredValues() {
-        currentWidget.setCategories(categoryHolder.cats);
-        TextView tv = findViewById(R.id.edTitle);
-        currentWidget.setTitle(tv.getText().toString());
-        tv = findViewById(R.id.edAmount);
-        String buff = tv.getText().toString();
-        double val = Double.parseDouble(buff);
-        currentWidget.setLimitAmount(val);
-        currentWidget.setStartPeriod(currentPeriodCode);
+        for( int i =0; i < viewPagerAdapter.getCount(); i++ )
+            (( ABCFragment )viewPagerAdapter.getItem( i )).applyEnteredValues();
     }
 
     private void exitApp() {
@@ -412,82 +284,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             wp.setAppId(appWidgetId);
         }
         return wp;
-    }
-
-    @Override
-    public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-        UUID id = (UUID) compoundButton.getTag();
-        if (checked)
-            categoryHolder.add(id);
-        else
-            categoryHolder.remove(id);
-    }
-
-    class CategoryLoaderHandler extends AZenClientResponseHandler {
-
-        @Override
-        public void onNon200Code(@NotNull Response response) {
-            if (response.code() == 401 || response.code() == 500)
-                runOnUiThread(() -> {
-                    loadCategoriesDialog.dismiss();
-                    showSettings(true);
-                });
-        }
-
-        @Override
-        public void onResponseReceived(JSONObject jObject) throws JSONException {
-            List<Category> cats = ResponseProcessor.getCategory(jObject);
-            final List<Category> cs = ResponseProcessor.makeCategoryTree(cats);
-            runOnUiThread(() -> {
-                loadCategoriesDialog.dismiss();
-                bringCategoryListToFront(cs);
-            });
-        }
-
-        @Override
-        public void processError(Exception e) {
-            runOnUiThread(() -> {
-                loadCategoriesDialog.dismiss();
-                if (e instanceof java.net.UnknownHostException) {
-
-                    AlertDialog.Builder dlg = new AlertDialog.Builder(MainActivity.this);
-                    dlg.setNegativeButton(android.R.string.cancel, (dialog, i) -> {
-                        dialog.dismiss();
-                        showSettings(true);
-                    });
-                    dlg.setTitle(R.string.netwotk_error);
-                    dlg.setMessage(e.getMessage());
-                    dlg.show();
-                }
-            });
-        }
-    }
-
-    private void bringCategoryListToFront(List<Category> cats) {
-        categories = cats;
-        List<Category> flatList = new ArrayList<>();
-        for (Category c : categories) {
-            flatList.add(c);
-            if (c.getChild().size() != 0)
-                flatList.addAll(c.getChild());
-        }
-        ListView lv = (ListView) findViewById(R.id.lvCategories);
-
-        flatList = flatList.stream().filter(c -> c.isOutcome()).collect(Collectors.toList());
-        List<UUID> widgetCats = null;
-        if (currentWidget != null)
-            widgetCats = currentWidget.getCategories();
-
-        lv.setAdapter(new CategoryListViewAdapter(getApplicationContext(), MainActivity.this, flatList, widgetCats));
-        unlockUIOnResult();
-    }
-
-    private void lockUIForWaiting() {
-
-    }
-
-    private void unlockUIOnResult() {
-
     }
 
     @Override
@@ -528,5 +324,4 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             finishAndRemoveTask();
         }
     }
-
 }
