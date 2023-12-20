@@ -13,8 +13,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewpager.widget.ViewPager;
 
+import org.json.JSONException;
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
+import org.max.peditor.IPropertyChangeListener;
+import org.max.peditor.IPropertyEditor;
+import org.max.peditor.PropertyHolder;
+
 
 public class FragmentWidgetParams extends ABCFragment {
 
@@ -24,13 +29,11 @@ public class FragmentWidgetParams extends ABCFragment {
 
     ViewPager viewPager;
 
-    EditText edTitle;
-
-    EditText edAmount;
-
     ValueChangeListener titleListener;
 
     ValueChangeListener amountListener;
+
+    PropertyHolder propertyHolder;
 
     public FragmentWidgetParams(MainActivity mainActivity) {
         super(mainActivity);
@@ -47,107 +50,68 @@ public class FragmentWidgetParams extends ABCFragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-
         fragmentView = inflater.inflate(R.layout.fragment_widget_params, container, false);
-
-        configSpinner(getMainActivity().getCurrentWidget());
-
+        propertyHolder = new PropertyHolder(getContext(), fragmentView.findViewById(R.id.layoutWidgetParams), R.raw.widget_props_form, R.layout.widget_property);
+        try {
+            propertyHolder.createViews();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
         bringWidgetToUI();
-
         return fragmentView;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-       /* viewPager = view.findViewById( R.id.pager);
-        BCPagerAdapter bcp = new BCPagerAdapter( getChildFragmentManager(), getMainActivity() );
-        viewPager.setAdapter( bcp );*/
     }
 
     private void bringWidgetToUI() {
-        edTitle = fragmentView.findViewById(R.id.edTitle);
-        edTitle.setText(getMainActivity().getCurrentWidget().getTitle());
+        IPropertyEditor<String> pes = (IPropertyEditor<String>) propertyHolder.getByKey( "title" );
+        pes.setValue( getMainActivity().getCurrentWidget().getTitle() );
 
-        configSpinner(getMainActivity().getCurrentWidget());
+        IPropertyEditor<Double> ped = (IPropertyEditor<Double>) propertyHolder.getByKey( "limit_amount" );
+        ped.setValue( getMainActivity().getCurrentWidget().getLimitAmount() );
 
-        edAmount = fragmentView.findViewById(R.id.edAmount);
-        edAmount.setText("" + getMainActivity().getCurrentWidget().getLimitAmount());
+        pes = (IPropertyEditor<String>) propertyHolder.getByKey( "period" );
+        pes.setSelectedItemIndex( getMainActivity().getCurrentWidget().getStartPeriod().number() );
 
-    }
-
-    void configSpinner(WidgetParams widget) {
-        Spinner sp = fragmentView.findViewById(R.id.spStartPeriod);
-        sp.setAdapter(new StartPeriodSpinAdapter(getMainActivity(), widget));
-        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Object obj = view.getTag();
-                currentPeriodCode = (StartPeriodEncoding) obj;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-        sp.setSelection(widget.getStartPeriod().number());
     }
 
     @Override
     public void initListeners(WidgetParamsStateListener paramsStateListener) {
-        super.setParamsStateListener(paramsStateListener);
-        titleListener = new ValueChangeListener(edTitle, paramsStateListener, value -> {
-            if (value == null)
+
+        IPropertyEditor<String> pes = (IPropertyEditor<String>) propertyHolder.getByKey( "title" );
+        pes.setChangeListener(s -> paramsStateListener.setTitleComplete( true ));
+
+        pes.setBeforeChangeListener( (value)->{
+            if( value != null && value.trim().length() >0 )
+                return true;
+            else
                 return false;
-            return value.toString().trim().length() > 0;
-        }) {
-            @Override
-            protected void valueChanged(boolean checkResult) {
-                paramsStateListener.setTitleComplete(checkResult);
-            }
-        };
+        });
 
-        amountListener = new ValueChangeListener(edAmount, paramsStateListener, value -> {
-            if (value == null)
-                return false;
-            if (value.toString().trim().length() == 0) return false;
-
-            double amount = -1;
-            try {
-                amount = Double.parseDouble(value.toString());
-            } catch (NumberFormatException e) {
-                return false;
-            }
-
-            return amount >= 0;
-        }) {
-            @Override
-            protected void valueChanged(boolean checkResult) {
-                paramsStateListener.setAmountLimitComplete(checkResult);
-            }
-        };
-
-        String buff = edAmount.getText().toString();
-        try {
-            double d = Double.parseDouble(buff);
-            paramsStateListener.setAmountLimitComplete(d >= 0);
-        } catch (NumberFormatException e) {
-            paramsStateListener.setAmountLimitComplete(false);
-        }
-
-        buff = edTitle.getText().toString();
-        paramsStateListener.setTitleComplete(buff.trim().length() > 0);
+        IPropertyEditor<Double> ped = (IPropertyEditor<Double>) propertyHolder.getByKey( "limit_amount" );
+        ped.setBeforeChangeListener( (value)-> value >= 0);
+        ped.setChangeListener( value-> paramsStateListener.setAmountLimitComplete( true ));
     }
 
     @Override
     public void applyEnteredValues() {
-        TextView tv = fragmentView.findViewById(R.id.edTitle);
-        getMainActivity().getCurrentWidget().setTitle(tv.getText().toString());
-        tv = fragmentView.findViewById(R.id.edAmount);
-        String buff = tv.getText().toString();
-        double val = Double.parseDouble(buff);
-        getMainActivity().getCurrentWidget().setLimitAmount(val);
-        getMainActivity().getCurrentWidget().setStartPeriod(currentPeriodCode);
+        IPropertyEditor<String> pes = (IPropertyEditor<String>) propertyHolder.getByKey( "title");
+
+        getMainActivity().getCurrentWidget().setTitle(pes.getValue());
+
+        IPropertyEditor<Double> ped = (IPropertyEditor<Double>) propertyHolder.getByKey( "limit_amount");
+        getMainActivity().getCurrentWidget().setLimitAmount(ped.getValue());
+
+        pes = (IPropertyEditor<String>) propertyHolder.getByKey( "period");
+        String buff = pes.getValue();
+        StartPeriodEncoding code = null;
+        if( "неделя".equals( buff ) ) code = StartPeriodEncoding.week;
+        else if( "месяц".equals( buff ) ) code = StartPeriodEncoding.month;
+        else if( "год".equals( buff ) ) code = StartPeriodEncoding.year;
+
+        getMainActivity().getCurrentWidget().setStartPeriod(code);
     }
 }

@@ -14,7 +14,7 @@ public class NoConnectionViewMaker extends AWidgetViewMaker {
         RemoteViews views = new RemoteViews(getContext().getPackageName(), R.layout.b_c_widget);
         views.setTextViewText(R.id.tvAmount, "");
         views.setTextViewText(R.id.tvTitle, "----");
-        views.setTextViewText(R.id.tvStartDate, "");
+        views.setTextViewText(R.id.tvPeriodName, "");
         return views;
     }
 }

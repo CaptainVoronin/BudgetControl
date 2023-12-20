@@ -47,4 +47,9 @@
     <string name="tab_title_categories">Категории</string>
     <string name="tab_title_common_settings">Параметры виджета</string>
     <string name="widget_limit_amount_title">Бюджет</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="fragment_appearance_title">Вид</string>
+    <string name="title_text_color">Цвет текста</string>
+    <string name="title_bg_color">Цвет фона</string>
 </resources>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="160dp"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true"
+        android:layout_margin="8dp"
+        android:background="@drawable/app_widget_background_view">
+
+        <TextView
+            android:id="@+id/tvAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="#D6D6D6"
+            android:contentDescription="@string/appwidget_text"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:gravity="right"
+            android:paddingRight="8dp"
+            android:layout_margin="2dp"
+            android:text="@string/appwidget_text"
+            android:textSize="34sp" />
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/tvAmount"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="right"
+            android:paddingRight="8dp"
+            android:text="—//—//—"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tvPeriodName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvAmount"
+            android:fontFamily="sans-serif-medium"
+            android:forceDarkAllowed="false"
+            android:gravity="right"
+            android:paddingRight="8dp"
+            android:text="—//—//—"
+            android:textSize="16sp" />
+
+    </RelativeLayout>
+</RelativeLayout>

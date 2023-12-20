@@ -21,6 +21,7 @@ public class BCPagerAdapter extends FragmentPagerAdapter {
         fragments = new ArrayList<>(2);
         fragments.add( new FragmentWidgetParams(mainActivity) );
         fragments.add( new FragmentCategories(mainActivity) );
+        fragments.add( new FragmentWidgetAppearance(mainActivity) );
     }
 
     @NonNull

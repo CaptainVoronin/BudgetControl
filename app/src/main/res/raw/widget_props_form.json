@@ -1,0 +1,26 @@
+{
+  "property": [
+    {
+      "key": "title",
+      "header": "Заголовок",
+      "type": "string"
+    },
+    {
+      "key": "period",
+      "header": "Период",
+      "type": "string",
+      "default_value_index" : 1,
+      "items" : [
+        "неделя",
+        "месяц",
+        "год"
+      ]
+    },
+    {
+      "key": "limit_amount",
+      "header": "Бюджет",
+      "type": "double",
+      "value": "0"
+    }
+  ]
+}

@@ -28,7 +28,7 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/tvStartDate"
+        android:id="@+id/tvPeriodName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvAmount"

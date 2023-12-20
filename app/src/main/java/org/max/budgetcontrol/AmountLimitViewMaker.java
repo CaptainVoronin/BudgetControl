@@ -19,7 +19,7 @@ public class AmountLimitViewMaker extends AWidgetViewMaker {
         RemoteViews views = new RemoteViews(getContext().getPackageName(), R.layout.b_c_amount_limit_widget);
         views.setTextViewText(R.id.tvAmount, formatAmount(getWidget().getCurrentAmount()));
         views.setTextViewText(R.id.tvTitle, getWidget().getTitle());
-        views.setTextViewText(R.id.tvStartDate, formatAmount(getWidget().getLimitAmount()) );
+        views.setTextViewText(R.id.tvPeriodName, formatAmount(getWidget().getLimitAmount()) );
         Color color = getScaleColor(getContext(), getWidget().getLimitAmount(), getWidget().getCurrentAmount());
         views.setInt(R.id.tvAmount, "setTextColor", color.toArgb());
         return views;

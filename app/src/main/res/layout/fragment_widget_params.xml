@@ -1,61 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutWidgetParams"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     android:orientation="vertical"
-    tools:context=".FragmentWidgetParams">
-
-    <TextView
-        android:id="@+id/tvStateHader"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:gravity="center_horizontal"
-        android:text="Новый виджет"
-        android:textSize="18sp" />
-
-    <EditText
-        android:id="@+id/edTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Заголовок виджета"
-        android:inputType="text"
-        android:text="Name" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:paddingTop="32dp"
-        android:text="Период"
-        android:textSize="18sp" />
-
-    <Spinner
-        android:id="@+id/spStartPeriod"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:entries="@array/period_codes" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:paddingTop="32dp"
-        android:text="@string/widget_limit_amount_title"
-        android:textSize="18sp" />
-
-    <EditText
-        android:id="@+id/edAmount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="numberDecimal"
-        android:text="0" />
-
-</LinearLayout>
+    tools:context=".FragmentWidgetParams" />

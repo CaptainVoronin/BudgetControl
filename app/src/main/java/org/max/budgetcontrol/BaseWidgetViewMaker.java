@@ -1,17 +1,9 @@
 package org.max.budgetcontrol;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.util.Log;
 import android.widget.RemoteViews;
 
-import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 
 class BaseWidgetViewMaker extends AWidgetViewMaker
 {
@@ -35,9 +27,9 @@ class BaseWidgetViewMaker extends AWidgetViewMaker
         views.setInt(R.id.tvTitle, "setTextColor", getWidget().getTitleParams().getFontColor().toArgb() );
         views.setInt(R.id.tvTitle, "setBackgroundColor", getWidget().getTitleParams().getBackColor().toArgb());
 
-        views.setTextViewText(R.id.tvStartDate, getPeriodMessage());
-        views.setInt(R.id.tvStartDate, "setTextColor", getWidget().getPeriodParams().getFontColor().toArgb() );
-        views.setInt(R.id.tvStartDate, "setBackgroundColor", getWidget().getPeriodParams().getBackColor().toArgb());
+        views.setTextViewText(R.id.tvPeriodName, getPeriodMessage());
+        views.setInt(R.id.tvPeriodName, "setTextColor", getWidget().getPeriodParams().getFontColor().toArgb() );
+        views.setInt(R.id.tvPeriodName, "setBackgroundColor", getWidget().getPeriodParams().getBackColor().toArgb());
 
         return views;
     }

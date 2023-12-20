@@ -7,7 +7,7 @@ android {
     def targetSDKVersion = 33
 
     namespace 'org.max.budgetcontrol'
-    compileSdk targetSDKVersion
+    compileSdk 34
 
     def versionPropsFile = file('version.properties')
     def value = 0
@@ -58,13 +58,12 @@ android {
 
     defaultConfig {
         applicationId "org.max.budgetcontrol"
-        minSdk 29
+        minSdk 33
         targetSdk targetSDKVersion
         versionCode 1
         versionName "1.0"
         versionCode versionProps['VERSION_NUMBER'].toInteger()
         versionName "${mVersionName} Build: ${versionProps['VERSION_BUILD']}"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -86,10 +85,12 @@ android {
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation 'com.squareup.okhttp3:okhttp:3.12.0'
     implementation 'org.json:json:20231013'
-    implementation 'androidx.preference:preference:1.2.0'
+    implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    releaseImplementation files('libs\\propeditors-release-v1.0.0.18.aar')
+    debugImplementation files('libs\\propeditors-debug-v1.0.0.20.aar')
 
 }

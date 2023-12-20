@@ -361,18 +361,18 @@ public class BCDBHelper
         int bgColor = cursor.getInt(6);
         int textColor = cursor.getInt(7);
         WidgetParams.LabelParams lp = new WidgetParams.LabelParams(Color.valueOf(bgColor), Color.valueOf(textColor));
-        wp.setTitleParams(lp);
+        wp.setLabelParams(WidgetParams.TITLE, lp);
 
         // Amount
         bgColor = cursor.getInt(8);
         textColor = cursor.getInt(9);
         lp = new WidgetParams.LabelParams(Color.valueOf(bgColor), Color.valueOf(textColor));
-        wp.setAmountParams(lp);
+        wp.setLabelParams( WidgetParams.AMOUNT, lp);
         // Period
         bgColor = cursor.getInt(10);
         textColor = cursor.getInt(11);
         lp = new WidgetParams.LabelParams(Color.valueOf(bgColor), Color.valueOf(textColor));
-        wp.setPeriodParams(lp);
+        wp.setLabelParams( WidgetParams.PERIOD, lp);
 
         return wp;
     }
