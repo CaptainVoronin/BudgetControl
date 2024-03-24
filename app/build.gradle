@@ -25,6 +25,7 @@ android {
         value = 1
     }
 
+    def mApplicationName = "BudgetControl"
     def mVersionName = ""
     def mFileName = ""
 
@@ -38,23 +39,23 @@ android {
         versionProps.store(versionPropsFile.newWriter(), null)
 
         // 1: change major and minor version here
-        mVersionName = "v1.0.${versionProps['VERSION_PATCH']}"
+        mVersionName = "v${versionProps['VERSION_NUMBER']}.${versionProps['VERSION_PATCH']}.${versionProps['VERSION_BUILD']}"
         // 2: change AppName for your app name
-        mFileName = "AppName-${mVersionName}.apk"
+        mFileName = "${mApplicationName}-${mVersionName}.apk"
 
     } else {
         throw new FileNotFoundException("Could not read version.properties!")
     }
 
-    if ('assembleRelease' in runTasks) {
-        applicationVariants.all { variant ->
-            variant.outputs.all { output ->
-                if (output.outputFile != null && output.outputFile.name.endsWith('.apk')) {
-                    outputFileName = mFileName
-                }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            if (output.outputFile != null && output.outputFile.name.endsWith('.apk')) {
+                outputFileName = mFileName
             }
         }
     }
+
 
     defaultConfig {
         applicationId "org.max.budgetcontrol"
