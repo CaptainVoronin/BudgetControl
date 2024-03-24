@@ -4,21 +4,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewpager.widget.ViewPager;
 
 import org.json.JSONException;
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
-import org.max.budgetcontrol.zentypes.WidgetParams;
-import org.max.peditor.IPropertyChangeListener;
-import org.max.peditor.IPropertyEditor;
-import org.max.peditor.PropertyHolder;
+import org.max.preditor.IPropertyAdapter;
+import org.max.preditor.PropertySet;
 
 
 public class FragmentWidgetParams extends ABCFragment {
@@ -33,7 +26,7 @@ public class FragmentWidgetParams extends ABCFragment {
 
     ValueChangeListener amountListener;
 
-    PropertyHolder propertyHolder;
+    PropertySet propertyHolder;
 
     public FragmentWidgetParams(MainActivity mainActivity) {
         super(mainActivity);
@@ -51,7 +44,7 @@ public class FragmentWidgetParams extends ABCFragment {
                              @Nullable Bundle savedInstanceState) {
 
         fragmentView = inflater.inflate(R.layout.fragment_widget_params, container, false);
-        propertyHolder = new PropertyHolder(getContext(), fragmentView.findViewById(R.id.layoutWidgetParams), R.raw.widget_props_form, R.layout.widget_property);
+        propertyHolder = new PropertySet(getContext(), fragmentView.findViewById(R.id.layoutWidgetParams), R.raw.widget_props_form, R.layout.widget_property);
         try {
             propertyHolder.createViews();
         } catch (JSONException e) {
@@ -67,13 +60,13 @@ public class FragmentWidgetParams extends ABCFragment {
     }
 
     private void bringWidgetToUI() {
-        IPropertyEditor<String> pes = (IPropertyEditor<String>) propertyHolder.getByKey( "title" );
+        IPropertyAdapter<String> pes = (IPropertyAdapter<String>) propertyHolder.getByKey( "title" );
         pes.setValue( getMainActivity().getCurrentWidget().getTitle() );
 
-        IPropertyEditor<Double> ped = (IPropertyEditor<Double>) propertyHolder.getByKey( "limit_amount" );
+        IPropertyAdapter<Double> ped = (IPropertyAdapter<Double>) propertyHolder.getByKey( "limit_amount" );
         ped.setValue( getMainActivity().getCurrentWidget().getLimitAmount() );
 
-        pes = (IPropertyEditor<String>) propertyHolder.getByKey( "period" );
+        pes = (IPropertyAdapter<String>) propertyHolder.getByKey( "period" );
         pes.setSelectedItemIndex( getMainActivity().getCurrentWidget().getStartPeriod().number() );
 
     }
@@ -81,31 +74,48 @@ public class FragmentWidgetParams extends ABCFragment {
     @Override
     public void initListeners(WidgetParamsStateListener paramsStateListener) {
 
-        IPropertyEditor<String> pes = (IPropertyEditor<String>) propertyHolder.getByKey( "title" );
-        pes.setChangeListener(s -> paramsStateListener.setTitleComplete( true ));
+        IPropertyAdapter<String> pes = (IPropertyAdapter<String>) propertyHolder.getByKey( "title" );
+        pes.setChangeListener(s -> paramsStateListener.setTitleComplete( s != null && s.trim().length() != 0 ));
 
         pes.setBeforeChangeListener( (value)->{
-            if( value != null && value.trim().length() >0 )
+            if( value != null && value.toString().trim().length() >0 )
                 return true;
             else
                 return false;
         });
 
-        IPropertyEditor<Double> ped = (IPropertyEditor<Double>) propertyHolder.getByKey( "limit_amount" );
-        ped.setBeforeChangeListener( (value)-> value >= 0);
+        paramsStateListener.setTitleComplete( pes.getValue() != null
+                                              && pes.getValue().trim().length() != 0 );
+
+        IPropertyAdapter<Double> ped = (IPropertyAdapter<Double>) propertyHolder.getByKey( "limit_amount" );
+        ped.setBeforeChangeListener(
+                (value)-> {
+                    if( value == null ) return false;
+                    try{
+                        Double.parseDouble( value.toString() );
+                        return true;
+                    }
+                    catch ( NumberFormatException e )
+                    {
+                        return false;
+                    }
+                }
+        );
         ped.setChangeListener( value-> paramsStateListener.setAmountLimitComplete( true ));
+        double val = ped.getValue();
+        paramsStateListener.setAmountLimitComplete( true );
     }
 
     @Override
     public void applyEnteredValues() {
-        IPropertyEditor<String> pes = (IPropertyEditor<String>) propertyHolder.getByKey( "title");
+        IPropertyAdapter<String> pes = (IPropertyAdapter<String>) propertyHolder.getByKey( "title");
 
         getMainActivity().getCurrentWidget().setTitle(pes.getValue());
 
-        IPropertyEditor<Double> ped = (IPropertyEditor<Double>) propertyHolder.getByKey( "limit_amount");
+        IPropertyAdapter<Double> ped = (IPropertyAdapter<Double>) propertyHolder.getByKey( "limit_amount");
         getMainActivity().getCurrentWidget().setLimitAmount(ped.getValue());
 
-        pes = (IPropertyEditor<String>) propertyHolder.getByKey( "period");
+        pes = (IPropertyAdapter<String>) propertyHolder.getByKey( "period");
         String buff = pes.getValue();
         StartPeriodEncoding code = null;
         if( "неделя".equals( buff ) ) code = StartPeriodEncoding.week;
