@@ -21,6 +21,10 @@ public class Category {
         return id;
     }
 
+    /**
+     *
+     * @return Chile list. May be empty but can n't be null
+     */
     public List<Category> getChild() {
         return child;
     }

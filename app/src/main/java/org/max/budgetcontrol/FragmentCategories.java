@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 import okhttp3.Response;
 
-public class FragmentCategories extends ABCFragment implements CompoundButton.OnCheckedChangeListener {
+public class FragmentCategories extends ABCFragment{
 
     List<Category> categories;
 
@@ -166,11 +166,11 @@ public class FragmentCategories extends ABCFragment implements CompoundButton.On
         lv.setAdapter(new CategoryListViewAdapter(getContext(), this, flatList, widgetCats));
     }
 
-    public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-        UUID id = (UUID) compoundButton.getTag();
+    public void setSelectedCategoriesList( List<UUID> selectedList, boolean checked )
+    {
         if (checked)
-            categoryHolder.add(id);
+            categoryHolder.add(selectedList);
         else
-            categoryHolder.remove(id);
+            categoryHolder.remove(selectedList);
     }
 }

@@ -6,30 +6,37 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import org.max.budgetcontrol.zentypes.Category;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
-public class CategoryListViewAdapter extends ArrayAdapter<Category> {
+public class CategoryListViewAdapter extends ArrayAdapter<Category> implements CompoundButton.OnCheckedChangeListener
+{
     List<UUID> selectedCats;
 
     Context context;
 
-    FragmentCategories setChangeListener;
+    FragmentCategories fragmentCategories;
+    Map<UUID, Category> flatMap;
 
-    public CategoryListViewAdapter(Context context, FragmentCategories setChangeListener, List<Category> flatList, List<UUID> widgetCts) {
+    public CategoryListViewAdapter(Context context, FragmentCategories fragmentCategories, List<Category> flatList, List<UUID> widgetCts)
+    {
         super(context, R.layout.category_list_item, flatList);
         this.context = context;
+        flatMap = new HashMap<>();
+        flatList.stream().forEach( item->flatMap.put( item.getId(), item ) );
 
-        this.setChangeListener = setChangeListener;
+        this.fragmentCategories = fragmentCategories;
 
         if (widgetCts != null)
             selectedCats = widgetCts;
@@ -37,57 +44,67 @@ public class CategoryListViewAdapter extends ArrayAdapter<Category> {
             selectedCats = new ArrayList<>();
     }
 
-
     @Override
-    public void registerDataSetObserver(DataSetObserver dataSetObserver) {
+    public void registerDataSetObserver(DataSetObserver dataSetObserver)
+    {
         super.registerDataSetObserver(dataSetObserver);
     }
 
     @Override
-    public void unregisterDataSetObserver(DataSetObserver dataSetObserver) {
+    public void unregisterDataSetObserver(DataSetObserver dataSetObserver)
+    {
         super.unregisterDataSetObserver(dataSetObserver);
     }
 
     @Override
-    public int getCount() {
+    public int getCount()
+    {
         return super.getCount();
     }
 
     @Override
-    public Category getItem(int i) {
+    public Category getItem(int i)
+    {
         return super.getItem(i);
     }
 
     @Override
-    public long getItemId(int i) {
+    public long getItemId(int i)
+    {
         return i;
     }
 
     @Override
-    public boolean hasStableIds() {
+    public boolean hasStableIds()
+    {
         return false;
     }
 
     @Override
-    public int getItemViewType(int i) {
+    public int getItemViewType(int i)
+    {
         return super.getItem(i).getParent() == null ? 0 : 1;
     }
 
     @Override
-    public int getViewTypeCount() {
+    public int getViewTypeCount()
+    {
         return 2;
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmpty()
+    {
         return false;
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
+    public View getView(int i, View view, ViewGroup viewGroup)
+    {
         Category category = super.getItem(i);
         int resourceId = category.getParent() == null ? R.layout.category_group_list_item : R.layout.category_list_item;
-        if (view == null) {
+        if (view == null)
+        {
             LayoutInflater infalInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = infalInflater.inflate(resourceId, null);
         }
@@ -95,28 +112,63 @@ public class CategoryListViewAdapter extends ArrayAdapter<Category> {
         tv.setText(category.getName());
 
         CheckBox cb = (CheckBox) view.findViewById(R.id.cbSelected);
-        cb.setTag(category.getId());
-        if (selectedCats != null && selectedCats.size() != 0) {
+        cb.setTag(category);
+        if (selectedCats != null && selectedCats.size() != 0)
+        {
             if (selectedCats.contains(category.getId()))
                 cb.setChecked(true);
         } else
             cb.setChecked(false);
 
-        cb.setOnCheckedChangeListener(setChangeListener);
+        cb.setOnCheckedChangeListener(this);
         return view;
     }
 
-    List<UUID> getSelected() {
+    List<UUID> getSelected()
+    {
         return selectedCats;
     }
 
     @Override
-    public boolean areAllItemsEnabled() {
+    public boolean areAllItemsEnabled()
+    {
         return true;
     }
 
     @Override
-    public boolean isEnabled(int i) {
+    public boolean isEnabled(int i)
+    {
         return true;
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean checked)
+    {
+        Category category = (Category) compoundButton.getTag();
+
+        Predicate<Category> findAbsentCat = cat -> !selectedCats.contains(cat.getId());
+        Predicate<Category> findPresentCat = cat -> selectedCats.contains(cat.getId());
+        Predicate<Category> actualFilter;
+
+        Consumer<Category> addCat = cat -> selectedCats.add(cat.getId());
+        Consumer<Category> removeCat = cat -> selectedCats.remove(cat.getId());
+        Consumer<Category> actualAction;
+
+        if (checked)
+        {
+            if (!selectedCats.contains(category.getId()))
+                selectedCats.add(category.getId());
+            actualFilter = findAbsentCat;
+            actualAction = addCat;
+        } else
+        {
+            selectedCats.remove(category.getId());
+            actualFilter = findPresentCat;
+            actualAction = removeCat;
+        }
+
+        category.getChild().stream().filter(actualFilter).forEach(actualAction);
+        notifyDataSetChanged();
+        fragmentCategories.setSelectedCategoriesList( selectedCats, checked );
     }
 }

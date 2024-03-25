@@ -3,6 +3,7 @@ package org.max.budgetcontrol;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 class WidgetCategoryHolder {
     List<UUID> cats;
@@ -26,22 +27,20 @@ class WidgetCategoryHolder {
         this.paramsStateListener.setCategoriesComplete(cats.size() != 0);
     }
 
-    public void add(UUID uuid) {
-        assert uuid != null : "Category id can not be null";
-
-        if (!cats.contains(uuid)) {
-            cats.add(uuid);
-            isChanged = true;
-            paramsStateListener.setCategoriesComplete(true);
-        }
+    public void add(List<UUID> uuidList) {
+        assert uuidList != null : "Category id can not be null";
+        List<UUID> toAdd = uuidList.stream().filter( selected-> !cats.contains( selected ) ).collect(Collectors.toList());
+        cats.addAll( toAdd );
+        isChanged = cats.size() != 0;
+        paramsStateListener.setCategoriesComplete(isChanged);
     }
 
-    public void remove(UUID uuid) {
-        assert uuid != null : "Category id can not be null";
-        if (cats.contains(uuid)) {
-            cats.remove(uuid);
-            isChanged = true;
-            paramsStateListener.setCategoriesComplete(cats.size() != 0);
-        }
+    public void remove(List<UUID> uuidList) {
+        assert uuidList != null : "Category id can not be null";
+        List<UUID> toRemove = uuidList.stream().filter( selected-> cats.contains( selected ) ).collect(Collectors.toList());
+        cats.removeAll( toRemove );
+        isChanged = cats.size() != 0;
+        paramsStateListener.setCategoriesComplete(isChanged);
     }
+
 }
