@@ -117,6 +117,8 @@ public class CategoryListViewAdapter extends ArrayAdapter<Category> implements C
         {
             if (selectedCats.contains(category.getId()))
                 cb.setChecked(true);
+            else
+                cb.setChecked(false);
         } else
             cb.setChecked(false);
 
