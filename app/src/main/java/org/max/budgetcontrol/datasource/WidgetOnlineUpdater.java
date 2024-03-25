@@ -57,13 +57,17 @@ public class WidgetOnlineUpdater
     private void saveCash()
     {
         BCDBHelper db = BCDBHelper.getInstance( getContext());
-        db.updateWidgetParams( getWidget() );
+        db.updateWidgetCash( getWidget() );
         Log.d( this.getClass().getName(), "[saveCash] Cash for " + getWidget().getTitle() + " saved");
     }
 
     protected void calculateAmount(List<Transaction> transactions, long startDate) {
         if( transactions != null )
         {
+            Log.d( this.getClass().getName(), "[calculateAmount] for " + getWidget().getTitle());
+            Log.d( this.getClass().getName(), "[calculateAmount] Transaction total count " + transactions.size());
+            getWidget().getCategories().stream().forEach( c-> Log.d( this.getClass().getName(), "[calculateAmount] Catgory " + c.toString()) );
+
             double amount = transactions.stream().filter(t -> t.getTimestamp() >= startDate)
                     .filter(t -> t.hasCategory(getWidget().getCategories()))
                     .mapToDouble(t -> t.getAmount()).sum();

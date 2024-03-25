@@ -44,6 +44,7 @@ import org.max.budgetcontrol.zentypes.WidgetParamsConverter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

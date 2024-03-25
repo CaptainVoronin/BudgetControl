@@ -156,6 +156,19 @@ public class BCDBHelper
         return wp;
     }
 
+    public void updateWidgetCash(WidgetParams wp)
+    {
+        Log.d(this.getClass().getName(), "[updateWidgetParams]");
+
+        ContentValues cv = new ContentValues(2);
+        cv.put(BCDB.TW_APP_ID, wp.getAppId());
+        cv.put(BCDB.TW_CURRENT_AMOUNT, wp.getCurrentAmount());
+        db.beginTransaction();
+        int updated = db.update(BCDB.TABLE_WIDGET, cv, "id=" + wp.getId(), null);
+        Log.d(this.getClass().getName(), "[updateWidgetParams] Updated " + updated);
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
     public void updateWidgetParams(WidgetParams wp)
     {
         Log.d(this.getClass().getName(), "[updateWidgetParams]");
@@ -288,7 +301,7 @@ public class BCDBHelper
         {
             Integer widgetId = crs.getInt(0);
             UUID catId = UUID.fromString(crs.getString(1));
-
+            Log.d(this.getClass().getName(), "[getWidgets] WID="  +  widgetId + " CID=" + catId.toString());
             cats.put(catId, widgetId);
         }
         crs.close();

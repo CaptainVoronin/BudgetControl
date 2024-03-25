@@ -27,6 +27,7 @@ class WidgetCategoryHolder {
         this.paramsStateListener.setCategoriesComplete(cats.size() != 0);
     }
 
+/*
     public void add(List<UUID> uuidList) {
         assert uuidList != null : "Category id can not be null";
         List<UUID> toAdd = uuidList.stream().filter( selected-> !cats.contains( selected ) ).collect(Collectors.toList());
@@ -34,7 +35,17 @@ class WidgetCategoryHolder {
         isChanged = cats.size() != 0;
         paramsStateListener.setCategoriesComplete(isChanged);
     }
+*/
 
+    public void set(List<UUID> uuidList) {
+        assert uuidList != null : "Category id can not be null";
+        cats.clear();
+        cats.addAll( uuidList );
+        isChanged = cats.size() != 0;
+        paramsStateListener.setCategoriesComplete(isChanged);
+    }
+
+/*
     public void remove(List<UUID> uuidList) {
         assert uuidList != null : "Category id can not be null";
         List<UUID> toRemove = uuidList.stream().filter( selected-> cats.contains( selected ) ).collect(Collectors.toList());
@@ -42,5 +53,6 @@ class WidgetCategoryHolder {
         isChanged = cats.size() != 0;
         paramsStateListener.setCategoriesComplete(isChanged);
     }
+*/
 
 }

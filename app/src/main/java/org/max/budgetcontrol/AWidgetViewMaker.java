@@ -5,6 +5,8 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
+
+import java.text.DecimalFormatSymbols;
 import java.util.Calendar;
 
 public abstract class AWidgetViewMaker
@@ -54,22 +56,9 @@ public abstract class AWidgetViewMaker
 
     protected final String formatAmount( double value )
     {
-        String buff = Double.toString( value );
-        String[] tokens = buff.split( "[,.]");
-        StringBuilder strb = new StringBuilder();
-        int i = 0;
-        for( int j = tokens[0].length() - 1; j >= 0; j-- )
-        {
-            strb.insert( 0, tokens[0].charAt( j ) );
-            if( i == 2 )
-            {
-                strb.insert( 0, '\'');
-                i = 0;
-            }
-            else
-                i++;
-        }
-        return strb.toString();
+        DecimalFormatSymbols d = new DecimalFormatSymbols();
+        char separator = d.getGroupingSeparator();
+        return String.format("%,.0f", value);
     }
 
     protected final String getPeriodMessage()

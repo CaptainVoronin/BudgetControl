@@ -31,7 +31,8 @@ import java.util.stream.Collectors;
 
 import okhttp3.Response;
 
-public class FragmentCategories extends ABCFragment{
+public class FragmentCategories extends ABCFragment
+{
 
     List<Category> categories;
 
@@ -43,17 +44,20 @@ public class FragmentCategories extends ABCFragment{
 
     private View fragmentView;
 
-    public FragmentCategories(MainActivity mainActivity) {
+    public FragmentCategories(MainActivity mainActivity)
+    {
         super(mainActivity);
     }
 
     @Override
-    public String getTitle() {
+    public String getTitle()
+    {
         return getMainActivity().getString(R.string.tab_title_categories);
     }
 
     @Override
-    public void initListeners(WidgetParamsStateListener paramsStateListener) {
+    public void initListeners(WidgetParamsStateListener paramsStateListener)
+    {
         super.setParamsStateListener(paramsStateListener);
         categoryHolder = new WidgetCategoryHolder(getParamsStateListener(), getMainActivity().getCurrentWidget().getCategories());
     }
@@ -62,7 +66,8 @@ public class FragmentCategories extends ABCFragment{
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+                             @Nullable Bundle savedInstanceState)
+    {
 
         fragmentView = inflater.inflate(R.layout.fragment_categories, container, false);
         if (getMainActivity().getSettings().isInit())
@@ -72,14 +77,17 @@ public class FragmentCategories extends ABCFragment{
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
+    {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    private void loadCategories() {
+    private void loadCategories()
+    {
         Log.d(this.getClass().getName(), "[loadCategories]");
         categoryLoaderHandler = new CategoryLoaderHandler();
-        try {
+        try
+        {
             ZenMoneyClient client = new ZenMoneyClient(
                     new URL(getMainActivity().getSettings().getParameterAsString("url")),
                     getMainActivity().getSettings().getParameterAsString("token"),
@@ -98,15 +106,18 @@ public class FragmentCategories extends ABCFragment{
             loadCategoriesDialog = dlg.create();
             loadCategoriesDialog.show();
 
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException e)
+        {
             categoryLoaderHandler.processError(e);
         }
     }
 
-    class CategoryLoaderHandler extends AZenClientResponseHandler {
+    class CategoryLoaderHandler extends AZenClientResponseHandler
+    {
 
         @Override
-        public void onNon200Code(@NotNull Response response) {
+        public void onNon200Code(@NotNull Response response)
+        {
             if (response.code() == 401 || response.code() == 500)
                 getMainActivity().runOnUiThread(() -> {
                     loadCategoriesDialog.dismiss();
@@ -115,7 +126,8 @@ public class FragmentCategories extends ABCFragment{
         }
 
         @Override
-        public void onResponseReceived(JSONObject jObject) throws JSONException {
+        public void onResponseReceived(JSONObject jObject) throws JSONException
+        {
             List<Category> cats = ResponseProcessor.getCategory(jObject);
             final List<Category> cs = ResponseProcessor.makeCategoryTree(cats);
             getMainActivity().runOnUiThread(() -> {
@@ -125,10 +137,12 @@ public class FragmentCategories extends ABCFragment{
         }
 
         @Override
-        public void processError(Exception e) {
+        public void processError(Exception e)
+        {
             getMainActivity().runOnUiThread(() -> {
                 loadCategoriesDialog.dismiss();
-                if (e instanceof java.net.UnknownHostException) {
+                if (e instanceof java.net.UnknownHostException)
+                {
 
                     AlertDialog.Builder dlg = new AlertDialog.Builder(getMainActivity());
                     dlg.setNegativeButton(android.R.string.cancel, (dialog, i) -> {
@@ -144,14 +158,17 @@ public class FragmentCategories extends ABCFragment{
     }
 
     @Override
-    public void applyEnteredValues() {
+    public void applyEnteredValues()
+    {
         getMainActivity().getCurrentWidget().setCategories(categoryHolder.cats);
     }
 
-    private void bringCategoryListToFront(List<Category> cats) {
+    private void bringCategoryListToFront(List<Category> cats)
+    {
         categories = cats;
         List<Category> flatList = new ArrayList<>();
-        for (Category c : categories) {
+        for (Category c : categories)
+        {
             flatList.add(c);
             if (c.getChild().size() != 0)
                 flatList.addAll(c.getChild());
@@ -166,11 +183,8 @@ public class FragmentCategories extends ABCFragment{
         lv.setAdapter(new CategoryListViewAdapter(getContext(), this, flatList, widgetCats));
     }
 
-    public void setSelectedCategoriesList( List<UUID> selectedList, boolean checked )
+    public void setSelectedCategoriesList(List<UUID> selectedList, boolean checked)
     {
-        if (checked)
-            categoryHolder.add(selectedList);
-        else
-            categoryHolder.remove(selectedList);
+        categoryHolder.set(selectedList);
     }
 }
