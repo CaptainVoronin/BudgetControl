@@ -159,7 +159,7 @@ public class BCDBHelper
 
     public void updateWidgetCash(WidgetParams wp)
     {
-        Log.d(this.getClass().getName(), "[updateWidgetParams]");
+        Log.d(this.getClass().getName(), "[updateWidgetCash]");
 
         ContentValues cv = new ContentValues(2);
         cv.put(BCDB.TW_APP_ID, wp.getAppId());
@@ -303,7 +303,6 @@ public class BCDBHelper
         {
             Integer widgetId = crs.getInt(0);
             UUID catId = UUID.fromString(crs.getString(1));
-            Log.d(this.getClass().getName(), "[getWidgets] WID=" + widgetId + " CID=" + catId.toString());
             Pair<UUID, Integer> item = new Pair<>(catId, widgetId);
             cats.add(item);
         }
