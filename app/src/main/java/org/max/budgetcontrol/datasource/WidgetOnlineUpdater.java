@@ -66,7 +66,6 @@ public class WidgetOnlineUpdater
         {
             Log.d( this.getClass().getName(), "[calculateAmount] for " + getWidget().getTitle());
             Log.d( this.getClass().getName(), "[calculateAmount] Transaction total count " + transactions.size());
-            getWidget().getCategories().stream().forEach( c-> Log.d( this.getClass().getName(), "[calculateAmount] Catgory " + c.toString()) );
 
             double amount = transactions.stream().filter(t -> t.getTimestamp() >= startDate)
                     .filter(t -> t.hasCategory(getWidget().getCategories()))
