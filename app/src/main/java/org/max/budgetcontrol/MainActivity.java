@@ -2,6 +2,7 @@ package org.max.budgetcontrol;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
@@ -12,6 +13,8 @@ import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -52,7 +55,8 @@ import java.util.stream.Collectors;
 
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+{
     public static final String CONNECTION_PROBLEM = "connection_problem";
     public static final String BUNDLE_KEY_NEW_WIDGET_TITLE = "NEW_WIDGET_TITLE";
     private static final int WIDGET_WAS_PINNED = 876876;
@@ -61,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String BUNDLE_KEY_EXIT_APP = "bc_action_exit_app";
     public static final String BUNDLE_KEY_PIN_ERROR = "bc_pin_widget_error";
 
-    public SettingsHolder getSettings() {
+    public SettingsHolder getSettings()
+    {
         return settings;
     }
 
@@ -69,7 +74,8 @@ public class MainActivity extends AppCompatActivity {
 
     BCDBHelper db;
 
-    public WidgetParams getCurrentWidget() {
+    public WidgetParams getCurrentWidget()
+    {
         return currentWidget;
     }
 
@@ -88,8 +94,20 @@ public class MainActivity extends AppCompatActivity {
     BCPagerAdapter viewPagerAdapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
+
+        try
+        {
+            String versionName = getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).versionName;
+            System.out.println(versionName);
+        } catch (PackageManager.NameNotFoundException e)
+        {
+            e.printStackTrace();
+            return;
+        }
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -120,14 +138,16 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        if (extras != null) {
+        if (extras != null)
+        {
             int appWidgetId = extras.getInt(
                     AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
             setActivityResult(Activity.RESULT_CANCELED, appWidgetId);
 
             currentWidget = getWidgetParams(appWidgetId);
-        } else {
+        } else
+        {
             currentWidget = new WidgetParams();
             currentWidget.setAppId(AppWidgetManager.INVALID_APPWIDGET_ID);
         }
@@ -136,14 +156,17 @@ public class MainActivity extends AppCompatActivity {
             showSettings(true);
     }
 
-    private void pinNewWidget() {
+    private void pinNewWidget()
+    {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         ComponentName myProvider = new ComponentName(this, BCWidget.class);
 
-        if (appWidgetManager.isRequestPinAppWidgetSupported()) {
+        if (appWidgetManager.isRequestPinAppWidgetSupported())
+        {
             Intent intent = new Intent(this, WidgetPinnedReceiver.class);
             String json = packWidgetIntoBundle();
-            if (json == null) {
+            if (json == null)
+            {
                 AlertDialog.Builder dlg = new AlertDialog.Builder(this);
                 dlg.setMessage(R.string.internal_application_error)
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -164,50 +187,90 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private String packWidgetIntoBundle() {
-        try {
+    private String packWidgetIntoBundle()
+    {
+        try
+        {
             JSONObject job = WidgetParamsConverter.toJSON(currentWidget);
             return job.toString();
-        } catch (JSONException e) {
+        } catch (JSONException e)
+        {
             e.printStackTrace();
             return null;
         }
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         MenuInflater i = getMenuInflater();
         i.inflate(R.menu.action_bar_menu, menu);
         initListeners(menu.findItem(R.id.idSave));
+        MenuItem itemAbout = menu.findItem(R.id.idAbout);
+        itemAbout.setOnMenuItemClickListener(menuItem -> {
+            showAboutDialog();
+            return false;
+        });
         return true;
     }
 
-    private void initListeners(MenuItem item) {
+    private void showAboutDialog()
+    {
+        try
+        {
+            androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+
+            String versionName = getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).versionName;
+            String message = "Budget control " + versionName;
+
+            builder.setTitle(R.string.dlg_about_title)
+                    .setNegativeButton(android.R.string.cancel,
+                            (dialogInterface, i) -> dialogInterface.cancel())
+                    .setMessage(message).setIcon( R.mipmap.ic_launcher);
+            builder.show();
+
+        } catch (PackageManager.NameNotFoundException e)
+        {
+            e.printStackTrace();
+            return;
+        }
+
+    }
+
+    private void initListeners(MenuItem item)
+    {
 
         paramsStateListener = new WidgetParamsStateListener(item);
 
-        for (int i = 0; i < viewPagerAdapter.getCount(); i++) {
+        for (int i = 0; i < viewPagerAdapter.getCount(); i++)
+        {
             ABCFragment fragment = (ABCFragment) viewPagerAdapter.getItem(i);
             fragment.initListeners(paramsStateListener);
         }
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.idCancel) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == R.id.idCancel)
+        {
             exitApp();
             return true;
-        } else if (item.getItemId() == R.id.idSave) {
+        } else if (item.getItemId() == R.id.idSave)
+        {
             saveChanges();
             return true;
-        } else if (item.getItemId() == R.id.idSettings) {
+        } else if (item.getItemId() == R.id.idSettings)
+        {
             showSettings(true);
             return true;
         } else
             return super.onOptionsItemSelected(item);
     }
 
-    public void showSettings(boolean withError) {
+    public void showSettings(boolean withError)
+    {
         Intent intent = new Intent(this, SettingsActivity.class);
         if (withError)
             intent.putExtra(CONNECTION_PROBLEM, true);
@@ -215,16 +278,19 @@ public class MainActivity extends AppCompatActivity {
         launcher.launch(intent);
     }
 
-    private void saveChanges() {
+    private void saveChanges()
+    {
 
         Log.d(this.getClass().getName(), "[saveChanges]");
         applyEnteredValues();
 
         // Виджет добавляется через приложение, у него еще нет APP ID
         // Он будет добавляться через WidgetPinnedReceiver
-        if (currentWidget.getAppId() == AppWidgetManager.INVALID_APPWIDGET_ID) {
+        if (currentWidget.getAppId() == AppWidgetManager.INVALID_APPWIDGET_ID)
+        {
             pinNewWidget();
-        } else {
+        } else
+        {
 
             // Виджет или добавляется через ланчер,
             // или конфигурится.
@@ -246,7 +312,8 @@ public class MainActivity extends AppCompatActivity {
                             wds);
             handler.setAfterCallback(new AfterUpdateWidgetCallback());
 
-            try {
+            try
+            {
                 ZenMoneyClient client = new ZenMoneyClient(new URL(settings.getParameterAsString("url")),
                         settings.getParameterAsString("token"),
                         handler);
@@ -257,31 +324,37 @@ public class MainActivity extends AppCompatActivity {
 
                 long timestamp = AWidgetViewMaker.calculateStartDate(currentWidget.getStartPeriod());
                 client.loadTransactions(timestamp);
-            } catch (MalformedURLException e) {
+            } catch (MalformedURLException e)
+            {
                 handler.processError(e);
             }
             setActivityResult(Activity.RESULT_OK, currentWidget.getAppId());
         }
     }
 
-    private void applyEnteredValues() {
-        for( int i =0; i < viewPagerAdapter.getCount(); i++ )
-            (( ABCFragment )viewPagerAdapter.getItem( i )).applyEnteredValues();
+    private void applyEnteredValues()
+    {
+        for (int i = 0; i < viewPagerAdapter.getCount(); i++)
+            ((ABCFragment) viewPagerAdapter.getItem(i)).applyEnteredValues();
     }
 
-    private void exitApp() {
+    private void exitApp()
+    {
         finishAndRemoveTask();
     }
 
-    private void setActivityResult(int result, int widgetId) {
+    private void setActivityResult(int result, int widgetId)
+    {
         Intent intent = new Intent();
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
         setResult(result, intent);
     }
 
-    private WidgetParams getWidgetParams(int appWidgetId) {
+    private WidgetParams getWidgetParams(int appWidgetId)
+    {
         WidgetParams wp = db.loadWidgetParamsByAppId(appWidgetId);
-        if (wp == null) {
+        if (wp == null)
+        {
             wp = new WidgetParams();
             wp.setAppId(appWidgetId);
         }
@@ -289,11 +362,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(Intent intent)
+    {
         super.onNewIntent(intent);
         Bundle extras = intent.getExtras();
-        if (extras != null) {
-            if (extras.containsKey(BUNDLE_KEY_EXIT_APP)) {
+        if (extras != null)
+        {
+            if (extras.containsKey(BUNDLE_KEY_EXIT_APP))
+            {
                 boolean exitApp = extras.getBoolean(BUNDLE_KEY_EXIT_APP, false);
                 String title = extras.getString(BUNDLE_KEY_NEW_WIDGET_TITLE, "");
                 AlertDialog.Builder dlg = new AlertDialog.Builder(this);
@@ -301,13 +377,15 @@ public class MainActivity extends AppCompatActivity {
                         .setMessage(String.format(getString(R.string.widget_pinned_message), title))
                         .setPositiveButton(android.R.string.ok, (dialog, i) -> {
                             dialog.dismiss();
-                            if (exitApp) {
+                            if (exitApp)
+                            {
                                 Log.i(this.getClass().getName(), "[onCreate] Finish signal received. Exit");
                                 finish();
                             }
                         });
                 dlg.show();
-            } else if (extras.containsKey(BUNDLE_KEY_PIN_ERROR)) {
+            } else if (extras.containsKey(BUNDLE_KEY_PIN_ERROR))
+            {
                 String message = extras.getString(BUNDLE_KEY_PIN_ERROR);
                 AlertDialog.Builder dlg = new AlertDialog.Builder(this);
                 dlg.setTitle(R.string.error_title)
@@ -318,9 +396,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    class AfterUpdateWidgetCallback extends ASecondCallback {
+    class AfterUpdateWidgetCallback extends ASecondCallback
+    {
         @Override
-        public void action() {
+        public void action()
+        {
             loadTransactionsDialog.dismiss();
             setActivityResult(Activity.RESULT_OK, currentWidget.getAppId());
             finishAndRemoveTask();
