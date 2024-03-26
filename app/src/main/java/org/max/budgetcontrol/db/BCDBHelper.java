@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.graphics.Color;
 import android.util.Log;
+import android.util.Pair;
 
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
@@ -134,7 +135,7 @@ public class BCDBHelper
         Log.d(this.getClass().getName(), "[insertWidgetParams]");
         assert db != null : "Database is not opened";
 
-        ContentValues cv = makeContentValues( wp );
+        ContentValues cv = makeContentValues(wp);
 
         db.beginTransaction();
 
@@ -169,11 +170,12 @@ public class BCDBHelper
         db.setTransactionSuccessful();
         db.endTransaction();
     }
+
     public void updateWidgetParams(WidgetParams wp)
     {
         Log.d(this.getClass().getName(), "[updateWidgetParams]");
 
-        ContentValues cv = makeContentValues( wp ); //
+        ContentValues cv = makeContentValues(wp); //
 
         db.beginTransaction();
 
@@ -295,28 +297,20 @@ public class BCDBHelper
                 + strWIds + ")";
 
         crs = db.rawQuery(queryAllWidgetCats, null);
-        Map<UUID, Integer> cats = new HashMap<>(crs.getCount());
+        List<Pair<UUID, Integer>> cats = new ArrayList<>(crs.getCount());
 
         while (crs.moveToNext())
         {
             Integer widgetId = crs.getInt(0);
             UUID catId = UUID.fromString(crs.getString(1));
-            Log.d(this.getClass().getName(), "[getWidgets] WID="  +  widgetId + " CID=" + catId.toString());
-            cats.put(catId, widgetId);
+            Log.d(this.getClass().getName(), "[getWidgets] WID=" + widgetId + " CID=" + catId.toString());
+            Pair<UUID, Integer> item = new Pair<>(catId, widgetId);
+            cats.add(item);
         }
         crs.close();
 
         for (WidgetParams w : widgets)
-        {
-            Iterator<UUID> it = cats.keySet().iterator();
-
-            while (it.hasNext())
-            {
-                UUID uuid = it.next();
-                Integer wId = cats.get(uuid);
-                if (w.getId() == wId.intValue()) w.addCategoryId(uuid);
-            }
-        }
+            cats.stream().filter(item -> item.second == w.getId()).forEach(item -> w.addCategoryId(item.first));
 
         return widgets;
     }
@@ -380,12 +374,12 @@ public class BCDBHelper
         bgColor = cursor.getInt(8);
         textColor = cursor.getInt(9);
         lp = new WidgetParams.LabelParams(Color.valueOf(bgColor), Color.valueOf(textColor));
-        wp.setLabelParams( WidgetParams.AMOUNT, lp);
+        wp.setLabelParams(WidgetParams.AMOUNT, lp);
         // Period
         bgColor = cursor.getInt(10);
         textColor = cursor.getInt(11);
         lp = new WidgetParams.LabelParams(Color.valueOf(bgColor), Color.valueOf(textColor));
-        wp.setLabelParams( WidgetParams.PERIOD, lp);
+        wp.setLabelParams(WidgetParams.PERIOD, lp);
 
         return wp;
     }
