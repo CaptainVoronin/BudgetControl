@@ -21,4 +21,12 @@
         android:layout_height="wrap_content"
         android:title="Настройки..."
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/idAbout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="О программе..."
+        app:showAsAction="never" />
+
 </menu>
