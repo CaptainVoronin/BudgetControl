@@ -57,7 +57,6 @@ public abstract class AWidgetViewMaker
     protected final String formatAmount( double value )
     {
         DecimalFormatSymbols d = new DecimalFormatSymbols();
-        char separator = d.getGroupingSeparator();
         return String.format("%,.0f", value);
     }
 
