@@ -20,6 +20,17 @@ public class AmountLimitViewMaker extends AWidgetViewMaker {
         views.setTextViewText(R.id.tvAmount, formatAmount(getWidget().getCurrentAmount()));
         views.setTextViewText(R.id.tvTitle, getWidget().getTitle());
         views.setTextViewText(R.id.tvPeriodName, formatAmount(getWidget().getLimitAmount()) );
+
+        views.setInt(R.id.MainLayout, "setBackgroundColor", getWidget().getAmountParams().getBackColor().toArgb() );
+
+        views.setInt(R.id.tvAmount, "setBackgroundColor", getWidget().getAmountParams().getBackColor().toArgb() );
+
+        views.setInt(R.id.tvTitle, "setTextColor", getWidget().getTitleParams().getFontColor().toArgb() );
+        views.setInt(R.id.tvTitle, "setBackgroundColor", getWidget().getTitleParams().getBackColor().toArgb());
+
+        views.setInt(R.id.tvPeriodName, "setTextColor", getWidget().getPeriodParams().getFontColor().toArgb() );
+        views.setInt(R.id.tvPeriodName, "setBackgroundColor", getWidget().getPeriodParams().getBackColor().toArgb());
+
         Color color = getScaleColor(getContext(), getWidget().getLimitAmount(), getWidget().getCurrentAmount());
         views.setInt(R.id.tvAmount, "setTextColor", color.toArgb());
         return views;

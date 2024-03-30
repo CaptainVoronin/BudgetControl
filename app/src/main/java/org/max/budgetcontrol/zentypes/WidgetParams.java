@@ -10,7 +10,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public class WidgetParams {
+public class WidgetParams
+{
     public static final String TITLE = "title";
     public static final String AMOUNT = "amount";
     public static final String PERIOD = "period";
@@ -25,47 +26,57 @@ public class WidgetParams {
 
     StartPeriodEncoding startPeriod;
 
-    public double getCurrentAmount() {
+    public double getCurrentAmount()
+    {
         return currentAmount;
     }
 
-    public void setCurrentAmount(double currentAmount) {
+    public void setCurrentAmount(double currentAmount)
+    {
         this.currentAmount = currentAmount;
     }
 
     double currentAmount;
 
-    public int getId() {
+    public int getId()
+    {
         return id;
     }
 
-    public int getAppId() {
+    public int getAppId()
+    {
         return appId;
     }
 
-    public double getLimitAmount() {
+    public double getLimitAmount()
+    {
         return limitAmount;
     }
 
-    public StartPeriodEncoding getStartPeriod() {
+    public StartPeriodEncoding getStartPeriod()
+    {
         return startPeriod;
     }
 
-    public String getTitle() {
+    public String getTitle()
+    {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(String title)
+    {
         this.title = title;
     }
 
     String title;
 
-    public List<UUID> getCategories() {
+    public List<UUID> getCategories()
+    {
         return categories;
     }
 
-    public void setCategories(List<UUID> categories) {
+    public void setCategories(List<UUID> categories)
+    {
         this.categories = categories;
     }
 
@@ -73,7 +84,8 @@ public class WidgetParams {
 
     Map<String, LabelParams> labels;
 
-    public WidgetParams() {
+    public WidgetParams()
+    {
         this.limitAmount = 0;
         this.startPeriod = StartPeriodEncoding.month;
         this.id = INVALID_WIDGET_ID;
@@ -87,7 +99,8 @@ public class WidgetParams {
         title = "";
     }
 
-    public LabelParams getLabelParams(String partName) {
+    public LabelParams getLabelParams(String partName)
+    {
         assert partName != null : "Parameter ca not be null";
 
         if (Stream.of(TITLE, AMOUNT, PERIOD).noneMatch(partName::equals))
@@ -95,64 +108,99 @@ public class WidgetParams {
         return labels.get(partName);
     }
 
-    public void setLabelParams(String partName, LabelParams params) {
+    public void setLabelParams(String partName, LabelParams params)
+    {
         assert partName != null && params != null : "Parameter can not be null";
 
         if (Stream.of(TITLE, AMOUNT, PERIOD).noneMatch(partName::equals))
             throw new InvalidParameterException(partName + " is not valid widget part name");
+        labels.remove( partName );
         labels.put(partName, params);
     }
 
-    public void setId(int id) {
+    public void setId(int id)
+    {
         this.id = id;
     }
 
-    public void setAppId(int appId) {
+    public void setAppId(int appId)
+    {
         this.appId = appId;
     }
 
-    public void setLimitAmount(double limitAmount) {
+    public void setLimitAmount(double limitAmount)
+    {
         this.limitAmount = limitAmount;
     }
 
-    public void setStartPeriod(StartPeriodEncoding startPeriod) {
+    public void setStartPeriod(StartPeriodEncoding startPeriod)
+    {
         this.startPeriod = startPeriod;
     }
 
-    public void addCategoryId(UUID uuid) {
+    public void addCategoryId(UUID uuid)
+    {
         categories.add(uuid);
     }
 
-    public LabelParams getPeriodParams() {
+    public LabelParams getPeriodParams()
+    {
         return labels.get(PERIOD);
     }
 
-    public LabelParams getAmountParams() {
+    public LabelParams getAmountParams()
+    {
         return labels.get(AMOUNT);
     }
 
-    public LabelParams getTitleParams() {
+    public LabelParams getTitleParams()
+    {
         return labels.get(TITLE);
     }
 
-    public static class LabelParams {
-        private final Color backColor;
-        private final Color fontColor;
+    public static class LabelParams
+    {
+        private Color backColor;
+        private Color fontColor;
 
-        public Color getBackColor() {
+        public void setBackColor(Color backColor)
+        {
+            this.backColor = backColor;
+        }
+
+        public void setFontColor(Color fontColor)
+        {
+            this.fontColor = fontColor;
+        }
+
+        public void setBackColor(int backColor)
+        {
+            this.backColor = Color.valueOf(backColor);
+        }
+
+        public void setFontColor(int fontColor)
+        {
+            this.fontColor = Color.valueOf(fontColor);
+        }
+
+        public Color getBackColor()
+        {
             return backColor;
         }
 
-        public Color getFontColor() {
+        public Color getFontColor()
+        {
             return fontColor;
         }
 
-        public LabelParams(Color backColor, Color fontColor) {
+        public LabelParams(Color backColor, Color fontColor)
+        {
             this.backColor = backColor;
             this.fontColor = fontColor;
         }
 
-        public LabelParams() {
+        public LabelParams()
+        {
             this.backColor = Color.valueOf(Color.WHITE);
             this.fontColor = Color.valueOf(Color.BLACK);
         }

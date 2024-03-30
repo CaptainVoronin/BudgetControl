@@ -71,6 +71,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
     }
     compileOptions {
@@ -91,6 +92,7 @@ dependencies {
     implementation 'org.json:json:20231013'
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'net.mm2d.color-chooser:color-chooser:<version>'
     implementation project(':propeditors')
 
 }

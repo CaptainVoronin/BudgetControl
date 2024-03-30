@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity
     private static final int WIDGET_WAS_PINNED = 876876;
     public static final String BUNDLE_KEY_WIDGET = "pinnedWidget";
     public static final String BUNDLE_KEY_APP_ID = "appWidgetId";
+
+    public static final String BUNDLE_KEY_WIDGET_ACTION = "showExpences";
     public static final String BUNDLE_KEY_EXIT_APP = "bc_action_exit_app";
     public static final String BUNDLE_KEY_PIN_ERROR = "bc_pin_widget_error";
 
@@ -137,7 +139,7 @@ public class MainActivity extends AppCompatActivity
         viewPager.setAdapter(viewPagerAdapter);
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
-
+        Log.d( MainActivity.class.getName(), "[onCreate]" );
         if (extras != null)
         {
             int appWidgetId = extras.getInt(
@@ -392,6 +394,10 @@ public class MainActivity extends AppCompatActivity
                         .setMessage(message)
                         .setNegativeButton(android.R.string.cancel, (dialog, i) -> dialog.dismiss());
                 dlg.show();
+            }
+            else if (extras.containsKey(BUNDLE_KEY_APP_ID))
+            {
+
             }
         }
     }

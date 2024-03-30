@@ -9,6 +9,10 @@ import android.widget.TextView;
 
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class FragmentWidgetAppearance extends ABCFragment
 {
 
@@ -39,39 +43,42 @@ public class FragmentWidgetAppearance extends ABCFragment
         View rootView = inflater.inflate(R.layout.fragment_widget_appearance, container, false);
 
         tvTitle = rootView.findViewById(R.id.tvTitle);
-        titleLabel =  wp.getLabelParams( WidgetParams.TITLE );
-        tvTitle.setTextColor( wp.getLabelParams( WidgetParams.TITLE ).getFontColor().toArgb() );
-        tvTitle.setBackgroundColor(wp.getLabelParams( WidgetParams.TITLE ).getBackColor().toArgb() );
-        tvTitle.setOnClickListener(new TextViewClickListener(WidgetParams.TITLE));
+        titleLabel = wp.getLabelParams(WidgetParams.TITLE);
+        tvTitle.setTextColor(titleLabel.getFontColor().toArgb());
+        tvTitle.setBackgroundColor(titleLabel.getBackColor().toArgb());
+        tvTitle.setOnClickListener(view -> {
+            DlgColorSelector dialog = new DlgColorSelector(getMainActivity(),
+                    titleLabel,
+                    new ColorSelectedListener(WidgetParams.TITLE),
+                    "");
+            dialog.show();
+        });
 
         tvAmount = rootView.findViewById(R.id.tvAmount);
-        amountLabel =  wp.getLabelParams( WidgetParams.AMOUNT );
-        tvAmount.setTextColor( wp.getLabelParams( WidgetParams.AMOUNT ).getFontColor().toArgb() );
-        tvAmount.setBackgroundColor(wp.getLabelParams( WidgetParams.AMOUNT ).getBackColor().toArgb() );
-        tvAmount.setOnClickListener(new TextViewClickListener(WidgetParams.AMOUNT));
+        amountLabel = wp.getLabelParams(WidgetParams.AMOUNT);
+        tvAmount.setTextColor(amountLabel.getFontColor().toArgb());
+        tvAmount.setBackgroundColor(amountLabel.getBackColor().toArgb());
+        tvAmount.setOnClickListener(view -> {
+            DlgColorSelector dialog = new DlgColorSelector(getMainActivity(),
+                    amountLabel,
+                    new ColorSelectedListener(WidgetParams.AMOUNT),
+                    "");
+            dialog.show();
+        });
 
         tvPeriod = rootView.findViewById(R.id.tvPeriodName);
-        periodLabel = wp.getLabelParams( WidgetParams.PERIOD );
-        tvPeriod.setTextColor( wp.getLabelParams( WidgetParams.PERIOD ).getFontColor().toArgb() );
-        tvPeriod.setBackgroundColor(wp.getLabelParams( WidgetParams.PERIOD ).getBackColor().toArgb() );
-        tvPeriod.setOnClickListener(new TextViewClickListener(WidgetParams.PERIOD));
+        periodLabel = wp.getLabelParams(WidgetParams.PERIOD);
+        tvPeriod.setTextColor(periodLabel.getFontColor().toArgb());
+        tvPeriod.setBackgroundColor(periodLabel.getBackColor().toArgb());
+        tvPeriod.setOnClickListener(view -> {
+            DlgColorSelector dialog = new DlgColorSelector(getMainActivity(),
+                    periodLabel,
+                    new ColorSelectedListener(WidgetParams.PERIOD),
+                    "");
+            dialog.show();
+        });
 
         return rootView;
-    }
-
-    private void editColors(String widgetPartName, View v)
-    {
-        WidgetParams.LabelParams labelParams = getMainActivity().getCurrentWidget().getLabelParams(widgetPartName);
-        getColors(labelParams, widgetPartName);
-    }
-
-    private void getColors(WidgetParams.LabelParams currentParams, String widgetPart)
-    {
-        DlgColorSelector dialog = new DlgColorSelector(getMainActivity(),
-                currentParams,
-                new ColorSelectedListener(widgetPart),
-                "");
-        dialog.show();
     }
 
     @Override
@@ -90,9 +97,9 @@ public class FragmentWidgetAppearance extends ABCFragment
     public void applyEnteredValues()
     {
         WidgetParams wp = getMainActivity().getCurrentWidget();
-        wp.setLabelParams( WidgetParams.TITLE, titleLabel );
-        wp.setLabelParams( WidgetParams.AMOUNT, amountLabel );
-        wp.setLabelParams( WidgetParams.PERIOD, periodLabel );
+        wp.setLabelParams(WidgetParams.TITLE, titleLabel);
+        wp.setLabelParams(WidgetParams.AMOUNT, amountLabel);
+        wp.setLabelParams(WidgetParams.PERIOD, periodLabel);
     }
 
     class ColorSelectedListener implements DlgColorSelector.OnOkListener
@@ -105,13 +112,24 @@ public class FragmentWidgetAppearance extends ABCFragment
         }
 
         @Override
-        public void okPressed(WidgetParams.LabelParams newLabelParams)
+        public void okPressed(WidgetParams.LabelParams newLabelParams, boolean applyToWholeWidget)
         {
-            TextView tv = getSpecificTextView(widgetPart);
-            tv.setBackgroundColor(newLabelParams.getBackColor().toArgb());
-            tv.setTextColor(newLabelParams.getFontColor().toArgb());
-            setSpecificLabelParams( widgetPart, newLabelParams );
-
+            if( !applyToWholeWidget )
+            {
+                TextView tv = getSpecificTextView(widgetPart);
+                tv.setBackgroundColor(newLabelParams.getBackColor().toArgb());
+                tv.setTextColor(newLabelParams.getFontColor().toArgb());
+                setSpecificLabelParams(widgetPart, newLabelParams);
+            }
+            else {
+                Stream.of(WidgetParams.TITLE, WidgetParams.AMOUNT, WidgetParams.PERIOD)
+                        .forEach( item->{
+                            TextView tv = getSpecificTextView(item);
+                            tv.setBackgroundColor(newLabelParams.getBackColor().toArgb());
+                            tv.setTextColor(newLabelParams.getFontColor().toArgb());
+                            setSpecificLabelParams(item, newLabelParams);
+                        } );
+            }
         }
     }
 
@@ -133,21 +151,5 @@ public class FragmentWidgetAppearance extends ABCFragment
             return tvAmount;
         else
             return tvPeriod;
-    }
-
-    class TextViewClickListener implements View.OnClickListener
-    {
-        String widgetPart;
-
-        public TextViewClickListener(String widgetPart)
-        {
-            this.widgetPart = widgetPart;
-        }
-
-        @Override
-        public void onClick(View view)
-        {
-            editColors(widgetPart, view);
-        }
     }
 }
