@@ -23,7 +23,7 @@ class BaseWidgetViewMaker extends AWidgetViewMaker
     public RemoteViews getViews()
     {
         Bundle extras = new Bundle();
-        Intent clickIntent = new Intent( getContext(), org.max.budgetcontrol.MainActivity.class );
+        Intent clickIntent = new Intent( getContext(), org.max.budgetcontrol.charts.ChartActivity.class );
 
         extras.putInt( BUNDLE_KEY_APP_ID, getWidget().getAppId() );
         extras.putBoolean( BUNDLE_KEY_WIDGET_ACTION, true );

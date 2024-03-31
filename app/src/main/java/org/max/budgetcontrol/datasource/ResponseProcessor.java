@@ -6,15 +6,12 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.max.budgetcontrol.datasource.ZenEntities;
 import org.max.budgetcontrol.zentypes.Category;
 import org.max.budgetcontrol.zentypes.Transaction;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +30,7 @@ public class ResponseProcessor {
     }
 
     public static List<Category> getCategory(JSONObject obj ) throws JSONException {
-        if( obj.has( ZenEntities.tag.name() ) )
+        if( obj.has( ZenEntities.tag.toString() ) )
         {
             JSONArray arr = obj.getJSONArray(ZenEntities.tag.name());
             List<Category> cats = new ArrayList<>();
@@ -79,7 +76,10 @@ public class ResponseProcessor {
     }
 
     public static List<Category> makeCategoryTree(List<Category> categories) {
-        Map<UUID, Category> cTree = new HashMap<>();
+
+        assert categories != null : "Categories can not be null";
+
+        Map<UUID, Category> cTree;
 
         // Take top level categories
         cTree = categories.stream().filter( category -> category.getParent() == null ).collect(Collectors.toMap( Category::getId, category -> category ) );

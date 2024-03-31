@@ -17,6 +17,11 @@
         android:theme="@style/Theme.BudgetControl"
         tools:targetApi="31">
         <activity
+            android:name=".charts.ChartActivity"
+            android:exported="false"
+            android:label="@string/title_activity_chart"
+            android:theme="@style/Theme.BudgetControl.NoActionBar" />
+        <activity
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="@string/title_activity_settings" />
@@ -26,7 +31,9 @@
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
+
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
@@ -42,7 +49,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/b_c_widget_info" />
         </receiver>
-
         <receiver
             android:name=".OnBootReceiver"
             android:enabled="true"
@@ -54,9 +60,7 @@
         <receiver
             android:name=".WidgetPinnedReceiver"
             android:enabled="true"
-            android:exported="false">
-        </receiver>
+            android:exported="false"></receiver>
     </application>
-
 
 </manifest>
