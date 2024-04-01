@@ -173,14 +173,21 @@ public class ChartFragment extends Fragment implements IDataListener
 
     private String[] getColorScale(Integer[] intervals)
     {
-        String[] scales = new String[6];
-        scales[0] = String.format( "{ less: %d }", intervals[0] );
-        scales[1] = String.format( "{ from: %d, to: %d }", intervals[0], intervals[1] );
-        scales[2] = String.format( "{ from: %d, to: %d }", intervals[1], intervals[2] );
-        scales[3] = String.format( "{ from: %d, to: %d }", intervals[2], intervals[3] );
-        scales[4] = String.format( "{ from: %d, to: %d }", intervals[3], intervals[4] );
-        scales[5] = String.format( "{ greater: %d }", intervals[4]  );
-        return  scales;
+        if( intervals.length == 1 )
+        {
+            return new String[]{String.format( "{ less: %d }", intervals[0] )};
+        }
+        else
+        {
+            String[] scales = new String[6];
+            scales[0] = String.format("{ less: %d }", intervals[0]);
+            scales[1] = String.format("{ from: %d, to: %d }", intervals[0], intervals[1]);
+            scales[2] = String.format("{ from: %d, to: %d }", intervals[1], intervals[2]);
+            scales[3] = String.format("{ from: %d, to: %d }", intervals[2], intervals[3]);
+            scales[4] = String.format("{ from: %d, to: %d }", intervals[3], intervals[4]);
+            scales[5] = String.format("{ greater: %d }", intervals[4]);
+            return scales;
+        }
     }
 
     private Integer[] getIntervals(Double min, Double max)
@@ -188,7 +195,9 @@ public class ChartFragment extends Fragment implements IDataListener
         int delta = max.intValue() - min.intValue();
         int step = delta / 6;
         if( step == 0 )
-            return null;
+        {
+            return new Integer[]{ max.intValue() *2 };
+        }
         Integer[] intervals = new Integer[6];
         int current = min.intValue() + step;
         for( int i = 0; i < 5; i++ )
