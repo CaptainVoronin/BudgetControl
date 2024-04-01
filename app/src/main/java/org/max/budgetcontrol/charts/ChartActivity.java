@@ -141,7 +141,8 @@ public class ChartActivity extends AppCompatActivity
     {
         this.transactions = transactions;
         makeGroups();
-        dataListeners.stream().forEach(listener -> listener.onTransactionsReceived(transactions));
+        if( transactions != null && transactions.size() != 0 )
+            dataListeners.stream().forEach(listener -> listener.onTransactionsReceived(transactions));
     }
 
     private void makeGroups()
@@ -154,7 +155,9 @@ public class ChartActivity extends AppCompatActivity
                     .filter(t -> t.getCategories().contains(c.getId()))
                     .mapToDouble(t -> t.getAmount())
                     .sum();
-            groups.add(new Pair<>(c, -1 * summ));
+
+            if( c.getChild().size() != 0 || summ.intValue() != 0 )
+                groups.add(new Pair<>(c, -1 * summ));
 
             if (c.getChild().size() != 0)
             {

@@ -31,8 +31,10 @@ import org.max.budgetcontrol.zentypes.Transaction;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -88,6 +90,13 @@ public class ChartFragment extends Fragment implements IDataListener
 
         String rootKey = wp.getTitle();
         data.add(new CustomTreeDataEntry(rootKey, null, rootKey));
+        Double min;
+        Double max;
+        List<Pair<Category, Double>> nonZero =  groups.stream().filter( group-> group.second.intValue() != 0 ).collect(Collectors.toList());
+        min = nonZero.stream().map(item -> item.second).min(Comparator.comparingDouble(a -> a)).get();
+        max = nonZero.stream().map(item -> item.second).max(Comparator.comparingDouble(a -> a)).get();
+        Integer[] intervals = getIntervals( min, max );
+        String[] colorScale = getColorScale( intervals );
 
         for (Pair<Category, Double> pair : groups)
         {
@@ -99,7 +108,6 @@ public class ChartFragment extends Fragment implements IDataListener
                     .getName();
             System.out.println(c.getName() + " " + parent + " " + c.getName() + " " + pair.second.intValue());
             data.add(new CustomTreeDataEntry(c.getName(), parent, c.getName(), pair.second.intValue(), c));
-
         }
 
         TreeMap treeMap = AnyChart.treeMap();
@@ -114,7 +122,7 @@ public class ChartFragment extends Fragment implements IDataListener
         treeMap.colorScale().colors(new String[]{
                 "#ffee58", "#fbc02d", "#f57f17", "#c0ca33", "#689f38", "#2e7d32"
         });
-
+        treeMap.colorScale().ranges( colorScale );
         treeMap.padding(10d, 10d, 10d, 20d);
         treeMap.maxDepth(2d);
         treeMap.hovered().fill("#bdbdbd", 1d);
@@ -125,7 +133,7 @@ public class ChartFragment extends Fragment implements IDataListener
             public void onClick(Event event)
             {
                 String uuid = event.getData().get("category");
-                chartActivity.bringTransactionsFragment( uuid );
+                chartActivity.bringTransactionsFragment(uuid);
             }
         });
 
@@ -161,6 +169,34 @@ public class ChartFragment extends Fragment implements IDataListener
 
         AnyChartView anyChartView = root.findViewById(R.id.any_chart_view);
         anyChartView.setChart(treeMap);
+    }
+
+    private String[] getColorScale(Integer[] intervals)
+    {
+        String[] scales = new String[6];
+        scales[0] = String.format( "{ less: %d }", intervals[0] );
+        scales[1] = String.format( "{ from: %d, to: %d }", intervals[0], intervals[1] );
+        scales[2] = String.format( "{ from: %d, to: %d }", intervals[1], intervals[2] );
+        scales[3] = String.format( "{ from: %d, to: %d }", intervals[2], intervals[3] );
+        scales[4] = String.format( "{ from: %d, to: %d }", intervals[3], intervals[4] );
+        scales[5] = String.format( "{ greater: %d }", intervals[4]  );
+        return  scales;
+    }
+
+    private Integer[] getIntervals(Double min, Double max)
+    {
+        int delta = max.intValue() - min.intValue();
+        int step = delta / 6;
+        if( step == 0 )
+            return null;
+        Integer[] intervals = new Integer[6];
+        int current = min.intValue() + step;
+        for( int i = 0; i < 5; i++ )
+        {
+            intervals[i] = current;
+            current += step;
+        }
+        return intervals;
     }
 
     @Override

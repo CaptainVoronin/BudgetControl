@@ -49,11 +49,10 @@ public class ResponseProcessor {
     public static @Nullable List<Transaction> getTransactions(@NonNull JSONObject obj ) throws JSONException, ParseException {
         final String deleted = "deleted";
 
-        List<Transaction> transactions = null;
+        List<Transaction> transactions = new ArrayList<>();
         if( obj.has( ZenEntities.transaction.name() ))
         {
             JSONArray arr = obj.getJSONArray(ZenEntities.transaction.name());
-            transactions = new ArrayList<>();
 
             for (int i = 0; i < arr.length(); i++)
             {
