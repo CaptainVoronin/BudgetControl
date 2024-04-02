@@ -190,7 +190,7 @@ public class ChartFragment extends Fragment implements IDataListener
         }
     }
 
-    private Integer[] getIntervals(Double min, Double max)
+    private Integer[] getIntervals( Double min, Double max)
     {
         int delta = max.intValue() - min.intValue();
         int step = delta / 6;
