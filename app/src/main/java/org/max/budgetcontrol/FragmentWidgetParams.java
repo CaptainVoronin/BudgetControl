@@ -124,4 +124,10 @@ public class FragmentWidgetParams extends ABCFragment {
 
         getMainActivity().getCurrentWidget().setStartPeriod(code);
     }
+
+    @Override
+    public void onSettingsComplete()
+    {
+
+    }
 }

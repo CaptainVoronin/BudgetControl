@@ -102,6 +102,12 @@ public class FragmentWidgetAppearance extends ABCFragment
         wp.setLabelParams(WidgetParams.PERIOD, periodLabel);
     }
 
+    @Override
+    public void onSettingsComplete()
+    {
+
+    }
+
     class ColorSelectedListener implements DlgColorSelector.OnOkListener
     {
         private final String widgetPart;

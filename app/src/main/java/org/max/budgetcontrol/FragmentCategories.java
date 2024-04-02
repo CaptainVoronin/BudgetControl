@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 import okhttp3.Response;
 
-public class FragmentCategories extends ABCFragment
+public class FragmentCategories extends ABCFragment implements MainActivity.SettingsCompleteListener
 {
 
     List<Category> categories;
@@ -60,6 +60,7 @@ public class FragmentCategories extends ABCFragment
     {
         super.setParamsStateListener(paramsStateListener);
         categoryHolder = new WidgetCategoryHolder(getParamsStateListener(), getMainActivity().getCurrentWidget().getCategories());
+        getMainActivity().addSettingsListener( this );
     }
 
     @Nullable
@@ -110,6 +111,12 @@ public class FragmentCategories extends ABCFragment
         {
             categoryLoaderHandler.processError(e);
         }
+    }
+
+    @Override
+    public void onSettingsComplete()
+    {
+        loadCategories();
     }
 
     class CategoryLoaderHandler extends AZenClientResponseHandler

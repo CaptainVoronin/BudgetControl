@@ -95,6 +95,13 @@ public class MainActivity extends AppCompatActivity
 
     BCPagerAdapter viewPagerAdapter;
 
+    private List<SettingsCompleteListener> settingsCompleteListeners;
+
+    public MainActivity()
+    {
+        settingsCompleteListeners = new ArrayList<>();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -115,6 +122,9 @@ public class MainActivity extends AppCompatActivity
                     settings = new SettingsHolder(getApplicationContext());
                     if (!settings.init())
                         showSettings(true);
+                    else
+                        runOnUiThread(() -> notifySettingsComplete());
+
                 });
 
         // Создать или открыть БД
@@ -399,5 +409,25 @@ public class MainActivity extends AppCompatActivity
             setActivityResult(Activity.RESULT_OK, currentWidget.getAppId());
             finishAndRemoveTask();
         }
+    }
+
+    final public void notifySettingsComplete()
+    {
+        settingsCompleteListeners.iterator().forEachRemaining(listener -> listener.onSettingsComplete());
+    }
+
+    public void setSelectedCategoriesList(List<UUID> selectedList, boolean checked)
+    {
+        categoryHolder.set(selectedList);
+    }
+
+    final public void addSettingsListener( SettingsCompleteListener listener )
+    {
+        settingsCompleteListeners.add( listener );
+    }
+
+    public interface SettingsCompleteListener
+    {
+        void onSettingsComplete();
     }
 }
