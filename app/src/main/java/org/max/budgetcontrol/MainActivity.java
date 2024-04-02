@@ -324,7 +324,7 @@ public class MainActivity extends AppCompatActivity
                 loadTransactionsDialog.show();
 
                 long timestamp = AWidgetViewMaker.calculateStartDate(currentWidget.getStartPeriod());
-                client.loadTransactions(timestamp);
+                client.loadTransactions(timestamp / 1000L);
             } catch (MalformedURLException e)
             {
                 handler.processError(e);

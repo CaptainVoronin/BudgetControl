@@ -56,7 +56,7 @@ public abstract class AWidgetViewMaker
                 current.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
                 break;
         }
-        Log.d( "org.max.budgetcontrol.AWidgetViewMaker", "[calculateStartDate] Date is " + current.getTime().toString());
+        Log.d( AWidgetViewMaker.class.getName(), "[calculateStartDate] Date is " + current.getTime().toString());
         return current.getTimeInMillis();
     }
 
@@ -91,14 +91,13 @@ public abstract class AWidgetViewMaker
     {
         Bundle extras = new Bundle();
         Intent clickIntent = new Intent( getContext(), org.max.budgetcontrol.charts.ChartActivity.class );
+        clickIntent.setAction( "" + getWidget().getAppId() );
 
-        extras.putInt( BUNDLE_KEY_APP_ID, getWidget().getAppId() );
         extras.putBoolean( BUNDLE_KEY_WIDGET_ACTION, true );
         clickIntent.putExtras( extras );
-
-        PendingIntent clickPI = PendingIntent.getActivity(getContext(), 0,
-                clickIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE, extras);
+        PendingIntent clickPI = PendingIntent.getActivity(getContext(), 0, clickIntent, PendingIntent.FLAG_IMMUTABLE, extras);
         views.setOnClickPendingIntent( resourceId, clickPI);
+        Log.d( AWidgetViewMaker.class.getName(), "[setOnClickReaction] Set for app widget ID " + getWidget().getAppId());
     }
 
 }

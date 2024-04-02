@@ -90,9 +90,8 @@ public class ChartActivity extends AppCompatActivity
         Log.d(ChartActivity.class.getName(), "[onCreate]");
         if (extras != null)
         {
-            int appWidgetId = extras.getInt(
-                    AppWidgetManager.EXTRA_APPWIDGET_ID,
-                    AppWidgetManager.INVALID_APPWIDGET_ID);
+            String action = intent.getAction();
+            int appWidgetId = Integer.parseInt( action );
             currentWidget = db.loadWidgetParamsByAppId(appWidgetId);
             loadData();
         } else

@@ -98,6 +98,6 @@ public class WidgetPinnedReceiver extends BroadcastReceiver {
                     handler);
 
             long timestamp = AWidgetViewMaker.calculateStartDate(widget.getStartPeriod());
-            client.loadTransactions(timestamp);
+            client.loadTransactions(timestamp / 1000L);
     }
 }
