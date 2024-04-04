@@ -95,21 +95,17 @@ public class MainActivity extends AppCompatActivity
 
     BCPagerAdapter viewPagerAdapter;
 
+    private List<SettingsCompleteListener> settingsCompleteListeners;
+
+    public MainActivity()
+    {
+        settingsCompleteListeners = new ArrayList<>();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
-        try
-        {
-            String versionName = getPackageManager()
-                    .getPackageInfo(getPackageName(), 0).versionName;
-            System.out.println(versionName);
-        } catch (PackageManager.NameNotFoundException e)
-        {
-            e.printStackTrace();
-            return;
-        }
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -126,6 +122,9 @@ public class MainActivity extends AppCompatActivity
                     settings = new SettingsHolder(getApplicationContext());
                     if (!settings.init())
                         showSettings(true);
+                    else
+                        runOnUiThread(() -> notifySettingsComplete());
+
                 });
 
         // Создать или открыть БД
@@ -139,7 +138,7 @@ public class MainActivity extends AppCompatActivity
         viewPager.setAdapter(viewPagerAdapter);
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
-        Log.d( MainActivity.class.getName(), "[onCreate]" );
+        Log.d(MainActivity.class.getName(), "[onCreate]");
         if (extras != null)
         {
             int appWidgetId = extras.getInt(
@@ -229,7 +228,7 @@ public class MainActivity extends AppCompatActivity
             builder.setTitle(R.string.dlg_about_title)
                     .setNegativeButton(android.R.string.cancel,
                             (dialogInterface, i) -> dialogInterface.cancel())
-                    .setMessage(message).setIcon( R.mipmap.ic_launcher);
+                    .setMessage(message).setIcon(R.mipmap.ic_launcher);
             builder.show();
 
         } catch (PackageManager.NameNotFoundException e)
@@ -325,7 +324,7 @@ public class MainActivity extends AppCompatActivity
                 loadTransactionsDialog.show();
 
                 long timestamp = AWidgetViewMaker.calculateStartDate(currentWidget.getStartPeriod());
-                client.loadTransactions(timestamp);
+                client.loadTransactions(timestamp / 1000L);
             } catch (MalformedURLException e)
             {
                 handler.processError(e);
@@ -394,8 +393,7 @@ public class MainActivity extends AppCompatActivity
                         .setMessage(message)
                         .setNegativeButton(android.R.string.cancel, (dialog, i) -> dialog.dismiss());
                 dlg.show();
-            }
-            else if (extras.containsKey(BUNDLE_KEY_APP_ID))
+            } else if (extras.containsKey(BUNDLE_KEY_APP_ID))
             {
 
             }
@@ -411,5 +409,25 @@ public class MainActivity extends AppCompatActivity
             setActivityResult(Activity.RESULT_OK, currentWidget.getAppId());
             finishAndRemoveTask();
         }
+    }
+
+    final public void notifySettingsComplete()
+    {
+        settingsCompleteListeners.iterator().forEachRemaining(listener -> listener.onSettingsComplete());
+    }
+
+    public void setSelectedCategoriesList(List<UUID> selectedList, boolean checked)
+    {
+        categoryHolder.set(selectedList);
+    }
+
+    final public void addSettingsListener( SettingsCompleteListener listener )
+    {
+        settingsCompleteListeners.add( listener );
+    }
+
+    public interface SettingsCompleteListener
+    {
+        void onSettingsComplete();
     }
 }

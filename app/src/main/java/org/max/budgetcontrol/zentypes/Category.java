@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
+
 public class Category {
 
     public String getName() {
@@ -25,7 +27,7 @@ public class Category {
      *
      * @return Chile list. May be empty but can n't be null
      */
-    public List<Category> getChild() {
+    public @NonNull List<Category> getChild() {
         return child;
     }
 

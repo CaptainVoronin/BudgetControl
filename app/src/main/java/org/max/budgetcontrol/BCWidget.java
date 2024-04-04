@@ -66,11 +66,11 @@ public class BCWidget extends AppWidgetProvider
 
         Collections.sort(widgets, (a, b) -> Integer.compare(a.getStartPeriod().number(), b.getStartPeriod().number()));
         StartPeriodEncoding maxPeriod = widgets.get(widgets.size() - 1).getStartPeriod();
-        long timestamp = AWidgetViewMaker.calculateStartDate(maxPeriod) / 1000l;
+        long timestamp = AWidgetViewMaker.calculateStartDate(maxPeriod);
 
         UpdateSelectedWidgetsHandler handler = new UpdateSelectedWidgetsHandler(context, appWidgetManager, appWidgetIds, widgets);
         ZenMoneyClient client = new ZenMoneyClient(url, token, handler);
-        client.loadTransactions(timestamp);
+        client.loadTransactions(timestamp/1000L);
     }
 
     private void updateWithError(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, JSONException e)

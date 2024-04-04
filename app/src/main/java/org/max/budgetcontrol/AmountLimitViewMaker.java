@@ -33,6 +33,7 @@ public class AmountLimitViewMaker extends AWidgetViewMaker {
 
         Color color = getScaleColor(getContext(), getWidget().getLimitAmount(), getWidget().getCurrentAmount());
         views.setInt(R.id.tvAmount, "setTextColor", color.toArgb());
+        setOnClickReaction( views, R.id.tvAmount );
         return views;
     }
 

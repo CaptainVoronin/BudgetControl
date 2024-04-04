@@ -6,7 +6,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,8 +18,8 @@ public class RequestUtils {
 
     public static byte[] getDiffRequestBody(long time) throws JSONException
     {
-        //return getSpecificRequestBody( ZenEntities.transaction, 1701378000l );
-        return getSpecificRequestBody( null, 1701378000l );
+        return getSpecificRequestBody( null, time );
+        //return getSpecificRequestBody( null, 1701378000l );
     }
 
     public static byte[] getCategoriesRequestBody() throws JSONException
@@ -38,7 +37,7 @@ public class RequestUtils {
         if( entity != null )
         {
             JSONArray arr = new JSONArray();
-            arr.put( entity );
+            arr.put( entity.toString() );
             job.put( "forceFetch", ( Object ) arr );
         }
         return job.toString().getBytes(StandardCharsets.UTF_8);

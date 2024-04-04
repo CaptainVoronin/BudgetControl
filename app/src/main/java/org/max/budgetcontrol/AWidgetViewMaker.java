@@ -1,6 +1,9 @@
 package org.max.budgetcontrol;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.RemoteViews;
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
@@ -8,6 +11,9 @@ import org.max.budgetcontrol.zentypes.WidgetParams;
 
 import java.text.DecimalFormatSymbols;
 import java.util.Calendar;
+
+import static org.max.budgetcontrol.MainActivity.BUNDLE_KEY_APP_ID;
+import static org.max.budgetcontrol.MainActivity.BUNDLE_KEY_WIDGET_ACTION;
 
 public abstract class AWidgetViewMaker
 {
@@ -50,7 +56,7 @@ public abstract class AWidgetViewMaker
                 current.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
                 break;
         }
-        Log.d( "org.max.budgetcontrol.AWidgetViewMaker", "[calculateStartDate] Date is " + current.getTime().toString());
+        Log.d( AWidgetViewMaker.class.getName(), "[calculateStartDate] Date is " + current.getTime().toString());
         return current.getTimeInMillis();
     }
 
@@ -80,4 +86,18 @@ public abstract class AWidgetViewMaker
         }
         return getContext().getString( messageId );
     }
+
+    protected void setOnClickReaction( RemoteViews views, int resourceId )
+    {
+        Bundle extras = new Bundle();
+        Intent clickIntent = new Intent( getContext(), org.max.budgetcontrol.charts.ChartActivity.class );
+        clickIntent.setAction( "" + getWidget().getAppId() );
+
+        extras.putBoolean( BUNDLE_KEY_WIDGET_ACTION, true );
+        clickIntent.putExtras( extras );
+        PendingIntent clickPI = PendingIntent.getActivity(getContext(), 0, clickIntent, PendingIntent.FLAG_IMMUTABLE, extras);
+        views.setOnClickPendingIntent( resourceId, clickPI);
+        Log.d( AWidgetViewMaker.class.getName(), "[setOnClickReaction] Set for app widget ID " + getWidget().getAppId());
+    }
+
 }

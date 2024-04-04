@@ -6,7 +6,7 @@ public enum ZenEntities {
     company ("company"),
     user ("user"),
     account ("account"),
-    tag ("tag"),
+    tag("tag"),
     merchant ("merchant"),
     budget ("budget"),
     reminder ("reminder"),

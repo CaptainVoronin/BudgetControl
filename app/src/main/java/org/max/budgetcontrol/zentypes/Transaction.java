@@ -5,7 +5,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Transaction implements Comparable<Transaction>{
@@ -67,7 +66,7 @@ public class Transaction implements Comparable<Transaction>{
         return new Date( timestamp ) ;
     }
 
-    public List<UUID> getCategory() {
+    public List<UUID> getCategories() {
         return category;
     }
 /*
