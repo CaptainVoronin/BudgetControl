@@ -28,6 +28,8 @@ public class FragmentWidgetAppearance extends ABCFragment
         super(activity);
     }
 
+    boolean colorsChanged = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -40,10 +42,13 @@ public class FragmentWidgetAppearance extends ABCFragment
     {
         WidgetParams wp = getMainActivity().getCurrentWidget();
 
+        titleLabel = wp.getLabelParams(WidgetParams.TITLE);
+        amountLabel = wp.getLabelParams(WidgetParams.AMOUNT);
+        periodLabel = wp.getLabelParams(WidgetParams.PERIOD);
+
         View rootView = inflater.inflate(R.layout.fragment_widget_appearance, container, false);
 
         tvTitle = rootView.findViewById(R.id.tvTitle);
-        titleLabel = wp.getLabelParams(WidgetParams.TITLE);
         tvTitle.setTextColor(titleLabel.getFontColor().toArgb());
         tvTitle.setBackgroundColor(titleLabel.getBackColor().toArgb());
         tvTitle.setOnClickListener(view -> {
@@ -55,7 +60,6 @@ public class FragmentWidgetAppearance extends ABCFragment
         });
 
         tvAmount = rootView.findViewById(R.id.tvAmount);
-        amountLabel = wp.getLabelParams(WidgetParams.AMOUNT);
         tvAmount.setTextColor(amountLabel.getFontColor().toArgb());
         tvAmount.setBackgroundColor(amountLabel.getBackColor().toArgb());
         tvAmount.setOnClickListener(view -> {
@@ -67,7 +71,6 @@ public class FragmentWidgetAppearance extends ABCFragment
         });
 
         tvPeriod = rootView.findViewById(R.id.tvPeriodName);
-        periodLabel = wp.getLabelParams(WidgetParams.PERIOD);
         tvPeriod.setTextColor(periodLabel.getFontColor().toArgb());
         tvPeriod.setBackgroundColor(periodLabel.getBackColor().toArgb());
         tvPeriod.setOnClickListener(view -> {
@@ -96,10 +99,13 @@ public class FragmentWidgetAppearance extends ABCFragment
     @Override
     public void applyEnteredValues()
     {
-        WidgetParams wp = getMainActivity().getCurrentWidget();
-        wp.setLabelParams(WidgetParams.TITLE, titleLabel);
-        wp.setLabelParams(WidgetParams.AMOUNT, amountLabel);
-        wp.setLabelParams(WidgetParams.PERIOD, periodLabel);
+        if (colorsChanged)
+        {
+            WidgetParams wp = getMainActivity().getCurrentWidget();
+            wp.setLabelParams(WidgetParams.TITLE, titleLabel);
+            wp.setLabelParams(WidgetParams.AMOUNT, amountLabel);
+            wp.setLabelParams(WidgetParams.PERIOD, periodLabel);
+        }
     }
 
     @Override
@@ -120,27 +126,28 @@ public class FragmentWidgetAppearance extends ABCFragment
         @Override
         public void okPressed(WidgetParams.LabelParams newLabelParams, boolean applyToWholeWidget)
         {
-            if( !applyToWholeWidget )
+            if (!applyToWholeWidget)
             {
                 TextView tv = getSpecificTextView(widgetPart);
                 tv.setBackgroundColor(newLabelParams.getBackColor().toArgb());
                 tv.setTextColor(newLabelParams.getFontColor().toArgb());
                 setSpecificLabelParams(widgetPart, newLabelParams);
-            }
-            else {
+            } else
+            {
                 Stream.of(WidgetParams.TITLE, WidgetParams.AMOUNT, WidgetParams.PERIOD)
-                        .forEach( item->{
+                        .forEach(item -> {
                             TextView tv = getSpecificTextView(item);
                             tv.setBackgroundColor(newLabelParams.getBackColor().toArgb());
                             tv.setTextColor(newLabelParams.getFontColor().toArgb());
                             setSpecificLabelParams(item, newLabelParams);
-                        } );
+                        });
             }
         }
     }
 
     private void setSpecificLabelParams(String widgetPart, WidgetParams.LabelParams newLabelParams)
     {
+        colorsChanged = true;
         if (widgetPart.equals(WidgetParams.TITLE))
             titleLabel = newLabelParams;
         else if (widgetPart.equals(WidgetParams.AMOUNT))
