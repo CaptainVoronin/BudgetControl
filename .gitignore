@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+/app/libs/propeditors-debug-v1.0.2.aar
+/app/release/BudgetControl-v1.3.366.apk
+/app/libs/propeditors-release-v1.0.2.aar
