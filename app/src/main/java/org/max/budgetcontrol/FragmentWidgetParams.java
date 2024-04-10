@@ -62,12 +62,15 @@ public class FragmentWidgetParams extends ABCFragment {
     private void bringWidgetToUI() {
         IPropertyAdapter<String> pes = (IPropertyAdapter<String>) propertyHolder.getByKey( "title" );
         pes.setValue( getMainActivity().getCurrentWidget().getTitle() );
+        pes.setChangeListener( (value) -> getMainActivity().getCurrentWidget().setTitle( value ));
 
         IPropertyAdapter<Double> ped = (IPropertyAdapter<Double>) propertyHolder.getByKey( "limit_amount" );
         ped.setValue( getMainActivity().getCurrentWidget().getLimitAmount() );
+        ped.setChangeListener( (limit) -> getMainActivity().getCurrentWidget().setLimitAmount(limit));
 
         pes = (IPropertyAdapter<String>) propertyHolder.getByKey( "period" );
         pes.setSelectedItemIndex( getMainActivity().getCurrentWidget().getStartPeriod().number() );
+        pes.setChangeListener( (period) -> getMainActivity().getCurrentWidget().setStartPeriod( getCurrentPeriodCode( period ) ));
 
     }
 
@@ -117,17 +120,22 @@ public class FragmentWidgetParams extends ABCFragment {
 
         pes = (IPropertyAdapter<String>) propertyHolder.getByKey( "period");
         String buff = pes.getValue();
-        StartPeriodEncoding code = null;
-        if( "неделя".equals( buff ) ) code = StartPeriodEncoding.week;
-        else if( "месяц".equals( buff ) ) code = StartPeriodEncoding.month;
-        else if( "год".equals( buff ) ) code = StartPeriodEncoding.year;
 
-        getMainActivity().getCurrentWidget().setStartPeriod(code);
+        getMainActivity().getCurrentWidget().setStartPeriod( getCurrentPeriodCode( buff ));
     }
 
     @Override
     public void onSettingsComplete()
     {
 
+    }
+
+    StartPeriodEncoding getCurrentPeriodCode( String buff )
+    {
+        StartPeriodEncoding code = null;
+        if( "неделя".equals( buff ) ) code = StartPeriodEncoding.week;
+        else if( "месяц".equals( buff ) ) code = StartPeriodEncoding.month;
+        else if( "год".equals( buff ) ) code = StartPeriodEncoding.year;
+        return code;
     }
 }

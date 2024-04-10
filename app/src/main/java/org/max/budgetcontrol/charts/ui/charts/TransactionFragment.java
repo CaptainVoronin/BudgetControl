@@ -63,12 +63,18 @@ public class TransactionFragment extends Fragment
 
     public void setCategoryId(String uuidString )
     {
-        UUID uuid = UUID.fromString( uuidString );
-        List<Transaction> transactions = chartActivity.getTransactions();
-        List<Transaction> filtered = transactions.stream()
-                .filter( t -> t.getCategories().contains( uuid ) )
-                .collect(Collectors.toList());
-        filtered = filtered.stream().sorted(Comparator.comparingLong(Transaction::getTimestamp)).collect(Collectors.toList());
+        List<Transaction> filtered;
+        if( uuidString != null )
+        {
+            UUID uuid = UUID.fromString(uuidString);
+            List<Transaction> transactions = chartActivity.getTransactions();
+            filtered = transactions.stream()
+                    .filter(t -> t.getCategories().contains(uuid))
+                    .collect(Collectors.toList());
+            filtered = filtered.stream().sorted(Comparator.comparingLong(Transaction::getTimestamp)).collect(Collectors.toList());
+        }
+        else
+            filtered = transactions;
         fillList( filtered );
     }
 
@@ -77,4 +83,15 @@ public class TransactionFragment extends Fragment
         ListView lv = root.findViewById( R.id.listTransactions );
         lv.setAdapter( new TransactionListAdapter( chartActivity, filtered ) );
     }
+
+    @Override
+    public void setUserVisibleHint(boolean visible)
+    {
+        super.setUserVisibleHint(visible);
+        if (visible && isResumed())
+        {
+            onResume();
+        }
+    }
+
 }
