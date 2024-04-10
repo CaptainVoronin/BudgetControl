@@ -236,11 +236,11 @@ public class ChartActivity extends AppCompatActivity
         });
     }
 
-    public void setActivePage(int index)
+  /*  public void setActivePage(int index)
     {
         viewPager.setCurrentItem(index);
     }
-
+*/
     private void setCategories(List<Category> cats)
     {
         this.categories = cats;
