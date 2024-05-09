@@ -1,16 +1,37 @@
 package org.max.budgetcontrol.charts.ui.charts;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.max.budgetcontrol.R;
+import org.max.budgetcontrol.charts.AddTransactionDialog;
 import org.max.budgetcontrol.charts.ChartActivity;
+import org.max.budgetcontrol.charts.IDataListener;
+import org.max.budgetcontrol.datasource.AZenClientResponseHandler;
+import org.max.budgetcontrol.datasource.ResponseProcessor;
+import org.max.budgetcontrol.datasource.ZenEntities;
+import org.max.budgetcontrol.datasource.ZenMoneyClient;
+import org.max.budgetcontrol.zentypes.Account;
+import org.max.budgetcontrol.zentypes.Category;
 import org.max.budgetcontrol.zentypes.Transaction;
+import org.max.budgetcontrol.zentypes.UnixTimestamp;
 
-import java.util.Comparator;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -18,17 +39,22 @@ import java.util.stream.Collectors;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import okhttp3.Response;
 
 /**
  * A fragment representing a list of Items.
  */
-public class TransactionFragment extends Fragment
+public class TransactionFragment extends Fragment implements AddTransactionDialog.ParamsCompletionListener, IDataListener
 {
-
     private final ChartActivity chartActivity;
 
     List<Transaction> transactions;
     private View root;
+    UUID currentCategoryID;
+    FloatingActionButton btnAddTransaction;
+    private List<Account> accounts;
+
+    Category currentCategory;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -37,6 +63,7 @@ public class TransactionFragment extends Fragment
     public TransactionFragment(ChartActivity chartActivity)
     {
         this.chartActivity = chartActivity;
+        accounts = null;
     }
 
     // TODO: Customize parameter initialization
@@ -51,6 +78,7 @@ public class TransactionFragment extends Fragment
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        chartActivity.addDataReceiveListener(this);
     }
 
     @Nullable
@@ -58,40 +86,210 @@ public class TransactionFragment extends Fragment
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         root = inflater.inflate(R.layout.fragment_transaction_item_list, container, false);
+
+        btnAddTransaction = root.findViewById(R.id.btnAddTransaction);
+        if (btnAddTransaction != null)
+        {
+            btnAddTransaction.setEnabled(false);
+            btnAddTransaction.setOnClickListener(view -> showAddTransaction());
+        }
         return root;
     }
 
-    public void setCategoryId(String uuidString )
+    private void showAddTransaction()
+    {
+        if (accounts == null)
+            loadAccountsAndGetTransaction();
+        else
+            showAddTransactionDialog();
+    }
+
+    private void loadAccountsAndGetTransaction()
+    {
+        try
+        {
+            ZenMoneyClient client = getClient(new DataLoadedHandler(ZenEntities.account,
+                    () -> showAddTransactionDialog()));
+            client.getAccounts();
+        } catch (MalformedURLException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void showAddTransactionDialog()
+    {
+        // Accounts могут быть null
+        Category cat = chartActivity.getCategories().stream()
+                .filter(c -> c.getId().equals(currentCategoryID))
+                .findFirst().get();
+        AddTransactionDialog dialog = new AddTransactionDialog(chartActivity, cat, accounts,
+                getFavoriteAccount(), this);
+        dialog.show();
+    }
+
+    private UUID getFavoriteAccount()
+    {
+        final Hashtable<UUID, Integer> hits = new Hashtable<>();
+        UUID favorite = null;
+
+        for (Transaction tr : transactions)
+        {
+            if (hits.containsKey(tr.getOutcomeAccount()))
+            {
+                int val = hits.get(tr.getOutcomeAccount()).intValue();
+                hits.put(tr.getOutcomeAccount(), val + 1);
+            } else
+                hits.put(tr.getOutcomeAccount(), 1);
+        }
+
+        int max = 0;
+
+        for (UUID id : hits.keySet())
+        {
+            if (hits.get(id).intValue() > max)
+            {
+                max = hits.get(id).intValue();
+                favorite = id;
+            }
+        }
+        return favorite;
+    }
+
+    public void setCategoryId(String uuidString)
+    {
+        currentCategoryID = UUID.fromString(uuidString);
+        List<Category> flatList = makeFlat(chartActivity.getCategories());
+        currentCategory = flatList.stream().filter(c -> c.getId().equals(currentCategoryID)).findFirst().get();
+        TextView tv = root.findViewById(R.id.tvCategoryName);
+        tv.setText(currentCategory.getName());
+        btnAddTransaction.setEnabled(true);
+        filterTransactionsAndFillList();
+    }
+
+    void filterTransactionsAndFillList()
     {
         List<Transaction> filtered;
-        if( uuidString != null )
+        if( currentCategory != null )
         {
-            UUID uuid = UUID.fromString(uuidString);
-            List<Transaction> transactions = chartActivity.getTransactions();
             filtered = transactions.stream()
-                    .filter(t -> t.getCategories().contains(uuid))
+                    .filter(t -> t.getCategories().contains(currentCategory.getId()))
                     .collect(Collectors.toList());
-            filtered = filtered.stream().sorted(Comparator.comparingLong(Transaction::getTimestamp)).collect(Collectors.toList());
+            filtered = filtered.stream().sorted((v1, v2) -> UnixTimestamp.compare(v1.created(), v2.created())).collect(Collectors.toList());
         }
         else
             filtered = transactions;
-        fillList( filtered );
+        fillList(filtered);
+    }
+
+    private List<Category> makeFlat(List<Category> categories)
+    {
+        List<Category> flat = new ArrayList<>();
+        for (Category c : categories)
+        {
+            flat.add(c);
+            if (c.getChild().size() != 0)
+                c.getChild().stream().forEach(cc -> flat.add(cc));
+        }
+        return flat;
     }
 
     private void fillList(List<Transaction> filtered)
     {
-        ListView lv = root.findViewById( R.id.listTransactions );
-        lv.setAdapter( new TransactionListAdapter( chartActivity, filtered ) );
+        ListView lv = root.findViewById(R.id.listTransactions);
+        lv.setAdapter(new TransactionListAdapter(chartActivity, filtered));
     }
 
     @Override
-    public void setUserVisibleHint(boolean visible)
+    public void setTransactionParams(@NonNull Double amount, @Nullable String comment, @NotNull Category category, @NonNull Account account)
     {
-        super.setUserVisibleHint(visible);
-        if (visible && isResumed())
+        Transaction tr = new Transaction(UUID.randomUUID(),
+                System.currentTimeMillis(),
+                System.currentTimeMillis(),
+                account.getUserId(),
+                amount,
+                Arrays.asList(category.getId()),
+                account.getId(),
+                account.getInstrument(),
+                comment);
+
+        try
         {
-            onResume();
+            ZenMoneyClient client = getClient(new DataLoadedHandler(ZenEntities.transaction, () -> {
+            }));
+            client.sendTransactions(tr);
+        } catch (MalformedURLException e)
+        {
+            throw new RuntimeException(e);
         }
     }
 
+    private ZenMoneyClient getClient(AZenClientResponseHandler handler) throws MalformedURLException
+    {
+        ZenMoneyClient client = new ZenMoneyClient(new URL(chartActivity.getSettings().getParameterAsString("url")),
+                chartActivity.getSettings().getParameterAsString("token"), handler);
+        return client;
+    }
+
+    @Override
+    public void onCategoriesReceived(List<Category> categories)
+    {
+        // empty
+    }
+
+    @Override
+    public void onTransactionsReceived(List<Transaction> transactions)
+    {
+        this.transactions = transactions;
+        filterTransactionsAndFillList();
+    }
+
+    class DataLoadedHandler extends AZenClientResponseHandler
+    {
+        Runnable afterCall;
+
+        public DataLoadedHandler(ZenEntities entity, Runnable afterCall)
+        {
+            this.entity = entity;
+            this.afterCall = afterCall;
+        }
+
+        ZenEntities entity;
+
+        @Override
+        public void onNon200Code(@NonNull Response response)
+        {
+            int code = response.code();
+            try
+            {
+                String body = response.body().string();
+                Log.d(this.getClass().getName(), "[onNon200Code] HTTP " + code + " " + body);
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onResponseReceived(@NonNull JSONObject jObject) throws JSONException
+        {
+            Log.d(this.getClass().getName(), "[onResponseReceived]" );
+            if (entity == ZenEntities.account)
+                TransactionFragment.this.accountsLoaded(jObject, afterCall);
+            else if (entity == ZenEntities.transaction)
+                chartActivity.loadTransactions();
+        }
+
+        @Override
+        public void processError(@NonNull Exception e)
+        {
+
+        }
+    }
+
+    private void accountsLoaded(JSONObject jObject, Runnable afterCall)
+    {
+        accounts = ResponseProcessor.getAccounts(jObject);
+        chartActivity.runOnUiThread(() -> afterCall.run());
+    }
 }

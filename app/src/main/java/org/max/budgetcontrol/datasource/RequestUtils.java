@@ -4,6 +4,7 @@ package org.max.budgetcontrol.datasource;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.max.budgetcontrol.zentypes.Transaction;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -19,8 +20,25 @@ public class RequestUtils {
     public static byte[] getDiffRequestBody(long time) throws JSONException
     {
         return getSpecificRequestBody( null, time );
-        //return getSpecificRequestBody( null, 1701378000l );
     }
+
+    public static byte[] getAccountsRequestBody() throws JSONException
+    {
+        return getSpecificRequestBody( ZenEntities.account, System.currentTimeMillis() / 1000l );
+    }
+
+    public static byte[] getNewTransactionRequestBody(Transaction transaction) throws JSONException
+    {
+        Map<String, Object> map = new HashMap<>();
+        map.put("currentClientTimestamp", System.currentTimeMillis() / 1000L );
+        map.put("serverTimestamp", 0l );
+        JSONObject job = new JSONObject( map );
+        JSONArray trAr = new JSONArray();
+        trAr.put( transaction.toJSONObject() );
+        job.put( "transaction", trAr );
+        return job.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
 
     public static byte[] getCategoriesRequestBody() throws JSONException
     {
@@ -30,7 +48,6 @@ public class RequestUtils {
     static byte[] getSpecificRequestBody( ZenEntities entity, long serverTimestampValue ) throws JSONException
     {
         Map<String, Object> map = new HashMap<>();
-        //map.put("currentClientTimestamp", System.currentTimeMillis() / 1000L );
         map.put("currentClientTimestamp", System.currentTimeMillis() / 1000L );
         map.put("serverTimestamp", serverTimestampValue );
         JSONObject job = new JSONObject( map );

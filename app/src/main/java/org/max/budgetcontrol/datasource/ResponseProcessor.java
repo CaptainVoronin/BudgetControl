@@ -6,6 +6,7 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.max.budgetcontrol.zentypes.Account;
 import org.max.budgetcontrol.zentypes.Category;
 import org.max.budgetcontrol.zentypes.Transaction;
 
@@ -21,16 +22,19 @@ import java.util.stream.Collectors;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class ResponseProcessor {
+public class ResponseProcessor
+{
 
     static SimpleDateFormat sdf;
 
-    static {
-        sdf = new SimpleDateFormat( "yyyy-MM-dd" );
+    static
+    {
+        sdf = new SimpleDateFormat("yyyy-MM-dd");
     }
 
-    public static List<Category> getCategory(JSONObject obj ) throws JSONException {
-        if( obj.has( ZenEntities.tag.toString() ) )
+    public static List<Category> getCategory(JSONObject obj) throws JSONException
+    {
+        if (obj.has(ZenEntities.tag.toString()))
         {
             JSONArray arr = obj.getJSONArray(ZenEntities.tag.name());
             List<Category> cats = new ArrayList<>();
@@ -41,16 +45,16 @@ public class ResponseProcessor {
                 cats.add(Category.fromJSONObject(element));
             }
             return cats;
-        }
-        else
+        } else
             return null;
     }
 
-    public static @Nullable List<Transaction> getTransactions(@NonNull JSONObject obj ) throws JSONException, ParseException {
+    public static @Nullable List<Transaction> getTransactions(@NonNull JSONObject obj) throws JSONException, ParseException
+    {
         final String deleted = "deleted";
 
         List<Transaction> transactions = new ArrayList<>();
-        if( obj.has( ZenEntities.transaction.name() ))
+        if (obj.has(ZenEntities.transaction.name()))
         {
             JSONArray arr = obj.getJSONArray(ZenEntities.transaction.name());
 
@@ -58,43 +62,68 @@ public class ResponseProcessor {
             {
                 JSONObject element = arr.getJSONObject(i);
 
-                if( element.has( deleted))
-                    if( element.getBoolean( deleted) == true )
+                if (element.has(deleted))
+                    if (element.getBoolean(deleted) == true)
                     {
-                        Log.i( "org.max.budgetcontrol.ResponseProcessor", "[getTransactions] Transaction deleted. Skip");
+                        Log.i("org.max.budgetcontrol.ResponseProcessor", "[getTransactions] Transaction deleted. Skip");
                         continue;
                     }
                 Transaction tr = Transaction.fromJSONObject(element);
-                if( tr != null )
-                    transactions.add( tr );
+                if (tr != null)
+                    transactions.add(tr);
                 else
-                    Log.w( "org.max.budgetcontrol.datasource.ResponseProcessor", "Can't make transaction without category" );
+                    Log.w("org.max.budgetcontrol.datasource.ResponseProcessor", "Can't make transaction without category");
             }
         }
         return transactions;
     }
 
-    public static List<Category> makeCategoryTree(List<Category> categories) {
+    public static List<Category> makeCategoryTree(List<Category> categories)
+    {
 
         assert categories != null : "Categories can not be null";
 
         Map<UUID, Category> cTree;
 
         // Take top level categories
-        cTree = categories.stream().filter( category -> category.getParent() == null ).collect(Collectors.toMap( Category::getId, category -> category ) );
+        cTree = categories.stream().filter(category -> category.getParent() == null).collect(Collectors.toMap(Category::getId, category -> category));
 
         // Fill categories with child ones
-        List<Category> children = categories.stream().filter( category -> category.getParent() != null ).collect(Collectors.toList());
-        children = children.stream().sorted( new Category.CategoryComparator() ).collect(Collectors.toList());
+        List<Category> children = categories.stream().filter(category -> category.getParent() != null).collect(Collectors.toList());
+        children = children.stream().sorted(new Category.CategoryComparator()).collect(Collectors.toList());
 
         Iterator<UUID> it = cTree.keySet().iterator();
-        while( it.hasNext() )
+        while (it.hasNext())
         {
             UUID id = it.next();
-            cTree.get( id ).setChild( children.stream().filter( ch -> ch.getParent().equals( id ) ).collect(Collectors.toList()));
+            cTree.get(id).setChild(children.stream().filter(ch -> ch.getParent().equals(id)).collect(Collectors.toList()));
         }
 
         // Make the sorted list
-        return cTree.values().stream().sorted( new Category.CategoryComparator() ).collect(Collectors.toList());
+        return cTree.values().stream().sorted(new Category.CategoryComparator()).collect(Collectors.toList());
+    }
+
+    public static List<Account> getAccounts(JSONObject obj)
+    {
+        try
+        {
+            List<Account> accounts = new ArrayList<>();
+            if (obj.has(ZenEntities.account.name()))
+            {
+                JSONArray arr = obj.getJSONArray(ZenEntities.account.name());
+                for (int i = 0; i < arr.length(); i++)
+                {
+                    JSONObject element = arr.getJSONObject(i);
+                    Account acc = Account.fromJSONObject(element);
+                    accounts.add(acc);
+                }
+            }
+
+            return accounts;
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

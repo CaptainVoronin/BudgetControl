@@ -57,4 +57,5 @@
     <string name="title_activity_chart">ChartActivity</string>
     <string name="tab_chart_header">Карта расходов</string>
     <string name="tab_transactions_header">Платежи</string>
+    <string name="lb_transaction_amount">Сумма</string>
 </resources>

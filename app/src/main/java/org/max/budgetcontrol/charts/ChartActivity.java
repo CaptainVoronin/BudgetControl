@@ -1,10 +1,13 @@
 package org.max.budgetcontrol.charts;
 
-import android.appwidget.AppWidgetManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.google.android.material.tabs.TabLayout;
 
@@ -13,7 +16,6 @@ import org.json.JSONObject;
 import org.max.budgetcontrol.AWidgetViewMaker;
 import org.max.budgetcontrol.R;
 import org.max.budgetcontrol.SettingsHolder;
-import org.max.budgetcontrol.charts.ui.charts.ChartFragment;
 import org.max.budgetcontrol.charts.ui.charts.SectionsPagerAdapter;
 import org.max.budgetcontrol.charts.ui.charts.TransactionFragment;
 import org.max.budgetcontrol.databinding.ActivityChartBinding;
@@ -36,17 +38,13 @@ import java.util.stream.Collectors;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.ViewPager;
 import okhttp3.Response;
 
-import static org.max.budgetcontrol.charts.ui.charts.SectionsPagerAdapter.CHART_FRAGMENT_INDEX;
 import static org.max.budgetcontrol.charts.ui.charts.SectionsPagerAdapter.TRANSACTION_FRAGMENT_INDEX;
 
 public class ChartActivity extends AppCompatActivity
 {
-
     private ActivityChartBinding binding;
     private ViewPager viewPager;
 
@@ -62,6 +60,11 @@ public class ChartActivity extends AppCompatActivity
     private List<Category> categories;
     private List<Pair<Category, Double>> groups;
     private List<IDataListener> dataListeners;
+
+    public SettingsHolder getSettings()
+    {
+        return settings;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -91,7 +94,7 @@ public class ChartActivity extends AppCompatActivity
         if (extras != null)
         {
             String action = intent.getAction();
-            int appWidgetId = Integer.parseInt( action );
+            int appWidgetId = Integer.parseInt(action);
             currentWidget = db.loadWidgetParamsByAppId(appWidgetId);
             loadData();
         } else
@@ -102,7 +105,7 @@ public class ChartActivity extends AppCompatActivity
         }
     }
 
-    private void loadTransactions()
+    public void loadTransactions()
     {
         try
         {
@@ -140,7 +143,7 @@ public class ChartActivity extends AppCompatActivity
     {
         this.transactions = transactions;
         makeGroups();
-        if( transactions != null && transactions.size() != 0 )
+        if (transactions != null && transactions.size() != 0)
             dataListeners.stream().forEach(listener -> listener.onTransactionsReceived(transactions));
     }
 
@@ -155,8 +158,11 @@ public class ChartActivity extends AppCompatActivity
                     .mapToDouble(t -> t.getAmount())
                     .sum();
 
-            if( c.getChild().size() != 0 || summ.intValue() != 0 )
+            if (c.getChild().size() != 0 || summ.intValue() != 0)
+            {
                 groups.add(new Pair<>(c, -1 * summ));
+                Log.d(this.getClass().getName(), "[makeGroups] " + c.getName() + " " + summ);
+            }
 
             if (c.getChild().size() != 0)
             {
@@ -167,13 +173,16 @@ public class ChartActivity extends AppCompatActivity
                             .mapToDouble(t -> t.getAmount())
                             .sum();
                     if (summ.intValue() != 0)
+                    {
                         groups.add(new Pair<>(subC, -1 * summ));
+                        Log.d(this.getClass().getName(), "[makeGroups] " + subC.getName() + " " + summ);
+                    }
                 }
             }
         }
     }
 
-    public void setDataReceiveListener(IDataListener dataReceiveListener)
+    public void addDataReceiveListener(IDataListener dataReceiveListener)
     {
         dataListeners.add(dataReceiveListener);
     }
@@ -236,11 +245,6 @@ public class ChartActivity extends AppCompatActivity
         });
     }
 
-  /*  public void setActivePage(int index)
-    {
-        viewPager.setCurrentItem(index);
-    }
-*/
     private void setCategories(List<Category> cats)
     {
         this.categories = cats;
@@ -264,4 +268,50 @@ public class ChartActivity extends AppCompatActivity
     {
         return groups;
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuInflater i = getMenuInflater();
+        i.inflate(R.menu.action_bar_menu, menu);
+        menu.findItem(R.id.idSave).setVisible(false);
+        menu.findItem(R.id.idSettings).setVisible(false);
+        MenuItem itemAbout = menu.findItem(R.id.idAbout);
+        itemAbout.setOnMenuItemClickListener(menuItem -> {
+            showAboutDialog();
+            return false;
+        });
+        return true;
+    }
+
+    private void showAboutDialog()
+    {
+        try
+        {
+            androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+
+            String versionName = getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).versionName;
+            String message = "Budget control " + versionName;
+
+            builder.setTitle(R.string.dlg_about_title)
+                    .setNegativeButton(android.R.string.cancel,
+                            (dialogInterface, i) -> dialogInterface.cancel())
+                    . setPositiveButton( android.R.string.ok, ((dialogInterface, i) -> {updateTransactions();}) )
+                    .setMessage(message).setIcon(R.mipmap.ic_launcher);
+            builder.show();
+
+        } catch (PackageManager.NameNotFoundException e)
+        {
+            e.printStackTrace();
+            return;
+        }
+
+    }
+
+    private void updateTransactions()
+    {
+        loadTransactions();
+    }
+
 }

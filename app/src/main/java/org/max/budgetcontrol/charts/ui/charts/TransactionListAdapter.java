@@ -18,32 +18,32 @@ import androidx.annotation.NonNull;
 
 class TransactionListAdapter extends ArrayAdapter<Transaction>
 {
-   private final SimpleDateFormat sdf;
+    private final SimpleDateFormat sdf;
 
-   public TransactionListAdapter(@NonNull Context context, List<Transaction> items)
-   {
-      super(context, R.layout.transaction_list_item, items);
-      sdf = new SimpleDateFormat("dd E HH:mm");
-   }
+    public TransactionListAdapter(@NonNull Context context, List<Transaction> items)
+    {
+        super(context, R.layout.transaction_list_item, items);
+        sdf = new SimpleDateFormat("dd E HH:mm");
+    }
 
-   @Override
-   public View getView(int i, View view, ViewGroup viewGroup)
-   {
-      Transaction tr = super.getItem(i);
-      if (view == null)
-      {
-         LayoutInflater infalInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-         view = infalInflater.inflate(R.layout.transaction_list_item, null);
-      }
+    @Override
+    public View getView(int i, View view, ViewGroup viewGroup)
+    {
+        Transaction tr = super.getItem(i);
+        if (view == null)
+        {
+            LayoutInflater infalInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            view = infalInflater.inflate(R.layout.transaction_list_item, null);
+        }
 
-      TextView tv = view.findViewById( R.id.tvDate );
-      tv.setText( sdf.format( tr.getDate() ) );
+        TextView tv = view.findViewById(R.id.tvDate);
+        tv.setText(sdf.format(new Date(tr.created().mills())));
 
-      tv = view.findViewById( R.id.tvAmount );
-      tv.setText( "" + -1 * tr.getAmount() );
+        tv = view.findViewById(R.id.tvAmount);
+        tv.setText("" + -1 * tr.getAmount());
 
-      return view;
-   }
+        return view;
+    }
 
 
 }
