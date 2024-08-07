@@ -37,7 +37,7 @@ class TransactionListAdapter extends ArrayAdapter<Transaction>
         }
 
         TextView tv = view.findViewById(R.id.tvDate);
-        tv.setText(sdf.format(new Date(tr.created().mills())));
+        tv.setText(sdf.format(new Date(tr.getCreated().mills())));
 
         tv = view.findViewById(R.id.tvAmount);
         tv.setText("" + -1 * tr.getAmount());

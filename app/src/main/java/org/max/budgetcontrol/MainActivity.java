@@ -1,59 +1,41 @@
 package org.max.budgetcontrol;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.viewpager.widget.ViewPager;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.google.android.material.tabs.TabLayout;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.ASecondCallback;
-import org.max.budgetcontrol.datasource.AZenClientResponseHandler;
 import org.max.budgetcontrol.datasource.UpdateSelectedWidgetsHandler;
 import org.max.budgetcontrol.datasource.ZenMoneyClient;
 import org.max.budgetcontrol.db.BCDBHelper;
-import org.max.budgetcontrol.zentypes.Category;
-import org.max.budgetcontrol.datasource.ResponseProcessor;
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 import org.max.budgetcontrol.zentypes.WidgetParamsConverter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-import okhttp3.Response;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager.widget.ViewPager;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -87,7 +69,7 @@ public class MainActivity extends AppCompatActivity
 
     StartPeriodEncoding currentPeriodCode;
 
-    ActivityResultLauncher<Intent> launcher;
+    ActivityResultLauncher<Intent> settingsLauncher;
 
     AlertDialog loadTransactionsDialog;
 
@@ -115,7 +97,9 @@ public class MainActivity extends AppCompatActivity
 
         Bundle extras = intent.getExtras();
 
-        launcher = registerForActivityResult(
+        // Зарегистрировать ланчеры для запуска активити
+        // Настройки
+        settingsLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     // There are no request codes
@@ -276,7 +260,7 @@ public class MainActivity extends AppCompatActivity
         if (withError)
             intent.putExtra(CONNECTION_PROBLEM, true);
 
-        launcher.launch(intent);
+        settingsLauncher.launch(intent);
     }
 
     private void saveChanges()
@@ -421,9 +405,9 @@ public class MainActivity extends AppCompatActivity
         categoryHolder.set(selectedList);
     }
 
-    final public void addSettingsListener( SettingsCompleteListener listener )
+    final public void addSettingsListener(SettingsCompleteListener listener)
     {
-        settingsCompleteListeners.add( listener );
+        settingsCompleteListeners.add(listener);
     }
 
     public interface SettingsCompleteListener

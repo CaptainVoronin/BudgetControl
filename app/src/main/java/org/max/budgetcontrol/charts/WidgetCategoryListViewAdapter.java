@@ -1,4 +1,4 @@
-package org.max.budgetcontrol;
+package org.max.budgetcontrol.charts;
 
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -10,38 +10,32 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import org.max.budgetcontrol.R;
 import org.max.budgetcontrol.zentypes.Category;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
-public class CategoryListViewAdapter extends ArrayAdapter<Category> implements CompoundButton.OnCheckedChangeListener
+public class WidgetCategoryListViewAdapter extends ArrayAdapter<Category>
 {
-    List<UUID> selectedCats;
 
     Context context;
 
-    FragmentCategories fragmentCategories;
     Map<UUID, Category> flatMap;
+    UUID selectedCategory;
 
-    public CategoryListViewAdapter(Context context, FragmentCategories fragmentCategories, List<Category> flatList, List<UUID> widgetCts)
+    CompoundButton.OnCheckedChangeListener changeListener;
+
+    public WidgetCategoryListViewAdapter(Context context, List<Category> flatList, UUID selected, CompoundButton.OnCheckedChangeListener changeListener)
     {
         super(context, R.layout.category_list_item, flatList);
         this.context = context;
         flatMap = new HashMap<>();
-        flatList.stream().forEach( item->flatMap.put( item.getId(), item ) );
-
-        this.fragmentCategories = fragmentCategories;
-
-        if (widgetCts != null)
-            selectedCats = widgetCts;
-        else
-            selectedCats = new ArrayList<>();
+        this.changeListener = changeListener;
+        this.selectedCategory = selected;
+        flatList.stream().forEach(item -> flatMap.put(item.getId(), item));
     }
 
     @Override
@@ -108,27 +102,22 @@ public class CategoryListViewAdapter extends ArrayAdapter<Category> implements C
             LayoutInflater infalInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = infalInflater.inflate(resourceId, null);
         }
-        TextView tv = (TextView) view.findViewById(R.id.tvItemName);
+        TextView tv = view.findViewById(R.id.tvItemName);
         tv.setText(category.getTitle());
 
-        CheckBox cb = (CheckBox) view.findViewById(R.id.cbSelected);
+        CheckBox cb = view.findViewById(R.id.cbSelected);
         cb.setTag(category);
-        if (selectedCats != null && selectedCats.size() != 0)
+        if (selectedCategory != null)
         {
-            if (selectedCats.contains(category.getId()))
+            if (selectedCategory.equals(category.getId()))
                 cb.setChecked(true);
             else
                 cb.setChecked(false);
         } else
             cb.setChecked(false);
 
-        cb.setOnCheckedChangeListener(this);
+        cb.setOnCheckedChangeListener(changeListener);
         return view;
-    }
-
-    List<UUID> getSelected()
-    {
-        return selectedCats;
     }
 
     @Override
@@ -141,36 +130,5 @@ public class CategoryListViewAdapter extends ArrayAdapter<Category> implements C
     public boolean isEnabled(int i)
     {
         return true;
-    }
-
-    @Override
-    public void onCheckedChanged(CompoundButton compoundButton, boolean checked)
-    {
-        Category category = (Category) compoundButton.getTag();
-
-        Predicate<Category> findAbsentCat = cat -> !selectedCats.contains(cat.getId());
-        Predicate<Category> findPresentCat = cat -> selectedCats.contains(cat.getId());
-        Predicate<Category> actualFilter;
-
-        Consumer<Category> addCat = cat -> selectedCats.add(cat.getId());
-        Consumer<Category> removeCat = cat -> selectedCats.remove(cat.getId());
-        Consumer<Category> actualAction;
-
-        if (checked)
-        {
-            if (!selectedCats.contains(category.getId()))
-                selectedCats.add(category.getId());
-            actualFilter = findAbsentCat;
-            actualAction = addCat;
-        } else
-        {
-            selectedCats.remove(category.getId());
-            actualFilter = findPresentCat;
-            actualAction = removeCat;
-        }
-
-        category.getChild().stream().filter(actualFilter).forEach(actualAction);
-        notifyDataSetChanged();
-        fragmentCategories.setSelectedCategoriesList( selectedCats, checked );
     }
 }

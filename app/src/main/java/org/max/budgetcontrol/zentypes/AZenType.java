@@ -2,63 +2,94 @@ package org.max.budgetcontrol.zentypes;
 
 import org.max.budgetcontrol.datasource.ZenEntities;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public abstract class AZenType implements IZenType
+import lombok.NoArgsConstructor;
+
+
+@NoArgsConstructor
+public class AZenType implements Serializable
 {
     UUID id;
 
     String title;
 
-    UnixTimestamp changed;
-    UnixTimestamp created;
+    ZenEntities type;
 
     Integer userId;
 
-    ZenEntities entity;
+    UnixTimestamp created;
 
-    public AZenType(UUID id, String title, Long created, Long changed, Integer userId, ZenEntities entity)
+    UnixTimestamp changed;
+
+    public AZenType(UUID id, String title, ZenEntities type, Integer userId, UnixTimestamp created, UnixTimestamp changed)
     {
         this.id = id;
         this.title = title;
-        this.changed = new UnixTimestamp(changed);
-        this.created = new UnixTimestamp( created );
+        this.type = type;
         this.userId = userId;
-        this.entity = entity;
+        this.created = created;
+        this.changed = changed;
     }
 
-    @Override
     public UUID getId()
     {
         return id;
     }
 
-    @Override
+    public void setId(UUID id)
+    {
+        this.id = id;
+    }
+
     public String getTitle()
     {
         return title;
     }
 
-    @Override
+    public void setTitle(String title)
+    {
+        this.title = title;
+    }
+
+    public ZenEntities getType()
+    {
+        return type;
+    }
+
+    public void setType(ZenEntities type)
+    {
+        this.type = type;
+    }
+
     public Integer getUserId()
     {
         return userId;
     }
 
-    @Override
-    public UnixTimestamp changed()
+    public void setUserId(Integer userId)
     {
-        return changed;
+        this.userId = userId;
     }
 
-    public UnixTimestamp created()
+    public UnixTimestamp getCreated()
     {
         return created;
     }
 
-    @Override
-    public ZenEntities getType()
+    public void setCreated(UnixTimestamp created)
     {
-        return entity;
+        this.created = created;
+    }
+
+    public UnixTimestamp getChanged()
+    {
+        return changed;
+    }
+
+    public void setChanged(UnixTimestamp changed)
+    {
+        this.changed = changed;
     }
 }

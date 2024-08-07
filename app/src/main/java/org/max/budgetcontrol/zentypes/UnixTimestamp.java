@@ -1,8 +1,9 @@
 package org.max.budgetcontrol.zentypes;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class UnixTimestamp implements Comparable<UnixTimestamp>
+public class UnixTimestamp implements Comparable<UnixTimestamp>, Serializable
 {
     long valueMills;
     long valueSec;

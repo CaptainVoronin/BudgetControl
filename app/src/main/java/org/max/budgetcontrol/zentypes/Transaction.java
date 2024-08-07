@@ -49,7 +49,7 @@ public class Transaction extends AZenType implements Comparable<Transaction>
                        Integer inInstrument,
                        String comment)
     {
-        super(id, "", created, changed, userId, ZenEntities.tag);
+        super(id, "", ZenEntities.tag, userId, new UnixTimestamp(created), new UnixTimestamp(changed));
         this.amount = amount;
         this.category = category;
         this.outcomeAccount = outAccount;
@@ -62,7 +62,7 @@ public class Transaction extends AZenType implements Comparable<Transaction>
     public Transaction(UUID id, Long created, Long changed, Integer userId, double amount,
                        @NotNull List<UUID> category, UUID account, Integer instrument, String comment)
     {
-        super(id, "", created, changed, userId, ZenEntities.tag);
+        super(id, "", ZenEntities.tag, userId, new UnixTimestamp(created), new UnixTimestamp(changed));
         this.amount = amount;
         this.category = category;
         this.outcomeAccount = account;
@@ -75,10 +75,10 @@ public class Transaction extends AZenType implements Comparable<Transaction>
     public JSONObject toJSONObject() throws JSONException
     {
         Calendar date = Calendar.getInstance();
-        date.setTimeInMillis(created().mills());
+        date.setTimeInMillis(getCreated().mills());
         JSONObject job = new JSONObject();
-        for( TRANSACTION_NODES node : TRANSACTION_NODES.values() )
-            job.put( node.name(), JSONObject.NULL );
+        for (TRANSACTION_NODES node : TRANSACTION_NODES.values())
+            job.put(node.name(), JSONObject.NULL);
 
         job.put(TRANSACTION_NODES.id.name(), getId());
         job.put(TRANSACTION_NODES.date.name(),
@@ -90,8 +90,8 @@ public class Transaction extends AZenType implements Comparable<Transaction>
         job.put(TRANSACTION_NODES.user.name(), getUserId());
         job.put(TRANSACTION_NODES.outcomeAccount.name(), getOutcomeAccount());
         job.put(TRANSACTION_NODES.incomeAccount.name(), getIncomeAccount());
-        job.put(TRANSACTION_NODES.created.name(), created().sec());
-        job.put(TRANSACTION_NODES.changed.name(), changed().sec());
+        job.put(TRANSACTION_NODES.created.name(), getCreated().sec());
+        job.put(TRANSACTION_NODES.changed.name(), getChanged().sec());
         job.put(TRANSACTION_NODES.income.name(), getAmount());
         job.put(TRANSACTION_NODES.outcome.name(), getAmount());
         job.put(TRANSACTION_NODES.deleted.name(), false);
@@ -204,7 +204,7 @@ public class Transaction extends AZenType implements Comparable<Transaction>
     @Override
     public int compareTo(Transaction t)
     {
-        return UnixTimestamp.compare(created, t.created());
+        return UnixTimestamp.compare(created, t.getCreated());
     }
 
     public enum TRANSACTION_NODES

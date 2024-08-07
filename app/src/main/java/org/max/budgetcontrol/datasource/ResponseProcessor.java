@@ -78,7 +78,7 @@ public class ResponseProcessor
         return transactions;
     }
 
-    public static List<Category> makeCategoryTree(List<Category> categories)
+    public static ArrayList<Category> makeCategoryTree(List<Category> categories)
     {
 
         assert categories != null : "Categories can not be null";
@@ -100,14 +100,14 @@ public class ResponseProcessor
         }
 
         // Make the sorted list
-        return cTree.values().stream().sorted(new Category.CategoryComparator()).collect(Collectors.toList());
+        return new ArrayList<Category>(cTree.values().stream().sorted(new Category.CategoryComparator()).collect(Collectors.toList()));
     }
 
-    public static List<Account> getAccounts(JSONObject obj)
+    public static ArrayList<Account> getAccounts(JSONObject obj)
     {
         try
         {
-            List<Account> accounts = new ArrayList<>();
+            ArrayList<Account> accounts = new ArrayList<>();
             if (obj.has(ZenEntities.account.name()))
             {
                 JSONArray arr = obj.getJSONArray(ZenEntities.account.name());

@@ -1,5 +1,6 @@
 package org.max.budgetcontrol.charts.ui.charts;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import org.max.budgetcontrol.R;
 import org.max.budgetcontrol.charts.AddTransactionDialog;
 import org.max.budgetcontrol.charts.ChartActivity;
 import org.max.budgetcontrol.charts.IDataListener;
+import org.max.budgetcontrol.charts.NewTransactionActivity;
 import org.max.budgetcontrol.datasource.AZenClientResponseHandler;
 import org.max.budgetcontrol.datasource.ResponseProcessor;
 import org.max.budgetcontrol.datasource.ZenEntities;
@@ -36,6 +38,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -52,9 +56,13 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     private View root;
     UUID currentCategoryID;
     FloatingActionButton btnAddTransaction;
-    private List<Account> accounts;
+    private ArrayList<Account> accounts;
 
     Category currentCategory;
+
+    private ActivityResultLauncher<Intent> newTransactionLauncher;
+
+    private UUID favoriteAccount;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -90,8 +98,17 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
         btnAddTransaction = root.findViewById(R.id.btnAddTransaction);
         if (btnAddTransaction != null)
         {
-            btnAddTransaction.setEnabled(false);
+            //  btnAddTransaction.setEnabled(false);
             btnAddTransaction.setOnClickListener(view -> showAddTransaction());
+            // Ввод новой транзакции
+            newTransactionLauncher = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        int code = result.getResultCode();
+                        Log.i(this.getClass().getName(), "[newTransactionLauncher] NewTransactionActivity returns " + code );
+                        if( code == 1 )
+                            chartActivity.loadTransactions();
+                    });
         }
         return root;
     }
@@ -101,15 +118,27 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
         if (accounts == null)
             loadAccountsAndGetTransaction();
         else
-            showAddTransactionDialog();
+            showNewTransactionActivity();
     }
 
+    public void showNewTransactionActivity()
+    {
+        Intent intent = new Intent(chartActivity, NewTransactionActivity.class);
+        if( currentCategory != null )
+            intent.putExtra(NewTransactionActivity.CATEGORY_UUID_EXTRA, currentCategoryID.toString());
+        intent.putExtra(NewTransactionActivity.CATEGORY_LIST_EXTRA, chartActivity.getCategories());
+        intent.putExtra(NewTransactionActivity.ACCOUNT_LIST_EXTRA, accounts);
+        intent.putExtra(NewTransactionActivity.FAVORITE_ACCOUNT_EXTRA, favoriteAccount.toString());
+        newTransactionLauncher.launch(intent);
+    }
+
+    // TODO: Перенести в NewTransactionActivity
     private void loadAccountsAndGetTransaction()
     {
         try
         {
             ZenMoneyClient client = getClient(new DataLoadedHandler(ZenEntities.account,
-                    () -> showAddTransactionDialog()));
+                    () -> showNewTransactionActivity()));
             client.getAccounts();
         } catch (MalformedURLException e)
         {
@@ -117,23 +146,12 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
         }
     }
 
-    private void showAddTransactionDialog()
-    {
-        // Accounts могут быть null
-        Category cat = chartActivity.getCategories().stream()
-                .filter(c -> c.getId().equals(currentCategoryID))
-                .findFirst().get();
-        AddTransactionDialog dialog = new AddTransactionDialog(chartActivity, cat, accounts,
-                getFavoriteAccount(), this);
-        dialog.show();
-    }
-
-    private UUID getFavoriteAccount()
+    private UUID getFavoriteAccount( List<Transaction> trs)
     {
         final Hashtable<UUID, Integer> hits = new Hashtable<>();
         UUID favorite = null;
 
-        for (Transaction tr : transactions)
+        for (Transaction tr : trs)
         {
             if (hits.containsKey(tr.getOutcomeAccount()))
             {
@@ -156,13 +174,14 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
         return favorite;
     }
 
+    // TODO: Разобраться, зачем эта функция?
     public void setCategoryId(String uuidString)
     {
         currentCategoryID = UUID.fromString(uuidString);
         List<Category> flatList = makeFlat(chartActivity.getCategories());
         currentCategory = flatList.stream().filter(c -> c.getId().equals(currentCategoryID)).findFirst().get();
         TextView tv = root.findViewById(R.id.tvCategoryName);
-        tv.setText(currentCategory.getName());
+        tv.setText(currentCategory.getTitle());
         btnAddTransaction.setEnabled(true);
         filterTransactionsAndFillList();
     }
@@ -170,14 +189,13 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     void filterTransactionsAndFillList()
     {
         List<Transaction> filtered;
-        if( currentCategory != null )
+        if (currentCategory != null)
         {
             filtered = transactions.stream()
                     .filter(t -> t.getCategories().contains(currentCategory.getId()))
                     .collect(Collectors.toList());
-            filtered = filtered.stream().sorted((v1, v2) -> UnixTimestamp.compare(v1.created(), v2.created())).collect(Collectors.toList());
-        }
-        else
+            filtered = filtered.stream().sorted((v1, v2) -> UnixTimestamp.compare(v1.getCreated(), v2.getCreated())).collect(Collectors.toList());
+        } else
             filtered = transactions;
         fillList(filtered);
     }
@@ -200,6 +218,7 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
         lv.setAdapter(new TransactionListAdapter(chartActivity, filtered));
     }
 
+    // TODO: удалить
     @Override
     public void setTransactionParams(@NonNull Double amount, @Nullable String comment, @NotNull Category category, @NonNull Account account)
     {
@@ -241,6 +260,7 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     public void onTransactionsReceived(List<Transaction> transactions)
     {
         this.transactions = transactions;
+        favoriteAccount = getFavoriteAccount( this.transactions );
         filterTransactionsAndFillList();
     }
 
@@ -273,7 +293,8 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
         @Override
         public void onResponseReceived(@NonNull JSONObject jObject) throws JSONException
         {
-            Log.d(this.getClass().getName(), "[onResponseReceived]" );
+            Log.d(this.getClass().getName(), "[onResponseReceived]");
+            // TODO: Ветку с account удалить после перенесения в NewTransaction
             if (entity == ZenEntities.account)
                 TransactionFragment.this.accountsLoaded(jObject, afterCall);
             else if (entity == ZenEntities.transaction)
@@ -287,6 +308,7 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
         }
     }
 
+    // TODO: Удалить после перенесения в NewTransaction
     private void accountsLoaded(JSONObject jObject, Runnable afterCall)
     {
         accounts = ResponseProcessor.getAccounts(jObject);

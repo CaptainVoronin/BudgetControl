@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -20,9 +19,7 @@ import org.max.budgetcontrol.zentypes.Category;
 
 import java.text.Collator;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import androidx.annotation.NonNull;
@@ -100,7 +97,7 @@ public class AddTransactionDialog extends Dialog
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setTitle(category.getName());
+        setTitle(category.getTitle());
         setContentView(R.layout.dlg_add_transaction);
         edAmount = findViewById(R.id.ed_transaction_amount);
         edAmount.addTextChangedListener(new TextWatcher()

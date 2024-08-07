@@ -6,13 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.RemoteViews;
+
 import org.max.budgetcontrol.zentypes.StartPeriodEncoding;
 import org.max.budgetcontrol.zentypes.WidgetParams;
 
-import java.text.DecimalFormatSymbols;
 import java.util.Calendar;
 
-import static org.max.budgetcontrol.MainActivity.BUNDLE_KEY_APP_ID;
 import static org.max.budgetcontrol.MainActivity.BUNDLE_KEY_WIDGET_ACTION;
 
 public abstract class AWidgetViewMaker
@@ -62,7 +61,6 @@ public abstract class AWidgetViewMaker
 
     protected final String formatAmount( double value )
     {
-        DecimalFormatSymbols d = new DecimalFormatSymbols();
         return String.format("%,.0f", value);
     }
 

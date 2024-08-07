@@ -32,12 +32,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 import okhttp3.Response;
 
@@ -57,7 +59,7 @@ public class ChartActivity extends AppCompatActivity
     private BCDBHelper db;
     private SettingsHolder settings;
     private List<Transaction> transactions;
-    private List<Category> categories;
+    private ArrayList<Category> categories;
     private List<Pair<Category, Double>> groups;
     private List<IDataListener> dataListeners;
 
@@ -76,6 +78,8 @@ public class ChartActivity extends AppCompatActivity
 
         binding = ActivityChartBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         viewPager = binding.viewPager;
@@ -103,6 +107,7 @@ public class ChartActivity extends AppCompatActivity
             /*currentWidget = new WidgetParams();
             currentWidget.setAppId(AppWidgetManager.INVALID_APPWIDGET_ID);*/
         }
+
     }
 
     public void loadTransactions()
@@ -135,16 +140,36 @@ public class ChartActivity extends AppCompatActivity
 
         } catch (MalformedURLException e)
         {
-
+            Log.e(this.getClass().getName(), e.getMessage());
         }
     }
 
-    public void setTransactions(List<Transaction> transactions)
+    public void setTransactions(List<Transaction> trs)
     {
-        this.transactions = transactions;
-        makeGroups();
-        if (transactions != null && transactions.size() != 0)
+        if (trs != null && trs.size() != 0)
+        {
+
+            transactions = filterTransactions(trs);
+            makeGroups();
             dataListeners.stream().forEach(listener -> listener.onTransactionsReceived(transactions));
+        }
+    }
+
+    /**
+     * Профильтровать транзакции. Останутся только те категории,
+     * которые есть в виджете.
+     *
+     * @param trs
+     * @return фильтрованный список транзакций
+     */
+    private List<Transaction> filterTransactions(List<Transaction> trs)
+    {
+        List<UUID> cats = this.currentWidget.getCategories();
+        List<Transaction> result = new LinkedList<>();
+        for (Transaction tr : trs)
+            if (tr.hasCategory(cats))
+                result.add(tr);
+        return result;
     }
 
     private void makeGroups()
@@ -161,7 +186,7 @@ public class ChartActivity extends AppCompatActivity
             if (c.getChild().size() != 0 || summ.intValue() != 0)
             {
                 groups.add(new Pair<>(c, -1 * summ));
-                Log.d(this.getClass().getName(), "[makeGroups] " + c.getName() + " " + summ);
+                Log.d(this.getClass().getName(), "[makeGroups] " + c.getTitle() + " " + summ);
             }
 
             if (c.getChild().size() != 0)
@@ -175,7 +200,7 @@ public class ChartActivity extends AppCompatActivity
                     if (summ.intValue() != 0)
                     {
                         groups.add(new Pair<>(subC, -1 * summ));
-                        Log.d(this.getClass().getName(), "[makeGroups] " + subC.getName() + " " + summ);
+                        Log.d(this.getClass().getName(), "[makeGroups] " + subC.getTitle() + " " + summ);
                     }
                 }
             }
@@ -208,7 +233,7 @@ public class ChartActivity extends AppCompatActivity
             if (entityKind == ZenEntities.tag)
             {
                 List<Category> flatCats = ResponseProcessor.getCategory(jObject);
-                List<Category> cats = ResponseProcessor.makeCategoryTree(flatCats);
+                ArrayList<Category> cats = ResponseProcessor.makeCategoryTree(flatCats);
                 ChartActivity.this.runOnUiThread(() ->
                 {
 
@@ -247,10 +272,12 @@ public class ChartActivity extends AppCompatActivity
 
     private void setCategories(List<Category> cats)
     {
-        this.categories = cats;
+
         List<UUID> widgetCats = currentWidget.getCategories();
-        categories = categories.stream().filter(cat -> widgetCats.contains(cat.getId()))
+        cats = cats.stream().filter(cat -> widgetCats.contains(cat.getId()))
                 .collect(Collectors.toList());
+        categories = new ArrayList<>();
+        categories.addAll(cats);
         dataListeners.stream().forEach(listener -> listener.onCategoriesReceived(categories));
     }
 
@@ -259,7 +286,7 @@ public class ChartActivity extends AppCompatActivity
         return transactions;
     }
 
-    public List<Category> getCategories()
+    public ArrayList<Category> getCategories()
     {
         return categories;
     }
@@ -297,7 +324,9 @@ public class ChartActivity extends AppCompatActivity
             builder.setTitle(R.string.dlg_about_title)
                     .setNegativeButton(android.R.string.cancel,
                             (dialogInterface, i) -> dialogInterface.cancel())
-                    . setPositiveButton( android.R.string.ok, ((dialogInterface, i) -> {updateTransactions();}) )
+                    .setPositiveButton(android.R.string.ok, ((dialogInterface, i) -> {
+                        updateTransactions();
+                    }))
                     .setMessage(message).setIcon(R.mipmap.ic_launcher);
             builder.show();
 

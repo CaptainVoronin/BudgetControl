@@ -1,5 +1,6 @@
 package org.max.budgetcontrol.charts.ui.charts;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -30,6 +31,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -55,6 +57,8 @@ public class ChartFragment extends Fragment implements IDataListener
     boolean firstTime = true;
 
     String[] colorScale;
+
+    private ActivityResultLauncher<Intent> newTransactionLauncher;
 
     public ChartFragment(ChartActivity chartActivity)
     {
@@ -82,7 +86,7 @@ public class ChartFragment extends Fragment implements IDataListener
         }
 
         pageViewModel.setIndex(index);
-        chartActivity.addDataReceiveListener( this );
+        chartActivity.addDataReceiveListener(this);
     }
 
     private void makeChart()
@@ -96,8 +100,8 @@ public class ChartFragment extends Fragment implements IDataListener
         Double min;
         Double max;
         List<Pair<Category, Double>> nonZero = groups.stream().filter(group -> group.second.intValue() != 0).collect(Collectors.toList());
-        min = nonZero.stream().map(item -> item.second).min(Comparator.comparingDouble(a -> a)).get();
-        max = nonZero.stream().map(item -> item.second).max(Comparator.comparingDouble(a -> a)).get();
+        min = nonZero.stream().map(item -> item.second).min(Comparator.comparingDouble(a -> a)).orElse(Double.MIN_VALUE);
+        max = nonZero.stream().map(item -> item.second).max(Comparator.comparingDouble(a -> a)).orElse(Double.MAX_VALUE);
         Integer[] intervals = getIntervals(min, max);
         colorScale = getColorScale(intervals);
 
@@ -108,9 +112,9 @@ public class ChartFragment extends Fragment implements IDataListener
                     .filter(item -> item.getId().equals(c.getParent()))
                     .findFirst()
                     .get()
-                    .getName();
-            System.out.println(c.getName() + " " + parent + " " + c.getName() + " " + pair.second.intValue());
-            data.add(new CustomTreeDataEntry(c.getName(), parent, c.getName(), pair.second.intValue(), c));
+                    .getTitle();
+            System.out.println(c.getTitle() + " " + parent + " " + c.getTitle() + " " + pair.second.intValue());
+            data.add(new CustomTreeDataEntry(c.getTitle(), parent, c.getTitle(), pair.second.intValue(), c));
         }
 
         treeMap.data(data, TreeFillingMethod.AS_TABLE);
@@ -229,7 +233,7 @@ public class ChartFragment extends Fragment implements IDataListener
     public void onTransactionsReceived(List<Transaction> transactions)
     {
         this.transactions = transactions;
-        if( !firstTime )
+        if (!firstTime)
             anyChartView.clear();
         else
             firstTime = false;
