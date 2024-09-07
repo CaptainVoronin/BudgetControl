@@ -6,10 +6,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.AZenClientResponseHandler;
@@ -20,8 +16,11 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import okhttp3.Response;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import okhttp3.Response;
 
 public class SettingsActivity extends AppCompatActivity {
     boolean connectionProblems;
@@ -104,8 +103,7 @@ public class SettingsActivity extends AppCompatActivity {
             ZenMoneyClient client = new ZenMoneyClient(url, token, handler);
 
             AlertDialog.Builder dlg = new AlertDialog.Builder(this);
-            dlg.setMessage("Check connection").setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-                handler.cancelRequest();
+            dlg.setMessage(R.string.check_connection_label).setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
                 dialogInterface.cancel();
             });
             dlg.setCancelable( false );

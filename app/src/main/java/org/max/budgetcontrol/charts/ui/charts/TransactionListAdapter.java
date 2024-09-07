@@ -11,7 +11,6 @@ import org.max.budgetcontrol.R;
 import org.max.budgetcontrol.zentypes.Transaction;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -23,7 +22,7 @@ class TransactionListAdapter extends ArrayAdapter<Transaction>
     public TransactionListAdapter(@NonNull Context context, List<Transaction> items)
     {
         super(context, R.layout.transaction_list_item, items);
-        sdf = new SimpleDateFormat("dd E HH:mm");
+        sdf = new SimpleDateFormat("dd E");
     }
 
     @Override
@@ -37,7 +36,7 @@ class TransactionListAdapter extends ArrayAdapter<Transaction>
         }
 
         TextView tv = view.findViewById(R.id.tvDate);
-        tv.setText(sdf.format(new Date(tr.getCreated().mills())));
+        tv.setText(sdf.format(tr.getDate()));
 
         tv = view.findViewById(R.id.tvAmount);
         tv.setText("" + -1 * tr.getAmount());

@@ -1,10 +1,12 @@
 package org.max.budgetcontrol.charts;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,6 +36,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,6 +72,7 @@ public class NewTransactionActivity extends AppCompatActivity implements Compoun
     private SettingsHolder settings;
     private MenuItem itemSave;
     private UUID favoriteAccount;
+    private AlertDialog dlgPostTransaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -192,7 +196,7 @@ public class NewTransactionActivity extends AppCompatActivity implements Compoun
             comment = edComment.getText().toString();
             if (comment != null)
                 comment = comment.trim();
-            setTransactionParams(amount, comment, selectedCategory, account);
+            postNewTransaction(amount, comment, selectedCategory, account);
             return false;
         });
         checkParams();
@@ -270,7 +274,11 @@ public class NewTransactionActivity extends AppCompatActivity implements Compoun
             if (entity == ZenEntities.account)
                 accountsLoaded(jObject, afterCall);
             if (entity == ZenEntities.transaction)
+            {
+                if( dlgPostTransaction != null )
+                    dlgPostTransaction.cancel();
                 runOnUiThread(() -> afterCall.run());
+            }
         }
 
         @Override
@@ -280,9 +288,11 @@ public class NewTransactionActivity extends AppCompatActivity implements Compoun
         }
     }
 
-    public void setTransactionParams(@NonNull Double amount, @Nullable String comment, @NotNull Category category, @NonNull Account account)
+    public void postNewTransaction(@NonNull Double amount, @Nullable String comment, @NotNull Category category, @NonNull Account account)
     {
+        Date date = new Date( System.currentTimeMillis() );
         Transaction tr = new Transaction(UUID.randomUUID(),
+                date,
                 System.currentTimeMillis(),
                 System.currentTimeMillis(),
                 account.getUserId(),
@@ -299,6 +309,13 @@ public class NewTransactionActivity extends AppCompatActivity implements Compoun
                 Log.i(this.getClass().getName(), "[setTransactionParams] Finish NewTransaction activity");
                 finish();
             }));
+            AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+            LayoutInflater inflater = this.getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.dlg_post_transaction, null);
+            dlg.setView(dialogView);
+            dlg.setCancelable( false );
+            dlgPostTransaction = dlg.create();
+            dlgPostTransaction.show();
             client.sendTransactions(tr);
         } catch (MalformedURLException e)
         {

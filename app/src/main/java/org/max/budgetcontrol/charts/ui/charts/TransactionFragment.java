@@ -26,13 +26,14 @@ import org.max.budgetcontrol.datasource.ZenMoneyClient;
 import org.max.budgetcontrol.zentypes.Account;
 import org.max.budgetcontrol.zentypes.Category;
 import org.max.budgetcontrol.zentypes.Transaction;
-import org.max.budgetcontrol.zentypes.UnixTimestamp;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
@@ -194,7 +195,7 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
             filtered = transactions.stream()
                     .filter(t -> t.getCategories().contains(currentCategory.getId()))
                     .collect(Collectors.toList());
-            filtered = filtered.stream().sorted((v1, v2) -> UnixTimestamp.compare(v1.getCreated(), v2.getCreated())).collect(Collectors.toList());
+            filtered = filtered.stream().sorted(Comparator.comparing(Transaction::getDate)).collect(Collectors.toList());
         } else
             filtered = transactions;
         fillList(filtered);
@@ -222,7 +223,9 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     @Override
     public void setTransactionParams(@NonNull Double amount, @Nullable String comment, @NotNull Category category, @NonNull Account account)
     {
+        Date date = new Date(System.currentTimeMillis());
         Transaction tr = new Transaction(UUID.randomUUID(),
+                date,
                 System.currentTimeMillis(),
                 System.currentTimeMillis(),
                 account.getUserId(),

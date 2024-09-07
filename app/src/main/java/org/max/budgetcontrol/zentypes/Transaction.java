@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.max.budgetcontrol.datasource.ZenEntities;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Transaction extends AZenType implements Comparable<Transaction>
@@ -18,6 +19,20 @@ public class Transaction extends AZenType implements Comparable<Transaction>
     UUID outcomeAccount;
 
     String comment;
+
+    static SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd");
+
+    public Date getDate()
+    {
+        return date;
+    }
+
+    public void setDate(Date date)
+    {
+        this.date = date;
+    }
+
+    Date date;
 
     public String getComment()
     {
@@ -41,7 +56,7 @@ public class Transaction extends AZenType implements Comparable<Transaction>
         return outcomeAccount;
     }
 
-    public Transaction(UUID id, Long created, Long changed, Integer userId, double amount,
+    public Transaction(UUID id, Date date, Long created, Long changed, Integer userId, double amount,
                        @NotNull List<UUID> category,
                        UUID outAccount,
                        Integer outInstrument,
@@ -57,9 +72,10 @@ public class Transaction extends AZenType implements Comparable<Transaction>
         this.inInstrument = inInstrument;
         this.outInstrument = outInstrument;
         this.comment = comment;
+        this.date = date;
     }
 
-    public Transaction(UUID id, Long created, Long changed, Integer userId, double amount,
+    public Transaction(UUID id, Date date, Long created, Long changed, Integer userId, double amount,
                        @NotNull List<UUID> category, UUID account, Integer instrument, String comment)
     {
         super(id, "", ZenEntities.tag, userId, new UnixTimestamp(created), new UnixTimestamp(changed));
@@ -70,12 +86,13 @@ public class Transaction extends AZenType implements Comparable<Transaction>
         this.inInstrument = instrument;
         this.outInstrument = instrument;
         this.comment = comment;
+        this.date = date;
     }
 
     public JSONObject toJSONObject() throws JSONException
     {
-        Calendar date = Calendar.getInstance();
-        date.setTimeInMillis(getCreated().mills());
+        Calendar tmpDate = Calendar.getInstance();
+        tmpDate.setTimeInMillis( date.getTime() );
         JSONObject job = new JSONObject();
         for (TRANSACTION_NODES node : TRANSACTION_NODES.values())
             job.put(node.name(), JSONObject.NULL);
@@ -83,9 +100,9 @@ public class Transaction extends AZenType implements Comparable<Transaction>
         job.put(TRANSACTION_NODES.id.name(), getId());
         job.put(TRANSACTION_NODES.date.name(),
                 String.format("%d-%d-%d",
-                        date.get(Calendar.YEAR),
-                        date.get(Calendar.MONTH) + 1,
-                        date.get(Calendar.DAY_OF_MONTH)));
+                        tmpDate.get(Calendar.YEAR),
+                        tmpDate.get(Calendar.MONTH) + 1,
+                        tmpDate.get(Calendar.DAY_OF_MONTH)));
 
         job.put(TRANSACTION_NODES.user.name(), getUserId());
         job.put(TRANSACTION_NODES.outcomeAccount.name(), getOutcomeAccount());
@@ -144,10 +161,13 @@ public class Transaction extends AZenType implements Comparable<Transaction>
         Integer userId = obj.getInt(TRANSACTION_NODES.user.name());
         Long created = obj.getLong(TRANSACTION_NODES.created.name());
         Long changed = obj.getLong(TRANSACTION_NODES.changed.name());
+        buff = obj.getString(TRANSACTION_NODES.date.name());
+        Date date = simpleDateFormat.parse( buff );
 
         String comment = obj.getString("comment");
 
         return new Transaction(uuid,
+                date,
                 created,
                 changed,
                 userId,
@@ -159,15 +179,6 @@ public class Transaction extends AZenType implements Comparable<Transaction>
                 inInstrument,
                 comment);
     }
-
-    /*private static void getCategories(List<UUID> trTagIds, List<Category> categories, List<Category> transCats ) {
-        for ( Category c : categories ) {
-            if( trTagIds.contains( c.getId() ) )
-                transCats.add( c );
-            if( c.getChild() != null )
-                getCategories( trTagIds, c.getChild(), transCats );
-        }
-    }*/
 
     public UUID getId()
     {
