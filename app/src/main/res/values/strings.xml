@@ -32,7 +32,7 @@
     <string name="message_internal_server_error">Внутренняя ошибка сервера</string>
     <string name="message_load_data">Получение данных с сервера...</string>
     <string name="netwotk_error">Ошибка сети</string>
-    <string name="message_for_week">за месяц</string>
+    <string name="message_for_week">за неделю</string>
     <string name="message_for_month">за месяц</string>
     <string name="message_for_year">за год</string>
     <string name="message_load_transactions">Обработка данных...</string>

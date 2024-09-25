@@ -106,8 +106,8 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
                     new ActivityResultContracts.StartActivityForResult(),
                     result -> {
                         int code = result.getResultCode();
-                        Log.i(this.getClass().getName(), "[newTransactionLauncher] NewTransactionActivity returns " + code );
-                        if( code == 1 )
+                        Log.i(this.getClass().getName(), "[newTransactionLauncher] NewTransactionActivity returns " + code);
+                        if (code == 1)
                             chartActivity.loadTransactions();
                     });
         }
@@ -125,7 +125,7 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     public void showNewTransactionActivity()
     {
         Intent intent = new Intent(chartActivity, NewTransactionActivity.class);
-        if( currentCategory != null )
+        if (currentCategory != null)
             intent.putExtra(NewTransactionActivity.CATEGORY_UUID_EXTRA, currentCategoryID.toString());
         intent.putExtra(NewTransactionActivity.CATEGORY_LIST_EXTRA, chartActivity.getCategories());
         intent.putExtra(NewTransactionActivity.ACCOUNT_LIST_EXTRA, accounts);
@@ -147,7 +147,7 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
         }
     }
 
-    private UUID getFavoriteAccount( List<Transaction> trs)
+    private UUID getFavoriteAccount(List<Transaction> trs)
     {
         final Hashtable<UUID, Integer> hits = new Hashtable<>();
         UUID favorite = null;
@@ -175,30 +175,40 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
         return favorite;
     }
 
-    // TODO: Разобраться, зачем эта функция?
-    public void setCategoryId(String uuidString)
-    {
-        currentCategoryID = UUID.fromString(uuidString);
-        List<Category> flatList = makeFlat(chartActivity.getCategories());
-        currentCategory = flatList.stream().filter(c -> c.getId().equals(currentCategoryID)).findFirst().get();
-        TextView tv = root.findViewById(R.id.tvCategoryName);
-        tv.setText(currentCategory.getTitle());
-        btnAddTransaction.setEnabled(true);
-        filterTransactionsAndFillList();
-    }
-
     void filterTransactionsAndFillList()
     {
+        Double amount = 0d;
         List<Transaction> filtered;
-        if (currentCategory != null)
+        if (currentCategoryID != null)
         {
             filtered = transactions.stream()
-                    .filter(t -> t.getCategories().contains(currentCategory.getId()))
+                    .filter(t -> t.getCategories().contains(currentCategoryID))
                     .collect(Collectors.toList());
             filtered = filtered.stream().sorted(Comparator.comparing(Transaction::getDate)).collect(Collectors.toList());
         } else
+        {
             filtered = transactions;
+        }
+        amount = filtered.stream().mapToDouble(Transaction::getAmount).sum() * -1d;
+        setSubHeader(amount);
         fillList(filtered);
+    }
+
+    private void setSubHeader(Double amount)
+    {
+        String categoryName;
+        if (currentCategory != null)
+            categoryName = currentCategory.getTitle();
+        else
+        {
+            UUID catId = chartActivity.getCurrentWidget().getCategories().get(0);
+            List<Category> flatList = makeFlat(chartActivity.getCategories());
+            Category cat = flatList.stream().filter(c -> c.getId().equals(catId)).findFirst().get();
+            categoryName = cat.getTitle();
+        }
+        String header = categoryName + " " + amount;
+        TextView tv = root.findViewById(R.id.tvCategoryName);
+        tv.setText(header);
     }
 
     private List<Category> makeFlat(List<Category> categories)
@@ -263,7 +273,13 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     public void onTransactionsReceived(List<Transaction> transactions)
     {
         this.transactions = transactions;
-        favoriteAccount = getFavoriteAccount( this.transactions );
+        favoriteAccount = getFavoriteAccount(this.transactions);
+        filterTransactionsAndFillList();
+    }
+
+    public void setCategoryId(String uuid)
+    {
+        currentCategoryID = UUID.fromString( uuid );
         filterTransactionsAndFillList();
     }
 

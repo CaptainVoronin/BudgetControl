@@ -71,7 +71,9 @@ public class ChartActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        boolean showCharts = false;
         super.onCreate(savedInstanceState);
+        Log.d(ChartActivity.class.getName(), "[onCreate]");
 
         settings = new SettingsHolder(getApplicationContext());
         settings.init();
@@ -80,34 +82,28 @@ public class ChartActivity extends AppCompatActivity
         setContentView(binding.getRoot());
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
-        viewPager = binding.viewPager;
-        viewPager.setAdapter(sectionsPagerAdapter);
-        TabLayout tabs = binding.tabs;
-        tabs.setupWithViewPager(viewPager);
-
-        Intent intent = getIntent();
-
-        // Создать или открыть БД
         db = BCDBHelper.getInstance(getApplicationContext());
 
+        Intent intent = getIntent();
         Bundle extras = intent.getExtras();
-        dataListeners = new ArrayList<>();
-        Log.d(ChartActivity.class.getName(), "[onCreate]");
         if (extras != null)
         {
             String action = intent.getAction();
             int appWidgetId = Integer.parseInt(action);
             currentWidget = db.loadWidgetParamsByAppId(appWidgetId);
+            showCharts = currentWidget.getCategories().size() > 1;
             loadData();
-        } else
-        {
-
-            /*currentWidget = new WidgetParams();
-            currentWidget.setAppId(AppWidgetManager.INVALID_APPWIDGET_ID);*/
         }
 
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager(), showCharts);
+        viewPager = binding.viewPager;
+        viewPager.setAdapter(sectionsPagerAdapter);
+        TabLayout tabs = binding.tabs;
+        tabs.setupWithViewPager(viewPager);
+
+        // Создать или открыть БД
+
+        dataListeners = new ArrayList<>();
     }
 
     public void loadTransactions()
