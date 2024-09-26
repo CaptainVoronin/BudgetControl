@@ -20,7 +20,7 @@ public class Transaction extends AZenType implements Comparable<Transaction>
 
     String comment;
 
-    static SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd");
+    static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public Date getDate()
     {
@@ -92,7 +92,7 @@ public class Transaction extends AZenType implements Comparable<Transaction>
     public JSONObject toJSONObject() throws JSONException
     {
         Calendar tmpDate = Calendar.getInstance();
-        tmpDate.setTimeInMillis( date.getTime() );
+        tmpDate.setTimeInMillis(date.getTime());
         JSONObject job = new JSONObject();
         for (TRANSACTION_NODES node : TRANSACTION_NODES.values())
             job.put(node.name(), JSONObject.NULL);
@@ -151,7 +151,7 @@ public class Transaction extends AZenType implements Comparable<Transaction>
         double out = obj.getDouble(TRANSACTION_NODES.outcome.name());
         double amount = out != 0 ? (out * -1) : inc;
         String buff = obj.getString(TRANSACTION_NODES.created.name());
-        long timestamp = Long.parseLong(buff) * 1000;
+        //long timestamp = Long.parseLong(buff) * 1000;
         buff = obj.getString(TRANSACTION_NODES.outcomeAccount.name());
         UUID outAccount = UUID.fromString(buff);
         buff = obj.getString(TRANSACTION_NODES.incomeAccount.name());
@@ -162,9 +162,11 @@ public class Transaction extends AZenType implements Comparable<Transaction>
         Long created = obj.getLong(TRANSACTION_NODES.created.name());
         Long changed = obj.getLong(TRANSACTION_NODES.changed.name());
         buff = obj.getString(TRANSACTION_NODES.date.name());
-        Date date = simpleDateFormat.parse( buff );
+        Date date = simpleDateFormat.parse(buff);
 
-        String comment = obj.getString("comment");
+        String comment = null;
+        if (!obj.isNull("comment"))
+            comment = obj.getString("comment");
 
         return new Transaction(uuid,
                 date,

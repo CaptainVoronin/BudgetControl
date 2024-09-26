@@ -19,10 +19,13 @@ class TransactionListAdapter extends ArrayAdapter<Transaction>
 {
     private final SimpleDateFormat sdf;
 
-    public TransactionListAdapter(@NonNull Context context, List<Transaction> items)
+    boolean showDetails;
+
+    public TransactionListAdapter(@NonNull Context context, List<Transaction> items,boolean showDetails )
     {
         super(context, R.layout.transaction_list_item, items);
         sdf = new SimpleDateFormat("dd E");
+        this.showDetails = showDetails;
     }
 
     @Override
@@ -41,8 +44,21 @@ class TransactionListAdapter extends ArrayAdapter<Transaction>
         tv = view.findViewById(R.id.tvAmount);
         tv.setText("" + -1 * tr.getAmount());
 
+        tv = view.findViewById(R.id.tvComment);
+        if (showDetails)
+            tv.setText(tr.getComment() != null ? tr.getComment() : "...");
+
+        tv.setVisibility(showDetails ? View.VISIBLE : View.GONE);
+
         return view;
     }
 
-
+    public void showDetails(boolean flag)
+    {
+        if (showDetails != flag)
+        {
+            showDetails = flag;
+            notifyDataSetInvalidated();
+        }
+    }
 }

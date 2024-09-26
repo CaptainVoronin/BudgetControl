@@ -299,10 +299,16 @@ public class ChartActivity extends AppCompatActivity
         i.inflate(R.menu.action_bar_menu, menu);
         menu.findItem(R.id.idSave).setVisible(false);
         menu.findItem(R.id.idSettings).setVisible(false);
-        MenuItem itemAbout = menu.findItem(R.id.idAbout);
-        itemAbout.setOnMenuItemClickListener(menuItem -> {
+        MenuItem item = menu.findItem(R.id.idAbout);
+        item.setOnMenuItemClickListener(menuItem -> {
             showAboutDialog();
             return false;
+        });
+
+        item = menu.findItem(R.id.idCancel);
+        item.setOnMenuItemClickListener( menuItem -> {
+            finishAndRemoveTask();
+            return true;
         });
         return true;
     }

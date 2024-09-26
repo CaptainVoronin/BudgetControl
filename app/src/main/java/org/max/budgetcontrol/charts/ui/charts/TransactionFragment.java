@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -64,11 +65,8 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     private ActivityResultLauncher<Intent> newTransactionLauncher;
 
     private UUID favoriteAccount;
+    private TransactionListAdapter adapter;
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
     public TransactionFragment(ChartActivity chartActivity)
     {
         this.chartActivity = chartActivity;
@@ -94,7 +92,7 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        root = inflater.inflate(R.layout.fragment_transaction_item_list, container, false);
+        root = inflater.inflate(R.layout.fragment_transactions, container, false);
 
         btnAddTransaction = root.findViewById(R.id.btnAddTransaction);
         if (btnAddTransaction != null)
@@ -111,6 +109,13 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
                             chartActivity.loadTransactions();
                     });
         }
+
+        Switch sw = root.findViewById( R.id.showDetails );
+        sw.setOnCheckedChangeListener((compoundButton, checked ) -> {
+            if( adapter != null )
+                adapter.showDetails( checked );
+        });
+
         return root;
     }
 
@@ -226,7 +231,8 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     private void fillList(List<Transaction> filtered)
     {
         ListView lv = root.findViewById(R.id.listTransactions);
-        lv.setAdapter(new TransactionListAdapter(chartActivity, filtered));
+        adapter  = new TransactionListAdapter(chartActivity, filtered, false);
+        lv.setAdapter( adapter );
     }
 
     // TODO: удалить
