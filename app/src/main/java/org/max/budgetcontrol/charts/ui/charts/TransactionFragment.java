@@ -130,7 +130,7 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     public void showNewTransactionActivity()
     {
         Intent intent = new Intent(chartActivity, NewTransactionActivity.class);
-        if (currentCategory != null)
+        if (currentCategoryID != null)
             intent.putExtra(NewTransactionActivity.CATEGORY_UUID_EXTRA, currentCategoryID.toString());
         intent.putExtra(NewTransactionActivity.CATEGORY_LIST_EXTRA, chartActivity.getCategories());
         intent.putExtra(NewTransactionActivity.ACCOUNT_LIST_EXTRA, accounts);

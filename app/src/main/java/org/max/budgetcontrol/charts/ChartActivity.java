@@ -241,7 +241,9 @@ public class ChartActivity extends AppCompatActivity
             {
                 try
                 {
-                    List<Transaction> transactions = ResponseProcessor.getTransactions(jObject);
+                    List<Transaction> raw = ResponseProcessor.getTransactions(jObject);
+                    long timestamp = AWidgetViewMaker.calculateStartDate(currentWidget.getStartPeriod());
+                    List<Transaction> transactions = raw.stream().filter(tr -> tr.getDate().getTime() >= timestamp).collect(Collectors.toList());
                     ChartActivity.this.runOnUiThread(() -> ChartActivity.this.setTransactions(transactions));
                 } catch (ParseException e)
                 {
@@ -306,7 +308,7 @@ public class ChartActivity extends AppCompatActivity
         });
 
         item = menu.findItem(R.id.idCancel);
-        item.setOnMenuItemClickListener( menuItem -> {
+        item.setOnMenuItemClickListener(menuItem -> {
             finishAndRemoveTask();
             return true;
         });

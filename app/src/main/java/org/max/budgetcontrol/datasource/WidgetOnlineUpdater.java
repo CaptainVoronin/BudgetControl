@@ -65,13 +65,13 @@ public class WidgetOnlineUpdater
 
     protected void calculateAmount(List<Transaction> transactions, long startDate)
     {
-        UnixTimestamp uxStartDate = new UnixTimestamp( startDate );
+        UnixTimestamp uxStartDate = new UnixTimestamp(startDate);
         if (transactions != null)
         {
             Log.d(this.getClass().getName(), "[calculateAmount] for " + getWidget().getTitle());
             Log.d(this.getClass().getName(), "[calculateAmount] Transaction total count " + transactions.size());
 
-            double amount = transactions.stream().filter(t -> t.getChanged().sec() >= uxStartDate.sec())
+            double amount = transactions.stream().filter(t -> t.getDate().getTime() >= startDate)
                     .filter(t -> t.hasCategory(getWidget().getCategories()))
                     .mapToDouble(t -> t.getAmount()).sum();
             getWidget().setCurrentAmount(Math.abs(amount));
