@@ -17,8 +17,9 @@ public class Transaction extends AZenType implements Comparable<Transaction>
     double amount;
     List<UUID> category;
     UUID outcomeAccount;
-
     String comment;
+    UUID incomeAccount;
+    Date date;
 
     static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -31,8 +32,6 @@ public class Transaction extends AZenType implements Comparable<Transaction>
     {
         this.date = date;
     }
-
-    Date date;
 
     public String getComment()
     {
@@ -48,8 +47,6 @@ public class Transaction extends AZenType implements Comparable<Transaction>
     {
         return incomeAccount;
     }
-
-    UUID incomeAccount;
 
     public UUID getOutcomeAccount()
     {

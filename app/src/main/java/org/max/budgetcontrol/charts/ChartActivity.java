@@ -144,7 +144,6 @@ public class ChartActivity extends AppCompatActivity
     {
         if (trs != null && trs.size() != 0)
         {
-
             transactions = filterTransactions(trs);
             makeGroups();
             dataListeners.stream().forEach(listener -> listener.onTransactionsReceived(transactions));

@@ -42,6 +42,7 @@ public abstract class AWidgetViewMaker
         current.set(Calendar.HOUR_OF_DAY, 0);
         current.set(Calendar.MINUTE, 0);
         current.set(Calendar.SECOND, 0);
+        current.set(Calendar.MILLISECOND, 0);
 
         switch (startPeriodCode)
         {

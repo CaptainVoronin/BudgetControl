@@ -59,9 +59,6 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     UUID currentCategoryID;
     FloatingActionButton btnAddTransaction;
     private ArrayList<Account> accounts;
-
-    Category currentCategory;
-
     private ActivityResultLauncher<Intent> newTransactionLauncher;
 
     private UUID favoriteAccount;
@@ -110,10 +107,10 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
                     });
         }
 
-        Switch sw = root.findViewById( R.id.showDetails );
-        sw.setOnCheckedChangeListener((compoundButton, checked ) -> {
-            if( adapter != null )
-                adapter.showDetails( checked );
+        Switch sw = root.findViewById(R.id.showDetails);
+        sw.setOnCheckedChangeListener((compoundButton, checked) -> {
+            if (adapter != null)
+                adapter.showDetails(checked);
         });
 
         return root;
@@ -202,15 +199,15 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     private void setSubHeader(Double amount)
     {
         String categoryName;
-        if (currentCategory != null)
-            categoryName = currentCategory.getTitle();
+        UUID catId;
+        if (currentCategoryID != null)
+            catId = currentCategoryID;
         else
-        {
-            UUID catId = chartActivity.getCurrentWidget().getCategories().get(0);
-            List<Category> flatList = makeFlat(chartActivity.getCategories());
-            Category cat = flatList.stream().filter(c -> c.getId().equals(catId)).findFirst().get();
-            categoryName = cat.getTitle();
-        }
+            catId = chartActivity.getCurrentWidget().getCategories().get(0);
+
+        List<Category> flatList = makeFlat(chartActivity.getCategories());
+        Category cat = flatList.stream().filter(c -> c.getId().equals(catId)).findFirst().get();
+        categoryName = cat.getTitle();
         String header = categoryName + " " + amount;
         TextView tv = root.findViewById(R.id.tvCategoryName);
         tv.setText(header);
@@ -231,8 +228,8 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
     private void fillList(List<Transaction> filtered)
     {
         ListView lv = root.findViewById(R.id.listTransactions);
-        adapter  = new TransactionListAdapter(chartActivity, filtered, false);
-        lv.setAdapter( adapter );
+        adapter = new TransactionListAdapter(chartActivity, filtered, false);
+        lv.setAdapter(adapter);
     }
 
     // TODO: удалить
@@ -285,7 +282,7 @@ public class TransactionFragment extends Fragment implements AddTransactionDialo
 
     public void setCategoryId(String uuid)
     {
-        currentCategoryID = UUID.fromString( uuid );
+        currentCategoryID = UUID.fromString(uuid);
         filterTransactionsAndFillList();
     }
 
